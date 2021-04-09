@@ -21,7 +21,14 @@ class Camera
         this.m_worldWidth = WORLD_WIDTH;
     }
 
-    update(x,y,width,height) {
+    update(x,y,width,height)
+     {
+        //CHANGE THIS LOGIC
+        if(!(this.m_x < 0 || this.m_y < 0 || this.m_x +  this.m_width > WORLD_WIDTH || this.m_y + this.m_height > WORLD_HEIGHT))
+        {
+             this.m_x = x - CANVAS_WIDTH/2;
+             this.m_y = y - CANVAS_HEIGHT/2;
+        }
     }
 
     draw()
@@ -44,12 +51,12 @@ class Player {
         this.m_color = color;           
     }
 
-    draw()
+    draw(cameraX,cameraY)
     {
         c.save();
         c.beginPath();
        
-        c.translate(this.m_xPos + this.m_width/2,this.m_yPos + this.m_height/2);
+        c.translate((this.m_xPos + this.m_width/2) - cameraX,(this.m_yPos + this.m_height/2) - cameraY);
         c.rotate(Math.PI/180 * this.m_angle);
        
        /* c.moveTo(0,-this.m_height/2);
@@ -68,11 +75,11 @@ class Player {
     move(dt)
     {        
         //calculation to move in direction is incorrect
-        this.m_xVelocity =  (Math.cos(this.m_angle) * Math.PI/180) * dt;//this.m_speed * dt;
-        this.m_yVelocity =  (Math.sin(this.m_angle) * Math.PI/180)* dt;//this.m_speed * dt;
+       // this.m_xVelocity =  (Math.cos(this.m_angle) * Math.PI/180) * dt;//this.m_speed * dt;
+       // this.m_yVelocity =  (Math.sin(this.m_angle) * Math.PI/180)* dt;//this.m_speed * dt;
 
-       //this.m_xVelocity =  Math.cos(this.m_angle) * this.m_speed * dt;
-       //this.m_yVelocity =  Math.sin(this.m_angle)* this.m_speed * dt;
+       this.m_xVelocity =  Math.cos(this.m_angle) * this.m_speed * dt;
+       this.m_yVelocity =  Math.sin(this.m_angle)* this.m_speed * dt;
       
         this.m_xPos += this.m_xVelocity;
         this.m_yPos += this.m_yVelocity;      
@@ -143,7 +150,6 @@ class Bullet {
         this.m_angle = _angle;
         this.m_radius = 5;
         this.m_color = 'Red';
-        this.m_angle = _angle;
         this.m_xVelocity = 0;
         this.m_yVelocity = 0;  
     }
@@ -156,11 +162,12 @@ class Bullet {
         this.m_y += this.m_yVelocity;
     }
 
-    draw()
+    draw(cameraX,cameraY)
     {
         c.save();
         c.beginPath();
-        c.arc(this.m_x, this.m_y, this.m_radius, 0, 2 * Math.PI);
+        c.translate(this.m_x - cameraX, this.m_y - cameraY);
+        c.arc(0, 0, this.m_radius, 0, 2 * Math.PI);
         c.fillStyle = 'green';
         c.fill();
         c.closePath();
@@ -188,10 +195,10 @@ class Enemy {
 
     }
 
-    draw()
+    draw(cameraX,cameraY)
     {
         c.beginPath();
-        c.fillRect(this.m_x, this.m_y, this.m_width, this.m_height);
+        c.fillRect(this.m_x - cameraX, this.m_y - cameraY, this.m_width, this.m_height);
         c.fillStyle = 'red';
         c.closePath();
     
@@ -199,11 +206,11 @@ class Enemy {
     }
 }
 
-let player = new Player(100,100,100,100,'red');
+let player = new Player(WORLD_WIDTH/2,WORLD_HEIGHT/2,100,100,'red');
 let bullets = new Array();
 let enemies = new Array();
 let collisionManager = new CollisionManager();
-let camera = new Camera(0,0,CANVAS_WIDTH,CANVAS_HEIGHT);
+let camera = new Camera(player.m_xPos - CANVAS_WIDTH/2,player.m_yPos - CANVAS_HEIGHT/2,CANVAS_WIDTH,CANVAS_HEIGHT);
 
 let dt = 0;
 let lastRender = 0;
@@ -211,17 +218,17 @@ let lastRender = 0;
 
 for(let i =0; i < ENEMY_COUNT; i++)
 {
-    let tempEnemy = new Enemy(Math.floor(Math.random() * 1920),Math.floor(Math.random() * 1080), 15, 15 ,-1, -1);
-    enemies.push(tempEnemy);
+   let tempEnemy = new Enemy(Math.floor(Math.random() * WORLD_WIDTH),Math.floor(Math.random() * WORLD_HEIGHT), 15, 15 ,-1, -1);
+   enemies.push(tempEnemy);
 }
+
 
 
 
 addEventListener('click', (event) =>
 {
-    let tempBullet = new Bullet(player.m_xPos + player.m_width/2, player.m_yPos + player.m_height/2, Math.atan2(event.y - (player.m_yPos + player.m_height/2), event.x - (player.m_xPos + player.m_width/2)));
+    let tempBullet = new Bullet(player.m_xPos + player.m_width/2, player.m_yPos + player.m_height/2, Math.atan2((event.y - ((player.m_yPos + player.m_height/2) - camera.m_y)), (event.x - ((player.m_xPos + player.m_width/2) - camera.m_x))));
     bullets.push(tempBullet);
-    console.log(event.x,event.y);
 })
 
 
@@ -231,13 +238,15 @@ addEventListener('keydown', (event) =>
    {
        //moves player forward based on rotation
       // player.m_yVelocity = -0.5; 
-       player.move(dt);             
+       player.move(dt); 
+       camera.update(player.m_xPos,player.m_yPos);                 
    }
    else if(event.key == 's')
    {
        //moves player in reverse based off rotationa
        // player.m_yVelocity = 0.5;
         player.move(dt); 
+        camera.update(player.m_xPos,player.m_yPos);     
    }
    else if(event.key == 'd')
    {
@@ -257,7 +266,8 @@ addEventListener('keyup', (event) =>
 
    if (event.key == 'w' || event.key == "s")
    {
-        player.m_yVelocity = 0;        
+        player.m_yVelocity = 0; 
+         
    }
    else if(event.key == 'a' || event.key == "d")
    {
@@ -274,11 +284,11 @@ function draw()
     player.draw(camera.m_x, camera.m_y);
 
     bullets.forEach(bullet => {
-        bullet.draw();
+        bullet.draw(camera.m_x,camera.m_y);
     });  
 
     enemies.forEach( enemy => {
-        enemy.draw();
+        enemy.draw(camera.m_x,camera.m_y);
     })  
 }
 
@@ -316,16 +326,15 @@ function gameLoop(timestamp)
         }
     }
 
-    for( let i = 0; i < bullets.length; i++)
+   /* for( let i = 0; i < bullets.length; i++)
     {
         if(collisionManager.objectBoundaryCollision(bullets[i]))
         {
             bullets.splice(i,1);
            i--;
         }
-    }
+    }*/
 
-    camera.update(player.m_xPos, player.m_yPos,player.m_width, player.m_height);
      
     draw();
     
