@@ -93,8 +93,8 @@ class Player {
         }
 
 
-        this.m_xVelocity =  Math.cos(this.m_angle  * Math.PI / 180) * this.m_speed * dt;// * this.m_speed * dt;
-        this.m_yVelocity =  Math.sin(this.m_angle  * Math.PI / 180)* this.m_speed * dt;// this.m_speed * dt;
+        this.m_xVelocity =  Math.cos(this.m_angle  * Math.PI / 180) * this.m_speed * dt;
+        this.m_yVelocity =  Math.sin(this.m_angle  * Math.PI / 180)* this.m_speed * dt;
         this.m_xPos += this.m_xVelocity;
         this.m_yPos += this.m_yVelocity;      
     }
