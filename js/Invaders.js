@@ -23,11 +23,25 @@ class Camera
 
     update(x,y,width,height)
      {
-        //CHANGE THIS LOGIC
-        if(!(this.m_x < 0 || this.m_y < 0 || this.m_x +  this.m_width > WORLD_WIDTH || this.m_y + this.m_height > WORLD_HEIGHT))
+        
+        this.m_x = x - CANVAS_WIDTH/2;
+        this.m_y = y - CANVAS_HEIGHT/2;
+
+        if(this.m_x <= 0 ) 
         {
-             this.m_x = x - CANVAS_WIDTH/2;
-             this.m_y = y - CANVAS_HEIGHT/2;
+             this.m_x = 0;
+        }
+        if( this.m_x +  this.m_width >= WORLD_WIDTH )
+        {
+            this.m_x = WORLD_WIDTH - this.m_width;
+        }
+        if(this.m_y <= 0)
+        {
+            this.m_y = 0;
+        }
+        if(this.m_y  + this.m_height >= WORLD_HEIGHT)
+        {
+            this.m_y = WORLD_HEIGHT - this.m_height;
         }
     }
 
@@ -54,15 +68,9 @@ class Player {
     draw(cameraX,cameraY)
     {
         c.save();
-        c.beginPath();
-       
+        c.beginPath();      
         c.translate((this.m_xPos + this.m_width/2) - cameraX,(this.m_yPos + this.m_height/2) - cameraY);
         c.rotate(Math.PI/180 * this.m_angle);
-       
-       /* c.moveTo(0,-this.m_height/2);
-        c.lineTo(this.m_width/2, this.m_height/2);
-        c.lineTo(-this.m_width/2, this.m_height/2); */
-
         c.moveTo(this.m_width/2, 0);
         c.lineTo(-this.m_width, this.m_height/2);
         c.lineTo(-this.m_width, -this.m_height/2);
@@ -72,15 +80,21 @@ class Player {
         c.restore();
     }
 
-    move(dt)
+    move(dt, forward)
     {        
-        //calculation to move in direction is incorrect
-       // this.m_xVelocity =  (Math.cos(this.m_angle) * Math.PI/180) * dt;//this.m_speed * dt;
-       // this.m_yVelocity =  (Math.sin(this.m_angle) * Math.PI/180)* dt;//this.m_speed * dt;
+        //accepts radians to convert degrees to radians multiply angle by pi and divide by 180
+        if(forward)
+        {
+           this.m_speed = 10;
+        }
+        else
+        {
+            this.m_speed = -10;
+        }
 
-       this.m_xVelocity =  Math.cos(this.m_angle) * this.m_speed * dt;
-       this.m_yVelocity =  Math.sin(this.m_angle)* this.m_speed * dt;
-      
+
+        this.m_xVelocity =  Math.cos(this.m_angle  * Math.PI / 180) * this.m_speed * dt;// * this.m_speed * dt;
+        this.m_yVelocity =  Math.sin(this.m_angle  * Math.PI / 180)* this.m_speed * dt;// this.m_speed * dt;
         this.m_xPos += this.m_xVelocity;
         this.m_yPos += this.m_yVelocity;      
     }
@@ -235,17 +249,15 @@ addEventListener('click', (event) =>
 addEventListener('keydown', (event) =>
 {
    if (event.key == 'w')
-   {
-       //moves player forward based on rotation
-      // player.m_yVelocity = -0.5; 
-       player.move(dt); 
-       camera.update(player.m_xPos,player.m_yPos);                 
+   {    
+       player.move(dt,true); 
+       camera.update(player.m_xPos,player.m_yPos);                    
    }
    else if(event.key == 's')
    {
        //moves player in reverse based off rotationa
        // player.m_yVelocity = 0.5;
-        player.move(dt); 
+        player.move(dt,false); 
         camera.update(player.m_xPos,player.m_yPos);     
    }
    else if(event.key == 'd')
