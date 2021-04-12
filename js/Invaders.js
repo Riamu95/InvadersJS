@@ -58,10 +58,11 @@ class Player {
         this.m_yPos = y;
         this.m_width = w;
         this.m_height =  h;
-        this.m_speed = 10;
+        this.m_speed = 0;
         this.m_xVelocity = 0;
         this.m_yVelocity = 0;
         this.m_angle = 0;
+        this.m_rotationSpeed = 1.5;
         this.m_color = color;           
     }
 
@@ -85,11 +86,11 @@ class Player {
         //accepts radians to convert degrees to radians multiply angle by pi and divide by 180
         if(forward)
         {
-           this.m_speed = 10;
+           this.m_speed = 0.1;
         }
         else
         {
-            this.m_speed = -10;
+            this.m_speed = -0.1;
         }
 
 
@@ -225,7 +226,7 @@ let bullets = new Array();
 let enemies = new Array();
 let collisionManager = new CollisionManager();
 let camera = new Camera(player.m_xPos - CANVAS_WIDTH/2,player.m_yPos - CANVAS_HEIGHT/2,CANVAS_WIDTH,CANVAS_HEIGHT);
-let pressedKeys = new Array();
+let pressedKeys = new Set();
 
 let dt = 0;
 let lastRender = 0;
@@ -248,45 +249,15 @@ addEventListener('click', (event) =>
 
 
 
-addEventListener('keydown', (event) =>
+document.addEventListener('keydown', (event) =>
 {
     pressedKeys[event.key] = true;
-    
-
-
-    if(pressedKeys['w'])
-    {
-        player.move(dt,true); 
-        camera.update(player.m_xPos,player.m_yPos);    
-    }
-    if(pressedKeys['s'])
-    {
-        player.move(dt,false); 
-        camera.update(player.m_xPos,player.m_yPos);  
-    }
-    if(pressedKeys['d'])
-    {
-        player.m_angle += 3;
-    }
-    if(pressedKeys['a'])
-    {
-        player.m_angle -= 3;
-    }
 })
 
 
-addEventListener('keyup', (event) =>
+document.addEventListener('keyup', (event) =>
 {
-   if (event.key == 'w' || event.key == "s")
-   {
-        player.m_yVelocity = 0; 
-         
-   }
-   else if(event.key == 'a' || event.key == "d")
-   {
-        player.m_xVelocity = 0; 
-   }
-   delete pressedKeys[event.key];
+    pressedKeys[event.key] = false;
 })
 
 
@@ -310,8 +281,8 @@ function draw()
 
 function gameLoop(timestamp)
 {
-   dt = timestamp  - lastRender;
-
+    dt = timestamp  - lastRender;
+    
     bullets.forEach(bullet => {
         bullet.move(dt);
     })
@@ -340,18 +311,28 @@ function gameLoop(timestamp)
         }
     }
 
-   /* for( let i = 0; i < bullets.length; i++)
+    if(pressedKeys['w'])
     {
-        if(collisionManager.objectBoundaryCollision(bullets[i]))
-        {
-            bullets.splice(i,1);
-           i--;
-        }
-    }*/
-
-     
+        player.move(dt,true); 
+        camera.update(player.m_xPos,player.m_yPos);    
+    }
+    if(pressedKeys['s'])
+    {
+        player.move(dt,false); 
+        camera.update(player.m_xPos,player.m_yPos);  
+    }
+    if(pressedKeys['d'])
+    {
+        player.m_angle += player.m_rotationSpeed;
+    }
+    if(pressedKeys['a'])
+    {
+        player.m_angle -= player.m_rotationSpeed;
+    }
+   
     draw();
     
+ 
     lastRender = timestamp;
     window.requestAnimationFrame(gameLoop);
 
