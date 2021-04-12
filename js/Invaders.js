@@ -1,13 +1,7 @@
-const canvas = document.querySelector('canvas');
-const c = canvas.getContext('2d');
-const background = document.querySelector('img');
-const CANVAS_WIDTH = canvas.width;
-const CANVAS_HEIGHT = canvas.height;
-const WORLD_HEIGHT = 3376;
-const WORLD_WIDTH = 6000;
-const CANVAS_MIN = 0;
-const ENEMY_COUNT = 5;
- 
+
+/*------------------------------------------------------- -----------------------------------------------------------------------------------------------*/
+/*---------------------------            CLASSES        ----------------------------------------------------------------------------------------------------------*/
+/*------------------------------------------------------- -----------------------------------------------------------------------------------------------*/
 
 class Camera
 {
@@ -58,9 +52,13 @@ class Player {
         this.m_yPos = y;
         this.m_width = w;
         this.m_height =  h;
-        this.m_speed = 0;
+        this.m_speed = 0.1;
         this.m_xVelocity = 0;
         this.m_yVelocity = 0;
+        this.m_deccelerationRate = 0.005;
+        this.m_acceleration = 0;
+        this.m_accelerationRate = 0.03;
+        this.m_maxAcceleration = 5;
         this.m_angle = 0;
         this.m_rotationSpeed = 1.5;
         this.m_color = color;           
@@ -81,21 +79,10 @@ class Player {
         c.restore();
     }
 
-    move(dt, forward)
+    move(dt)
     {        
-        //accepts radians to convert degrees to radians multiply angle by pi and divide by 180
-        if(forward)
-        {
-           this.m_speed = 0.1;
-        }
-        else
-        {
-            this.m_speed = -0.1;
-        }
-
-
-        this.m_xVelocity =  Math.cos(this.m_angle  * Math.PI / 180) * this.m_speed * dt;
-        this.m_yVelocity =  Math.sin(this.m_angle  * Math.PI / 180)* this.m_speed * dt;
+        this.m_xVelocity =  Math.cos(this.m_angle  * Math.PI / 180) * this.m_acceleration *this.m_speed * dt;
+        this.m_yVelocity =  Math.sin(this.m_angle  * Math.PI / 180)* this.m_acceleration * this.m_speed * dt;
         this.m_xPos += this.m_xVelocity;
         this.m_yPos += this.m_yVelocity;      
     }
@@ -220,6 +207,19 @@ class Enemy {
 
     }
 }
+/*------------------------------------------------------- -----------------------------------------------------------------------------------------------*/
+/*---------------------------Variables + objects ----------------------------------------------------------------------------------------------------------*/
+/*------------------------------------------------------- -----------------------------------------------------------------------------------------------*/
+
+const canvas = document.querySelector('canvas');
+const c = canvas.getContext('2d');
+const background = document.querySelector('img');
+const CANVAS_WIDTH = canvas.width;
+const CANVAS_HEIGHT = canvas.height;
+const WORLD_HEIGHT = 3376;
+const WORLD_WIDTH = 6000;
+const CANVAS_MIN = 0;
+const ENEMY_COUNT = 5;
 
 let player = new Player(WORLD_WIDTH/2,WORLD_HEIGHT/2,100,100,'red');
 let bullets = new Array();
@@ -231,15 +231,15 @@ let pressedKeys = new Set();
 let dt = 0;
 let lastRender = 0;
 
-
 for(let i =0; i < ENEMY_COUNT; i++)
 {
    let tempEnemy = new Enemy(Math.floor(Math.random() * WORLD_WIDTH),Math.floor(Math.random() * WORLD_HEIGHT), 15, 15 ,-1, -1);
    enemies.push(tempEnemy);
 }
 
-
-
+/*------------------------------------------------------- -----------------------------------------------------------------------------------------------*/
+/*---------------------------------------------GAME LOOP -----------------------------------------------------------------------------------------------*/
+/*------------------------------------------------------ -----------------------------------------------------------------------------------------------*/
 
 addEventListener('click', (event) =>
 {
@@ -247,36 +247,17 @@ addEventListener('click', (event) =>
     bullets.push(tempBullet);
 })
 
-
-
 document.addEventListener('keydown', (event) =>
 {
     pressedKeys[event.key] = true;
 })
 
-
 document.addEventListener('keyup', (event) =>
 {
     pressedKeys[event.key] = false;
-})
+});
 
-
-function draw()
-{
-    c.clearRect(0,0,canvas.width,canvas.height);
-    camera.draw();
-   
-    player.draw(camera.m_x, camera.m_y);
-
-    bullets.forEach(bullet => {
-        bullet.draw(camera.m_x,camera.m_y);
-    });  
-
-    enemies.forEach( enemy => {
-        enemy.draw(camera.m_x,camera.m_y);
-    })  
-}
-
+window.requestAnimationFrame(gameLoop);
 
 
 function gameLoop(timestamp)
@@ -310,15 +291,44 @@ function gameLoop(timestamp)
             }
         }
     }
+    inputHandling();
+    draw();
+    
+    lastRender = timestamp;
+    window.requestAnimationFrame(gameLoop);
+}
 
+function inputHandling()
+{
     if(pressedKeys['w'])
     {
-        player.move(dt,true); 
-        camera.update(player.m_xPos,player.m_yPos);    
+        if(player.m_acceleration <= player.m_maxAcceleration)
+        {
+            player.m_acceleration += player.m_accelerationRate;
+        } 
+        player.move(dt); 
+        camera.update(player.m_xPos,player.m_yPos); 
     }
-    if(pressedKeys['s'])
+    else if(pressedKeys['s'])
     {
-        player.move(dt,false); 
+        if(player.m_acceleration >= -player.m_maxAcceleration)
+        {
+            player.m_acceleration -= player.m_accelerationRate;
+        }  
+        player.move(dt); 
+        camera.update(player.m_xPos,player.m_yPos);  
+    }
+    else if(!pressedKeys['w'] && !pressedKeys['s'])
+    {
+        if(player.m_acceleration > 0)
+        {
+            player.m_acceleration -= player.m_deccelerationRate;
+        }
+        else if(player.m_acceleration < 0)
+        {
+            player.m_acceleration += player.m_deccelerationRate;
+        }
+        player.move(dt); 
         camera.update(player.m_xPos,player.m_yPos);  
     }
     if(pressedKeys['d'])
@@ -329,13 +339,20 @@ function gameLoop(timestamp)
     {
         player.m_angle -= player.m_rotationSpeed;
     }
-   
-    draw();
-    
- 
-    lastRender = timestamp;
-    window.requestAnimationFrame(gameLoop);
-
 }
 
-window.requestAnimationFrame(gameLoop);
+function draw()
+{
+    c.clearRect(0,0,canvas.width,canvas.height);
+    camera.draw();
+   
+    player.draw(camera.m_x, camera.m_y);
+
+    bullets.forEach(bullet => {
+        bullet.draw(camera.m_x,camera.m_y);
+    });  
+
+    enemies.forEach( enemy => {
+        enemy.draw(camera.m_x,camera.m_y);
+    })  
+}
