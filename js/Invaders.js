@@ -7,7 +7,7 @@ const WORLD_HEIGHT = 3376;
 const WORLD_WIDTH = 6000;
 const CANVAS_MIN = 0;
 const ENEMY_COUNT = 5;
-
+ 
 
 class Camera
 {
@@ -225,6 +225,7 @@ let bullets = new Array();
 let enemies = new Array();
 let collisionManager = new CollisionManager();
 let camera = new Camera(player.m_xPos - CANVAS_WIDTH/2,player.m_yPos - CANVAS_HEIGHT/2,CANVAS_WIDTH,CANVAS_HEIGHT);
+let pressedKeys = new Array();
 
 let dt = 0;
 let lastRender = 0;
@@ -246,36 +247,36 @@ addEventListener('click', (event) =>
 })
 
 
+
 addEventListener('keydown', (event) =>
 {
-   if (event.key == 'w')
-   {    
-       player.move(dt,true); 
-       camera.update(player.m_xPos,player.m_yPos);                    
-   }
-   else if(event.key == 's')
-   {
-       //moves player in reverse based off rotationa
-       // player.m_yVelocity = 0.5;
+    pressedKeys[event.key] = true;
+    
+
+
+    if(pressedKeys['w'])
+    {
+        player.move(dt,true); 
+        camera.update(player.m_xPos,player.m_yPos);    
+    }
+    if(pressedKeys['s'])
+    {
         player.move(dt,false); 
-        camera.update(player.m_xPos,player.m_yPos);     
-   }
-   else if(event.key == 'd')
-   {
-       //rotates player right
+        camera.update(player.m_xPos,player.m_yPos);  
+    }
+    if(pressedKeys['d'])
+    {
         player.m_angle += 3;
-   }
-   else if(event.key == 'a')
-   {
-        //rotates player left
+    }
+    if(pressedKeys['a'])
+    {
         player.m_angle -= 3;
-   }
+    }
 })
 
 
 addEventListener('keyup', (event) =>
 {
-
    if (event.key == 'w' || event.key == "s")
    {
         player.m_yVelocity = 0; 
@@ -285,6 +286,7 @@ addEventListener('keyup', (event) =>
    {
         player.m_xVelocity = 0; 
    }
+   delete pressedKeys[event.key];
 })
 
 
