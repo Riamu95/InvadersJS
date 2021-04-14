@@ -1,13 +1,7 @@
-const canvas = document.querySelector('canvas');
-const c = canvas.getContext('2d');
-const background = document.querySelector('img');
-const CANVAS_WIDTH = canvas.width;
-const CANVAS_HEIGHT = canvas.height;
-const WORLD_HEIGHT = 3376;
-const WORLD_WIDTH = 6000;
-const CANVAS_MIN = 0;
-const ENEMY_COUNT = 5;
 
+/*------------------------------------------------------- -----------------------------------------------------------------------------------------------*/
+/*---------------------------            CLASSES        ----------------------------------------------------------------------------------------------------------*/
+/*------------------------------------------------------- -----------------------------------------------------------------------------------------------*/
 
 class Camera
 {
@@ -58,10 +52,15 @@ class Player {
         this.m_yPos = y;
         this.m_width = w;
         this.m_height =  h;
-        this.m_speed = 10;
+        this.m_speed = 0.1;
         this.m_xVelocity = 0;
         this.m_yVelocity = 0;
+        this.m_deccelerationRate = 0.005;
+        this.m_acceleration = 0;
+        this.m_accelerationRate = 0.03;
+        this.m_maxAcceleration = 5;
         this.m_angle = 0;
+        this.m_rotationSpeed = 1.5;
         this.m_color = color;           
     }
 
@@ -71,30 +70,16 @@ class Player {
         c.beginPath();      
         c.translate((this.m_xPos + this.m_width/2) - cameraX,(this.m_yPos + this.m_height/2) - cameraY);
         c.rotate(Math.PI/180 * this.m_angle);
-        c.moveTo(this.m_width/2, 0);
-        c.lineTo(-this.m_width, this.m_height/2);
-        c.lineTo(-this.m_width, -this.m_height/2);
-        c.fillStyle = "yellow";
+        c.drawImage(playerIMG,0,0,this.m_width,this.m_height,-this.m_width/2,-this.m_height/2,this.m_width,this.m_height);
         c.fill();
         c.closePath();
         c.restore();
     }
 
-    move(dt, forward)
+    move(dt)
     {        
-        //accepts radians to convert degrees to radians multiply angle by pi and divide by 180
-        if(forward)
-        {
-           this.m_speed = 10;
-        }
-        else
-        {
-            this.m_speed = -10;
-        }
-
-
-        this.m_xVelocity =  Math.cos(this.m_angle  * Math.PI / 180) * this.m_speed * dt;
-        this.m_yVelocity =  Math.sin(this.m_angle  * Math.PI / 180)* this.m_speed * dt;
+        this.m_xVelocity =  Math.cos(this.m_angle  * Math.PI / 180) * this.m_acceleration *this.m_speed * dt;
+        this.m_yVelocity =  Math.sin(this.m_angle  * Math.PI / 180)* this.m_acceleration * this.m_speed * dt;
         this.m_xPos += this.m_xVelocity;
         this.m_yPos += this.m_yVelocity;      
     }
@@ -212,32 +197,48 @@ class Enemy {
     draw(cameraX,cameraY)
     {
         c.beginPath();
-        c.fillRect(this.m_x - cameraX, this.m_y - cameraY, this.m_width, this.m_height);
-        c.fillStyle = 'red';
+        c.drawImage(enemyOne,0,0,this.m_width,this.m_height,this.m_x - cameraX,this.m_y - cameraY,this.m_width,this.m_height);
         c.closePath();
     
 
     }
 }
+/*------------------------------------------------------- -----------------------------------------------------------------------------------------------*/
+/*---------------------------Variables + objects ----------------------------------------------------------------------------------------------------------*/
+/*------------------------------------------------------- -----------------------------------------------------------------------------------------------*/
 
-let player = new Player(WORLD_WIDTH/2,WORLD_HEIGHT/2,100,100,'red');
+const canvas = document.querySelector('canvas');
+const c = canvas.getContext('2d');
+
+const background = document.getElementById('background');
+const playerIMG = document.getElementById('player');
+const enemyOne = document.getElementById('enemyOne');
+const CANVAS_WIDTH = canvas.width;
+const CANVAS_HEIGHT = canvas.height;
+const WORLD_HEIGHT = 3376;
+const WORLD_WIDTH = 6000;
+const CANVAS_MIN = 0;
+const ENEMY_COUNT = 5;
+
+let player = new Player(WORLD_WIDTH/2,WORLD_HEIGHT/2,114,66,'red');
 let bullets = new Array();
 let enemies = new Array();
 let collisionManager = new CollisionManager();
 let camera = new Camera(player.m_xPos - CANVAS_WIDTH/2,player.m_yPos - CANVAS_HEIGHT/2,CANVAS_WIDTH,CANVAS_HEIGHT);
+let pressedKeys = new Set();
 
 let dt = 0;
 let lastRender = 0;
 
-
 for(let i =0; i < ENEMY_COUNT; i++)
 {
-   let tempEnemy = new Enemy(Math.floor(Math.random() * WORLD_WIDTH),Math.floor(Math.random() * WORLD_HEIGHT), 15, 15 ,-1, -1);
+   let tempEnemy = new Enemy(Math.floor(Math.random() * WORLD_WIDTH),Math.floor(Math.random() * WORLD_HEIGHT), 102, 177 ,-1, -1);
    enemies.push(tempEnemy);
 }
 
-
-
+/*------------------------------------------------------- -----------------------------------------------------------------------------------------------*/
+/*---------------------------------------------GAME LOOP -----------------------------------------------------------------------------------------------*/
+/*------------------------------------------------------ -----------------------------------------------------------------------------------------------*/
 
 addEventListener('click', (event) =>
 {
@@ -245,71 +246,23 @@ addEventListener('click', (event) =>
     bullets.push(tempBullet);
 })
 
-
-addEventListener('keydown', (event) =>
+document.addEventListener('keydown', (event) =>
 {
-   if (event.key == 'w')
-   {    
-       player.move(dt,true); 
-       camera.update(player.m_xPos,player.m_yPos);                    
-   }
-   else if(event.key == 's')
-   {
-       //moves player in reverse based off rotationa
-       // player.m_yVelocity = 0.5;
-        player.move(dt,false); 
-        camera.update(player.m_xPos,player.m_yPos);     
-   }
-   else if(event.key == 'd')
-   {
-       //rotates player right
-        player.m_angle += 3;
-   }
-   else if(event.key == 'a')
-   {
-        //rotates player left
-        player.m_angle -= 3;
-   }
+    pressedKeys[event.key] = true;
 })
 
-
-addEventListener('keyup', (event) =>
+document.addEventListener('keyup', (event) =>
 {
+    pressedKeys[event.key] = false;
+});
 
-   if (event.key == 'w' || event.key == "s")
-   {
-        player.m_yVelocity = 0; 
-         
-   }
-   else if(event.key == 'a' || event.key == "d")
-   {
-        player.m_xVelocity = 0; 
-   }
-})
-
-
-function draw()
-{
-    c.clearRect(0,0,canvas.width,canvas.height);
-    camera.draw();
-   
-    player.draw(camera.m_x, camera.m_y);
-
-    bullets.forEach(bullet => {
-        bullet.draw(camera.m_x,camera.m_y);
-    });  
-
-    enemies.forEach( enemy => {
-        enemy.draw(camera.m_x,camera.m_y);
-    })  
-}
-
+window.requestAnimationFrame(gameLoop);
 
 
 function gameLoop(timestamp)
 {
-   dt = timestamp  - lastRender;
-
+    dt = timestamp  - lastRender;
+    
     bullets.forEach(bullet => {
         bullet.move(dt);
     })
@@ -337,22 +290,68 @@ function gameLoop(timestamp)
             }
         }
     }
-
-   /* for( let i = 0; i < bullets.length; i++)
-    {
-        if(collisionManager.objectBoundaryCollision(bullets[i]))
-        {
-            bullets.splice(i,1);
-           i--;
-        }
-    }*/
-
-     
+    inputHandling();
     draw();
     
     lastRender = timestamp;
     window.requestAnimationFrame(gameLoop);
-
 }
 
-window.requestAnimationFrame(gameLoop);
+function inputHandling()
+{
+    if(pressedKeys['w'])
+    {
+        if(player.m_acceleration <= player.m_maxAcceleration)
+        {
+            player.m_acceleration += player.m_accelerationRate;
+        } 
+        player.move(dt); 
+        camera.update(player.m_xPos,player.m_yPos); 
+    }
+    else if(pressedKeys['s'])
+    {
+        if(player.m_acceleration >= -player.m_maxAcceleration)
+        {
+            player.m_acceleration -= player.m_accelerationRate;
+        }  
+        player.move(dt); 
+        camera.update(player.m_xPos,player.m_yPos);  
+    }
+    else if(!pressedKeys['w'] && !pressedKeys['s'])
+    {
+        if(player.m_acceleration > 0)
+        {
+            player.m_acceleration -= player.m_deccelerationRate;
+        }
+        else if(player.m_acceleration < 0)
+        {
+            player.m_acceleration += player.m_deccelerationRate;
+        }
+        player.move(dt); 
+        camera.update(player.m_xPos,player.m_yPos);  
+    }
+    if(pressedKeys['d'])
+    {
+        player.m_angle += player.m_rotationSpeed;
+    }
+    if(pressedKeys['a'])
+    {
+        player.m_angle -= player.m_rotationSpeed;
+    }
+}
+
+function draw()
+{
+    c.clearRect(0,0,canvas.width,canvas.height);
+    camera.draw();
+   
+    player.draw(camera.m_x, camera.m_y);
+
+    bullets.forEach(bullet => {
+        bullet.draw(camera.m_x,camera.m_y);
+    });  
+
+    enemies.forEach( enemy => {
+        enemy.draw(camera.m_x,camera.m_y);
+    })  
+}
