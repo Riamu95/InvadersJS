@@ -70,10 +70,7 @@ class Player {
         c.beginPath();      
         c.translate((this.m_xPos + this.m_width/2) - cameraX,(this.m_yPos + this.m_height/2) - cameraY);
         c.rotate(Math.PI/180 * this.m_angle);
-        c.moveTo(this.m_width/2, 0);
-        c.lineTo(-this.m_width, this.m_height/2);
-        c.lineTo(-this.m_width, -this.m_height/2);
-        c.fillStyle = "yellow";
+        c.drawImage(playerIMG,0,0,this.m_width,this.m_height,-this.m_width/2,-this.m_height/2,this.m_width,this.m_height);
         c.fill();
         c.closePath();
         c.restore();
@@ -200,8 +197,7 @@ class Enemy {
     draw(cameraX,cameraY)
     {
         c.beginPath();
-        c.fillRect(this.m_x - cameraX, this.m_y - cameraY, this.m_width, this.m_height);
-        c.fillStyle = 'red';
+        c.drawImage(enemyOne,0,0,this.m_width,this.m_height,this.m_x - cameraX,this.m_y - cameraY,this.m_width,this.m_height);
         c.closePath();
     
 
@@ -213,7 +209,10 @@ class Enemy {
 
 const canvas = document.querySelector('canvas');
 const c = canvas.getContext('2d');
-const background = document.querySelector('img');
+
+const background = document.getElementById('background');
+const playerIMG = document.getElementById('player');
+const enemyOne = document.getElementById('enemyOne');
 const CANVAS_WIDTH = canvas.width;
 const CANVAS_HEIGHT = canvas.height;
 const WORLD_HEIGHT = 3376;
@@ -221,7 +220,7 @@ const WORLD_WIDTH = 6000;
 const CANVAS_MIN = 0;
 const ENEMY_COUNT = 5;
 
-let player = new Player(WORLD_WIDTH/2,WORLD_HEIGHT/2,100,100,'red');
+let player = new Player(WORLD_WIDTH/2,WORLD_HEIGHT/2,114,66,'red');
 let bullets = new Array();
 let enemies = new Array();
 let collisionManager = new CollisionManager();
@@ -233,7 +232,7 @@ let lastRender = 0;
 
 for(let i =0; i < ENEMY_COUNT; i++)
 {
-   let tempEnemy = new Enemy(Math.floor(Math.random() * WORLD_WIDTH),Math.floor(Math.random() * WORLD_HEIGHT), 15, 15 ,-1, -1);
+   let tempEnemy = new Enemy(Math.floor(Math.random() * WORLD_WIDTH),Math.floor(Math.random() * WORLD_HEIGHT), 102, 177 ,-1, -1);
    enemies.push(tempEnemy);
 }
 
