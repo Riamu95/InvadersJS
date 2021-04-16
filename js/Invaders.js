@@ -43,6 +43,16 @@ class Camera
     {
         c.drawImage(background,this.m_x,this.m_y,this.m_width,this.m_height,0,0,this.m_width,this.m_height);
     }
+
+    get getX()
+    {
+        return this.m_x;
+    }
+    get getY()
+    {
+        return this.m_y;
+    }
+
 }
 
 class Player {
@@ -83,6 +93,55 @@ class Player {
         this.m_xPos += this.m_xVelocity;
         this.m_yPos += this.m_yVelocity;      
     }
+
+    get getXPos()
+    {
+        return this.m_xPos;
+    }
+    get getYPos()
+    {
+        return this.m_yPos;
+    }
+    get getWidth()
+    {
+        return this.m_width;
+    }
+    get getHeight()
+    {
+        return this.m_height;
+    }
+    get getDeccelerationRate()
+    {
+        return this.m_deccelerationRate;
+    }
+    get getAcceleration()
+    {
+        return this.m_acceleration;
+    }
+    get getAccelerationRate()
+    {
+        return this.m_accelerationRate;
+    }
+    get getMaxAcceleration()
+    {
+        return this.m_maxAcceleration;
+    }
+    get getAngle()
+    {
+        return this.m_angle;
+    }
+    get getRotationSpeed()
+    {
+        return this.m_rotationSpeed;
+    }
+    set setAngle(_angle)
+    {
+        this.m_angle += _angle;
+    }
+    set setAcceleration(_accel)
+    {
+        this.m_acceleration += _accel;
+    }
 }
 
 class CollisionManager {
@@ -107,20 +166,20 @@ class CollisionManager {
 
     playerBoundaryCollision(_object)
     {
-        if(_object.m_xPos <= CANVAS_MIN)
+        if(_object.getXPos <= CANVAS_MIN)
         {
             _object.m_xVelocity = 0;
         }
-        else if ( _object.m_xPos + player.m_width >= CANVAS_WIDTH)
+        else if ( _object.getXPos + player.getWidth >= CANVAS_WIDTH)
         {
             _object.m_xVelocity = 0
         
         }
-        else if (_object.m_yPos < CANVAS_MIN)
+        else if (_object.getYPos < CANVAS_MIN)
         {
             _object.m_yVelocity = 0;
         }
-        else if (_object.m_yPos + player.m_height >= CANVAS_HEIGHT)
+        else if (_object.getYPos + player.getHeight >= CANVAS_HEIGHT)
         {
             _object.m_yVelocity = 0;
         }
@@ -224,7 +283,7 @@ let player = new Player(WORLD_WIDTH/2,WORLD_HEIGHT/2,114,66,'red');
 let bullets = new Array();
 let enemies = new Array();
 let collisionManager = new CollisionManager();
-let camera = new Camera(player.m_xPos - CANVAS_WIDTH/2,player.m_yPos - CANVAS_HEIGHT/2,CANVAS_WIDTH,CANVAS_HEIGHT);
+let camera = new Camera(player.getXPos - CANVAS_WIDTH/2,player.getYPos - CANVAS_HEIGHT/2,CANVAS_WIDTH,CANVAS_HEIGHT);
 let pressedKeys = new Set();
 
 let dt = 0;
@@ -242,7 +301,7 @@ for(let i =0; i < ENEMY_COUNT; i++)
 
 addEventListener('click', (event) =>
 {
-    let tempBullet = new Bullet(player.m_xPos + player.m_width/2, player.m_yPos + player.m_height/2, Math.atan2((event.y - ((player.m_yPos + player.m_height/2) - camera.m_y)), (event.x - ((player.m_xPos + player.m_width/2) - camera.m_x))));
+    let tempBullet = new Bullet(player.getXPos + player.getWidth/2, player.getYPos + player.getHeight/2, Math.atan2((event.y - ((player.getYPos + player.getHeight/2) - camera.getY)), (event.x - ((player.getXPos + player.getWidth/2) - camera.getX))));
     bullets.push(tempBullet);
 })
 
@@ -301,42 +360,42 @@ function inputHandling()
 {
     if(pressedKeys['w'])
     {
-        if(player.m_acceleration <= player.m_maxAcceleration)
+        if(player.getAcceleration <= player.getMaxAcceleration)
         {
-            player.m_acceleration += player.m_accelerationRate;
+            player.setAcceleration = player.getAccelerationRate;
         } 
         player.move(dt); 
-        camera.update(player.m_xPos,player.m_yPos); 
+        camera.update(player.getXPos,player.getYPos); 
     }
     else if(pressedKeys['s'])
     {
-        if(player.m_acceleration >= -player.m_maxAcceleration)
+        if(player.getAcceleration >= -player.getMaxAcceleration)
         {
-            player.m_acceleration -= player.m_accelerationRate;
+            player.setAcceleration = -player.getAccelerationRate;
         }  
         player.move(dt); 
-        camera.update(player.m_xPos,player.m_yPos);  
+        camera.update(player.getXPos,player.getYPos);  
     }
     else if(!pressedKeys['w'] && !pressedKeys['s'])
     {
-        if(player.m_acceleration > 0)
+        if(player.getAcceleration > 0)
         {
-            player.m_acceleration -= player.m_deccelerationRate;
+            player.setAcceleration = -player.getDeccelerationRate;
         }
-        else if(player.m_acceleration < 0)
+        else if(player.getAcceleration < 0)
         {
-            player.m_acceleration += player.m_deccelerationRate;
+            player.setAcceleration = player.getDeccelerationRate;
         }
         player.move(dt); 
-        camera.update(player.m_xPos,player.m_yPos);  
+        camera.update(player.getXPos,player.getYPos);  
     }
     if(pressedKeys['d'])
     {
-        player.m_angle += player.m_rotationSpeed;
+        player.setAngle = player.getRotationSpeed;
     }
     if(pressedKeys['a'])
     {
-        player.m_angle -= player.m_rotationSpeed;
+        player.setAngle = -player.getRotationSpeed;
     }
 }
 
@@ -345,13 +404,13 @@ function draw()
     c.clearRect(0,0,canvas.width,canvas.height);
     camera.draw();
    
-    player.draw(camera.m_x, camera.m_y);
+    player.draw(camera.getX, camera.getY);
 
     bullets.forEach(bullet => {
-        bullet.draw(camera.m_x,camera.m_y);
+        bullet.draw(camera.getX,camera.getY);
     });  
 
     enemies.forEach( enemy => {
-        enemy.draw(camera.m_x,camera.m_y);
+        enemy.draw(camera.getX,camera.getY);
     })  
 }
