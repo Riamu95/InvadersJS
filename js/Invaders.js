@@ -248,9 +248,21 @@ class Enemy {
 
     }
 
-    move (dt) 
+    move (dt, playerX, playerY) 
     {
+        let xdist = playerX - this.m_x;
+        let ydist = playerY - this.m_y;
 
+        xdist = xdist * xdist;
+        ydist = ydist * ydist;
+
+        let distance = xdist + ydist;
+        distance = Math.sqrt(distance);
+
+        if(distance < 500)
+        {
+            console.log("hiiiii");
+        }
     }
 
     draw(cameraX,cameraY)
@@ -258,10 +270,28 @@ class Enemy {
         c.beginPath();
         c.drawImage(enemyOne,0,0,this.m_width,this.m_height,this.m_x - cameraX,this.m_y - cameraY,this.m_width,this.m_height);
         c.closePath();
-    
-
     }
 }
+
+class EnemyMinion extends Enemy {
+
+    constructor (_x, _y,_width, _height, _xVel, _yVel)
+    {
+        super(_x, _y,_width, _height, _xVel, _yVel);
+
+    }
+    move()
+    {
+
+    }
+    draw(cameraX,cameraY)
+    {
+        c.beginPath();
+        c.drawImage(enemyMinionImage,0,0,this.m_width,this.m_height,this.m_x - cameraX,this.m_y - cameraY,this.m_width,this.m_height);
+        c.closePath();
+    }
+}
+
 /*------------------------------------------------------- -----------------------------------------------------------------------------------------------*/
 /*---------------------------Variables + objects ----------------------------------------------------------------------------------------------------------*/
 /*------------------------------------------------------- -----------------------------------------------------------------------------------------------*/
@@ -272,6 +302,7 @@ const c = canvas.getContext('2d');
 const background = document.getElementById('background');
 const playerIMG = document.getElementById('player');
 const enemyOne = document.getElementById('enemyOne');
+const enemyMinionImage = document.getElementById('enemyMinion');
 const CANVAS_WIDTH = canvas.width;
 const CANVAS_HEIGHT = canvas.height;
 const WORLD_HEIGHT = 3376;
@@ -285,7 +316,7 @@ let enemies = new Array();
 let collisionManager = new CollisionManager();
 let camera = new Camera(player.getXPos - CANVAS_WIDTH/2,player.getYPos - CANVAS_HEIGHT/2,CANVAS_WIDTH,CANVAS_HEIGHT);
 let pressedKeys = new Set();
-
+let minion = new EnemyMinion(player.getXPos,player.getYPos,53,100,-1,-1);
 let dt = 0;
 let lastRender = 0;
 
@@ -349,6 +380,11 @@ function gameLoop(timestamp)
             }
         }
     }
+    enemies.forEach(enemy => 
+    {
+        enemy.move(dt, player.getXPos, player.getYPos);
+    });
+
     inputHandling();
     draw();
     
@@ -412,5 +448,6 @@ function draw()
 
     enemies.forEach( enemy => {
         enemy.draw(camera.getX,camera.getY);
-    })  
+    })
+    minion.draw(camera.getX,camera.getY);
 }
