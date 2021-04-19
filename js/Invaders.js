@@ -7,64 +7,58 @@ class Camera
 {
     constructor(x,y,width,height)
     {   
-        this.m_x = x;
-        this.m_y = y;
+        this._pos = new Vec2(x,y);
         this.m_width = width;
         this.m_height = height;
         this.m_worldHeight = WORLD_HEIGHT;
         this.m_worldWidth = WORLD_WIDTH;
     }
 
-    update(x,y,width,height)
+    update(playerPos,width,height)
      {
         
-        this.m_x = x - CANVAS_WIDTH/2;
-        this.m_y = y - CANVAS_HEIGHT/2;
+        this._pos.x = playerPos.x - CANVAS_WIDTH/2;
+        this._pos.y = playerPos.y - CANVAS_HEIGHT/2;
 
-        if(this.m_x <= 0 ) 
+        if(this._pos.getVec2._x <= 0 ) 
         {
-             this.m_x = 0;
+             this._pos.x = 0;
         }
-        if( this.m_x +  this.m_width >= WORLD_WIDTH )
+        if( this._pos.x +  this.m_width >= WORLD_WIDTH )
         {
-            this.m_x = WORLD_WIDTH - this.m_width;
+            this._pos.x = WORLD_WIDTH - this.m_width;
         }
-        if(this.m_y <= 0)
+        if(this._pos.y <= 0)
         {
-            this.m_y = 0;
+            this._pos.y = 0;
         }
-        if(this.m_y  + this.m_height >= WORLD_HEIGHT)
+        if(this._pos.y  + this.m_height >= WORLD_HEIGHT)
         {
-            this.m_y = WORLD_HEIGHT - this.m_height;
+            this._pos.y = WORLD_HEIGHT - this.m_height;
         }
     }
 
     draw()
     {
-        c.drawImage(background,this.m_x,this.m_y,this.m_width,this.m_height,0,0,this.m_width,this.m_height);
+        c.drawImage(background,this._pos.x,this._pos.y,this.m_width,this.m_height,0,0,this.m_width,this.m_height);
     }
 
-    get getX()
+    get getPos()
     {
-        return this.m_x;
+        return this._pos;
     }
-    get getY()
-    {
-        return this.m_y;
-    }
+   
 
 }
 
 class Player {
     constructor(x, y, w ,h ,color)
     {
-        this.m_xPos = x;
-        this.m_yPos = y;
+        this._pos = new Vec2(x,y);
         this.m_width = w;
         this.m_height =  h;
         this.m_speed = 0.1;
-        this.m_xVelocity = 0;
-        this.m_yVelocity = 0;
+        this._velocity = new Vec2(0,0);
         this.m_deccelerationRate = 0.005;
         this.m_acceleration = 0;
         this.m_accelerationRate = 0.03;
@@ -74,11 +68,11 @@ class Player {
         this.m_color = color;           
     }
 
-    draw(cameraX,cameraY)
+    draw(cameraPos)
     {
         c.save();
         c.beginPath();      
-        c.translate((this.m_xPos + this.m_width/2) - cameraX,(this.m_yPos + this.m_height/2) - cameraY);
+        c.translate((this._pos.x + this.m_width/2) - cameraPos.x,(this._pos.getVec2.y + this.m_height/2) - cameraPos.y);
         c.rotate(Math.PI/180 * this.m_angle);
         c.drawImage(playerIMG,0,0,this.m_width,this.m_height,-this.m_width/2,-this.m_height/2,this.m_width,this.m_height);
         c.fill();
@@ -88,20 +82,16 @@ class Player {
 
     move(dt)
     {        
-        this.m_xVelocity =  Math.cos(this.m_angle  * Math.PI / 180) * this.m_acceleration *this.m_speed * dt;
-        this.m_yVelocity =  Math.sin(this.m_angle  * Math.PI / 180)* this.m_acceleration * this.m_speed * dt;
-        this.m_xPos += this.m_xVelocity;
-        this.m_yPos += this.m_yVelocity;      
+        this._velocity.x =  Math.cos(this.m_angle  * Math.PI / 180) * this.m_acceleration *this.m_speed * dt;
+        this._velocity.y =  Math.sin(this.m_angle  * Math.PI / 180)* this.m_acceleration * this.m_speed * dt;
+        this._pos.x += this._velocity.x;
+        this._pos.y += this._velocity.y;      
+    }
+    get getPos()
+    {
+        return this._pos;
     }
 
-    get getXPos()
-    {
-        return this.m_xPos;
-    }
-    get getYPos()
-    {
-        return this.m_yPos;
-    }
     get getWidth()
     {
         return this.m_width;
@@ -151,10 +141,10 @@ class CollisionManager {
 
     circleRectCollision(_a,_b)
     {
-        if(_a.m_x  < _b.m_x &&
-            _a.m_x  + _a.m_radius * 2 > _b.m_x &&
-            _a.m_y  < _b.m_y  + _b.m_height &&
-            _a.m_y  + _a.m_radius * 2 > _b.m_y)
+        if(_a.getPos.x  < _b.getPos.x &&
+            _a.getPos.x  + _a.m_radius * 2 > _b.getPos.x &&
+            _a.getPos.y  < _b.getPos.y  + _b.m_height &&
+            _a.getPos.y  + _a.m_radius * 2 > _b.getPos.y)
         {
            return true;
         }
@@ -166,28 +156,28 @@ class CollisionManager {
 
     playerBoundaryCollision(_object)
     {
-        if(_object.getXPos <= CANVAS_MIN)
+        if(_object.getPos.x <= CANVAS_MIN)
         {
-            _object.m_xVelocity = 0;
+            _object._velocity.x = 0;
         }
-        else if ( _object.getXPos + player.getWidth >= CANVAS_WIDTH)
+        else if ( _object.getPos.x + player.getWidth >= CANVAS_WIDTH)
         {
-            _object.m_xVelocity = 0
+            _object._velocity.x = 0
         
         }
-        else if (_object.getYPos < CANVAS_MIN)
+        else if (_object.getPos.y < CANVAS_MIN)
         {
-            _object.m_yVelocity = 0;
+            _object._velocity.y = 0;
         }
-        else if (_object.getYPos + player.getHeight >= CANVAS_HEIGHT)
+        else if (_object.getPos.y + player.getHeight >= CANVAS_HEIGHT)
         {
-            _object.m_yVelocity = 0;
+            _object._velocity.y = 0;
         }
     }
 
     objectBoundaryCollision(_object)
     {
-        if( _object.m_x <= CANVAS_MIN || _object.m_x >= CANVAS_WIDTH || _object.m_y <= CANVAS_MIN || _object.m_y >= CANVAS_HEIGHT)
+        if( _object.getPos.x <= CANVAS_MIN || _object.getPos.x >= CANVAS_WIDTH || _object.getPos.y <= CANVAS_MIN || _object.getPos.y >= CANVAS_HEIGHT)
         {
             return true;
           
@@ -201,35 +191,43 @@ class CollisionManager {
 
 
 class Bullet {
-    constructor(_x,_y,_angle)
+    constructor(x,y,_angle)
     {
-        this.m_x = _x;
-        this.m_y = _y;
+        this._pos = new Vec2(x,y);
         this.m_angle = _angle;
         this.m_radius = 5;
         this.m_color = 'Red';
-        this.m_xVelocity = 0;
-        this.m_yVelocity = 0;  
+        this._velocity = new Vec2(0,0);
     }
 
     move(dt)
     {
-        this.m_xVelocity = Math.cos(this.m_angle) * dt;
-        this.m_yVelocity = Math.sin(this.m_angle) * dt;
-        this.m_x += this.m_xVelocity;
-        this.m_y += this.m_yVelocity;
+        this._velocity.x = Math.cos(this.m_angle) * dt;
+        this._velocity.y = Math.sin(this.m_angle) * dt;
+        this._pos.x += this._velocity.x;
+        this._pos.y += this._velocity.y;
     }
 
-    draw(cameraX,cameraY)
+    draw(cameraPos)
     {
         c.save();
         c.beginPath();
-        c.translate(this.m_x - cameraX, this.m_y - cameraY);
+        c.translate(this._pos.x - cameraPos.x, this._pos.y - cameraPos.y);
         c.arc(0, 0, this.m_radius, 0, 2 * Math.PI);
         c.fillStyle = 'green';
         c.fill();
         c.closePath();
         c.restore();
+    }
+
+    get getVel()
+    {
+        return this._velocity;
+    }
+
+    get getPos()
+    {
+        return this._pos;
     }
 }
 
@@ -238,39 +236,60 @@ class Enemy {
 
     constructor (_x, _y,_width, _height, _xVel, _yVel)
      {
-        this.m_x = _x;
-        this.m_y = _y;
+        this._pos = new Vec2(_x,_y);
         this.m_width = _width;
         this.m_height = _height;
-        this.m_xVelocity = _xVel;
-        this.m_yVelocity = _yVel;
-
-
+        this._velocity = new Vec2(_xVel, _yVel);
+        this.m_angle = 90;
+        this.m_speed = 0.2;
+        this.m_active = false;
+        this.m_attack = false;
     }
 
-    move (dt, playerX, playerY) 
+    move (dt,playerPos) 
     {
-        let xdist = playerX - this.m_x;
-        let ydist = playerY - this.m_y;
+        let distance = Vec2.distance(playerPos,this._pos);
 
-        xdist = xdist * xdist;
-        ydist = ydist * ydist;
-
-        let distance = xdist + ydist;
-        distance = Math.sqrt(distance);
-
-        if(distance < 500)
+        if(distance < 500 && !this.m_active)
         {
-            console.log("hiiiii");
+           this.m_active = true;
+        }
+        else if( distance > 500 && this.m_active)
+        {
+            this.m_active = !this.m_active;
+        }
+
+        if(this.m_active)
+        {
+            //not calculating appropriate rotation angle 
+           this.m_angle = Math.atan2(playerPos.y - (this._pos.y + this.m_height/2),playerPos.x - (this._pos.x + this.m_width/2));
+           this._velocity.x = Math.cos(this.m_angle) * this.m_speed * dt;
+           this._velocity.y = Math.sin(this.m_angle) * this.m_speed * dt;
+           this._pos.x += this._velocity.x;
+           this._pos.y += this._velocity.y;
         }
     }
 
-    draw(cameraX,cameraY)
+    draw(cameraPos)
     {
+        c.save();
         c.beginPath();
-        c.drawImage(enemyOne,0,0,this.m_width,this.m_height,this.m_x - cameraX,this.m_y - cameraY,this.m_width,this.m_height);
+        c.translate((this._pos.x + this.m_width/2) - cameraPos.x,(this._pos.y + this.m_height/2) - cameraPos.y);
+        c.rotate(Math.PI/180 * this.m_angle);
+        c.drawImage(enemyOne,0,0,this.m_width,this.m_height,0,0,this.m_width,this.m_height);
         c.closePath();
+        c.restore();
     }
+
+    get getPos()
+    {
+        return this._pos;
+    }
+    get getVel()
+    {
+        return this._velocity;
+    }
+
 }
 
 class EnemyMinion extends Enemy {
@@ -284,11 +303,44 @@ class EnemyMinion extends Enemy {
     {
 
     }
-    draw(cameraX,cameraY)
+    draw(cameraPos)
     {
         c.beginPath();
-        c.drawImage(enemyMinionImage,0,0,this.m_width,this.m_height,this.m_x - cameraX,this.m_y - cameraY,this.m_width,this.m_height);
+        c.drawImage(enemyMinionImage,0,0,this.m_width,this.m_height,this._pos.x - cameraPos.getVec2.x,this._pos.y - cameraPos.getVec2.y,this.m_width,this.m_height);
         c.closePath();
+    }
+}
+
+
+class Vec2 
+{
+    constructor(x,y)
+    {
+        this.x = x;
+        this.y = y;
+    }
+
+    get getVec2()
+    {
+        return this;
+    }
+
+    set setVec2(vec)
+    {
+        this.x += vec.x;
+        this.y += vec.y;
+    }
+
+    static distance(a, b)
+    {
+        let  distance = new Vec2(a.x - b.x , a.y - b.y);
+        distance.x = distance.x * distance.x;
+        distance.y = distance.y * distance.y;
+
+        let absolouteDistance = distance.x + distance.y;
+        absolouteDistance = Math.sqrt(absolouteDistance);
+
+        return absolouteDistance;
     }
 }
 
@@ -314,7 +366,7 @@ let player = new Player(WORLD_WIDTH/2,WORLD_HEIGHT/2,114,66,'red');
 let bullets = new Array();
 let enemies = new Array();
 let collisionManager = new CollisionManager();
-let camera = new Camera(player.getXPos - CANVAS_WIDTH/2,player.getYPos - CANVAS_HEIGHT/2,CANVAS_WIDTH,CANVAS_HEIGHT);
+let camera = new Camera(player.getPos.x - CANVAS_WIDTH/2,player.getPos.y - CANVAS_HEIGHT/2,CANVAS_WIDTH,CANVAS_HEIGHT);
 let pressedKeys = new Set();
 let minion = new EnemyMinion(player.getXPos,player.getYPos,53,100,-1,-1);
 let dt = 0;
@@ -323,6 +375,7 @@ let lastRender = 0;
 for(let i =0; i < ENEMY_COUNT; i++)
 {
    let tempEnemy = new Enemy(Math.floor(Math.random() * WORLD_WIDTH),Math.floor(Math.random() * WORLD_HEIGHT), 102, 177 ,-1, -1);
+   //let tempEnemy = new Enemy(player.getXPos + 200,player.getYPos, 102, 177 ,-1, -1);
    enemies.push(tempEnemy);
 }
 
@@ -332,7 +385,7 @@ for(let i =0; i < ENEMY_COUNT; i++)
 
 addEventListener('click', (event) =>
 {
-    let tempBullet = new Bullet(player.getXPos + player.getWidth/2, player.getYPos + player.getHeight/2, Math.atan2((event.y - ((player.getYPos + player.getHeight/2) - camera.getY)), (event.x - ((player.getXPos + player.getWidth/2) - camera.getX))));
+    let tempBullet = new Bullet(player.getPos.x + player.getWidth/2, player.getPos.y + player.getHeight/2, Math.atan2((event.y - ((player.getPos.y + player.getHeight/2) - camera.getPos.y)), (event.x - ((player.getPos.x + player.getWidth/2) - camera.getPos.x))));
     bullets.push(tempBullet);
 })
 
@@ -382,7 +435,7 @@ function gameLoop(timestamp)
     }
     enemies.forEach(enemy => 
     {
-        enemy.move(dt, player.getXPos, player.getYPos);
+        enemy.move(dt, player.getPos);
     });
 
     inputHandling();
@@ -401,7 +454,7 @@ function inputHandling()
             player.setAcceleration = player.getAccelerationRate;
         } 
         player.move(dt); 
-        camera.update(player.getXPos,player.getYPos); 
+        camera.update(player.getPos); 
     }
     else if(pressedKeys['s'])
     {
@@ -410,7 +463,7 @@ function inputHandling()
             player.setAcceleration = -player.getAccelerationRate;
         }  
         player.move(dt); 
-        camera.update(player.getXPos,player.getYPos);  
+        camera.update(player.getPos);  
     }
     else if(!pressedKeys['w'] && !pressedKeys['s'])
     {
@@ -423,7 +476,7 @@ function inputHandling()
             player.setAcceleration = player.getDeccelerationRate;
         }
         player.move(dt); 
-        camera.update(player.getXPos,player.getYPos);  
+        camera.update(player.getPos);  
     }
     if(pressedKeys['d'])
     {
@@ -440,14 +493,14 @@ function draw()
     c.clearRect(0,0,canvas.width,canvas.height);
     camera.draw();
    
-    player.draw(camera.getX, camera.getY);
+    player.draw(camera.getPos);
 
     bullets.forEach(bullet => {
-        bullet.draw(camera.getX,camera.getY);
+        bullet.draw(camera.getPos);
     });  
 
     enemies.forEach( enemy => {
-        enemy.draw(camera.getX,camera.getY);
+        enemy.draw(camera.getPos);
     })
-    minion.draw(camera.getX,camera.getY);
+    minion.draw(camera.getPos);
 }
