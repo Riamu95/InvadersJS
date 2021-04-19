@@ -8,10 +8,8 @@ class Camera
     constructor(x,y,width,height)
     {   
         this._pos = new Vec2(x,y);
-        this.m_width = width;
-        this.m_height = height;
-        this.m_worldHeight = WORLD_HEIGHT;
-        this.m_worldWidth = WORLD_WIDTH;
+        this._size= new Vec2(width,height);
+        this._worldSize = new Vec2(WORLD_WIDTH,WORLD_HEIGHT);
     }
 
     update(playerPos,width,height)
@@ -20,51 +18,57 @@ class Camera
         this._pos.x = playerPos.x - CANVAS_WIDTH/2;
         this._pos.y = playerPos.y - CANVAS_HEIGHT/2;
 
-        if(this._pos.getVec2._x <= 0 ) 
+        if(this._pos.x <= 0 ) 
         {
              this._pos.x = 0;
         }
-        if( this._pos.x +  this.m_width >= WORLD_WIDTH )
+        if( this._pos.x +  this._size.x >= this._worldSize.x)
         {
-            this._pos.x = WORLD_WIDTH - this.m_width;
+            this._pos.x = this._worldSize.x - this._size.x;
         }
         if(this._pos.y <= 0)
         {
             this._pos.y = 0;
         }
-        if(this._pos.y  + this.m_height >= WORLD_HEIGHT)
+        if(this._pos.y  + this._size.y >= this._worldSize.y)
         {
-            this._pos.y = WORLD_HEIGHT - this.m_height;
+            this._pos.y = this._worldSize.y - this._size.y;
         }
     }
 
     draw()
     {
-        c.drawImage(background,this._pos.x,this._pos.y,this.m_width,this.m_height,0,0,this.m_width,this.m_height);
+        c.drawImage(background,this._pos.x,this._pos.y,this._size.x,this._size.y,0,0,this._size.x,this._size.y);
     }
 
     get getPos()
     {
         return this._pos;
     }
-   
-
+    get getSize()
+    {
+        return this._size;
+    }
 }
 
 class Player {
     constructor(x, y, w ,h ,color)
     {
         this._pos = new Vec2(x,y);
-        this.m_width = w;
-        this.m_height =  h;
+        this._size = new Vec2(w,h);
+
+        this._health = 1;
+
         this.m_speed = 0.1;
         this._velocity = new Vec2(0,0);
         this.m_deccelerationRate = 0.005;
         this.m_acceleration = 0;
         this.m_accelerationRate = 0.03;
         this.m_maxAcceleration = 5;
+        
         this.m_angle = 0;
         this.m_rotationSpeed = 1.5;
+        
         this.m_color = color;           
     }
 
@@ -72,9 +76,9 @@ class Player {
     {
         c.save();
         c.beginPath();      
-        c.translate((this._pos.x + this.m_width/2) - cameraPos.x,(this._pos.getVec2.y + this.m_height/2) - cameraPos.y);
+        c.translate((this._pos.x + this._size.x/2) - cameraPos.x,(this._pos.y + this._size.y/2) - cameraPos.y);
         c.rotate(Math.PI/180 * this.m_angle);
-        c.drawImage(playerIMG,0,0,this.m_width,this.m_height,-this.m_width/2,-this.m_height/2,this.m_width,this.m_height);
+        c.drawImage(playerIMG,0,0,this._size.x,this._size.y,-this._size.x/2,-this._size.y/2,this._size.x,this._size.y);
         c.fill();
         c.closePath();
         c.restore();
@@ -87,18 +91,18 @@ class Player {
         this._pos.x += this._velocity.x;
         this._pos.y += this._velocity.y;      
     }
+
     get getPos()
     {
         return this._pos;
     }
-
-    get getWidth()
+    get getHealth()
     {
-        return this.m_width;
+        return this._health;
     }
-    get getHeight()
+    get getSize()
     {
-        return this.m_height;
+        return this._size;
     }
     get getDeccelerationRate()
     {
@@ -132,6 +136,10 @@ class Player {
     {
         this.m_acceleration += _accel;
     }
+    set setHealth(value)
+    {
+        this._health -= value;
+    }
 }
 
 class CollisionManager {
@@ -143,7 +151,7 @@ class CollisionManager {
     {
         if(_a.getPos.x  < _b.getPos.x &&
             _a.getPos.x  + _a.m_radius * 2 > _b.getPos.x &&
-            _a.getPos.y  < _b.getPos.y  + _b.m_height &&
+            _a.getPos.y  < _b.getPos.y  + _b.getSize.y &&
             _a.getPos.y  + _a.m_radius * 2 > _b.getPos.y)
         {
            return true;
@@ -237,36 +245,66 @@ class Enemy {
     constructor (_x, _y,_width, _height, _xVel, _yVel)
      {
         this._pos = new Vec2(_x,_y);
-        this.m_width = _width;
-        this.m_height = _height;
+        this._size = new Vec2(_width,_height);
+      
         this._velocity = new Vec2(_xVel, _yVel);
         this.m_angle = 90;
         this.m_speed = 0.2;
-        this.m_active = false;
-        this.m_attack = false;
+        
+        this._active = false;
+        this._shoot = false;
+        this._activateDistance = 750;
+        this._activateshootingdistance = this._activateDistance/2;
+
+        this._bullets = new Array();
+        this._bulletTimer = 2000;
+        this._timer = 0;
     }
 
-    move (dt,playerPos) 
+    move (dt,playerPos,playerSize) 
     {
+       
         let distance = Vec2.distance(playerPos,this._pos);
 
-        if(distance < 500 && !this.m_active)
+        if(distance < this._activateDistance && distance > 200 && !this._active)
         {
-           this.m_active = true;
+           this._active = true;
         }
-        else if( distance > 500 && this.m_active)
+        else if (distance < this._activateshootingdistance && distance > 200 && !this._shoot)
         {
-            this.m_active = !this.m_active;
+            this._shoot = true;
+        }
+        else if( distance > this._activateDistance && this._active)
+        {
+            this._active = !this._active;
+        }
+        else if( distance > this._activateshootingdistance && this._shoot)
+        {
+            this._shoot = !this._shoot;
+        }
+        else if( distance <=  200 && this._shoot && this._active)
+        {
+            this._shoot = !this._shoot;
+            this._active = !this._active;
         }
 
-        if(this.m_active)
+        if(this._active)
         {
             //not calculating appropriate rotation angle 
-           this.m_angle = Math.atan2(playerPos.y - (this._pos.y + this.m_height/2),playerPos.x - (this._pos.x + this.m_width/2));
+           this.m_angle = Math.atan2(playerPos.y + playerSize.y/2 - (this._pos.y + this._size.y/2),playerPos.x + playerSize.x/2 - (this._pos.x + this._size.x/2));
            this._velocity.x = Math.cos(this.m_angle) * this.m_speed * dt;
            this._velocity.y = Math.sin(this.m_angle) * this.m_speed * dt;
            this._pos.x += this._velocity.x;
            this._pos.y += this._velocity.y;
+            
+           this._timer += dt;
+
+           if(this._shoot && this._timer >= this._bulletTimer)
+           {
+               let tempBullet = new Bullet(this._pos.x + this._size.x/2, this._pos.y + this._size.y/2, Math.atan2(playerPos.y - (this._pos.y + this._size.y/2),playerPos.x - (this._pos.x + this._size.x/2)));
+               this._bullets.push(tempBullet);
+               this._timer = 0;
+           }
         }
     }
 
@@ -274,9 +312,9 @@ class Enemy {
     {
         c.save();
         c.beginPath();
-        c.translate((this._pos.x + this.m_width/2) - cameraPos.x,(this._pos.y + this.m_height/2) - cameraPos.y);
+        c.translate((this._pos.x + this._size.x/2) - cameraPos.x,(this._pos.y + this._size.y/2) - cameraPos.y);
         c.rotate(Math.PI/180 * this.m_angle);
-        c.drawImage(enemyOne,0,0,this.m_width,this.m_height,0,0,this.m_width,this.m_height);
+        c.drawImage(enemyOne,0,0,this._size.x,this._size.y,0,0,this._size.x,this._size.y);
         c.closePath();
         c.restore();
     }
@@ -288,6 +326,10 @@ class Enemy {
     get getVel()
     {
         return this._velocity;
+    }
+    get getSize()
+    {
+        return this._size;
     }
 
 }
@@ -355,12 +397,25 @@ const background = document.getElementById('background');
 const playerIMG = document.getElementById('player');
 const enemyOne = document.getElementById('enemyOne');
 const enemyMinionImage = document.getElementById('enemyMinion');
+const hearth = document.getElementById('heart');
+const healthBar = document.getElementById('healthBar');
+const healthValue = document.getElementById('healthValue');
 const CANVAS_WIDTH = canvas.width;
 const CANVAS_HEIGHT = canvas.height;
 const WORLD_HEIGHT = 3376;
 const WORLD_WIDTH = 6000;
 const CANVAS_MIN = 0;
 const ENEMY_COUNT = 5;
+
+const HEARTH_POS = new Vec2(0,0);
+const HEARTH_SIZE = new Vec2(100,100);
+
+const HEALTHBAR_POS = new Vec2(0,0);
+const HEALTHBAR_SIZE = new Vec2(300,100);
+
+const HEALTHVALUE_POS = new Vec2(0,0);
+const HEALTHVALUE_SIZE = new Vec2(296,96);
+
 
 let player = new Player(WORLD_WIDTH/2,WORLD_HEIGHT/2,114,66,'red');
 let bullets = new Array();
@@ -371,6 +426,7 @@ let pressedKeys = new Set();
 let minion = new EnemyMinion(player.getXPos,player.getYPos,53,100,-1,-1);
 let dt = 0;
 let lastRender = 0;
+
 
 for(let i =0; i < ENEMY_COUNT; i++)
 {
@@ -385,7 +441,7 @@ for(let i =0; i < ENEMY_COUNT; i++)
 
 addEventListener('click', (event) =>
 {
-    let tempBullet = new Bullet(player.getPos.x + player.getWidth/2, player.getPos.y + player.getHeight/2, Math.atan2((event.y - ((player.getPos.y + player.getHeight/2) - camera.getPos.y)), (event.x - ((player.getPos.x + player.getWidth/2) - camera.getPos.x))));
+    let tempBullet = new Bullet(player.getPos.x + player.getSize.x/2, player.getPos.y + player.getSize.y/2, Math.atan2((event.y - ((player.getPos.y + player.getSize.y/2) - camera.getPos.y)), (event.x - ((player.getPos.x + player.getSize.x/2) - camera.getPos.x))));
     bullets.push(tempBullet);
 })
 
@@ -433,13 +489,32 @@ function gameLoop(timestamp)
             }
         }
     }
+
+    
+
     enemies.forEach(enemy => 
     {
-        enemy.move(dt, player.getPos);
+        enemy.move(dt,player.getPos,player.getSize);
     });
+
+    for(let e = 0; e < enemies.length; e++)
+    {
+        for(let b = 0; b < enemies[e]._bullets.length; b++)
+        {
+            enemies[e]._bullets[b].move(dt);
+            if(collisionManager.circleRectCollision(enemies[e]._bullets[b],player))
+            {
+                enemies[e]._bullets.splice(b,1);
+                b--;
+                player.setHealth = 0.1;
+            }
+        }
+    }
 
     inputHandling();
     draw();
+
+   
     
     lastRender = timestamp;
     window.requestAnimationFrame(gameLoop);
@@ -492,7 +567,15 @@ function draw()
 {
     c.clearRect(0,0,canvas.width,canvas.height);
     camera.draw();
-   
+    if(player.getHealth > 0)
+    {
+        c.drawImage(hearth,0,0,HEARTH_SIZE.x,HEARTH_SIZE.y,(camera._pos.x + (camera._size.x * 0.75)) - camera._pos.x,(camera._pos.y +  (camera._size.x / 30)) - camera._pos.y,HEARTH_SIZE.x,HEARTH_SIZE.y);
+        //heartBar
+        c.drawImage(healthBar,0,0,HEALTHBAR_SIZE.x,HEALTHBAR_SIZE.y,(camera._pos.x + (camera._size.x * 0.81)) - camera._pos.x,(camera._pos.y +  (camera._size.x / 30)) - camera._pos.y,HEALTHBAR_SIZE.x,HEALTHBAR_SIZE.y);
+        //heartValue
+        //render width based off health
+        c.drawImage(healthValue,0,0,HEALTHVALUE_SIZE.x,HEALTHVALUE_SIZE.y,(camera._pos.x + (camera._size.x * 0.81)) - camera._pos.x,(camera._pos.y +  (camera._size.x / 30.1)) - camera._pos.y,HEALTHVALUE_SIZE.x * player.getHealth,HEALTHVALUE_SIZE.y);
+    }
     player.draw(camera.getPos);
 
     bullets.forEach(bullet => {
@@ -501,6 +584,9 @@ function draw()
 
     enemies.forEach( enemy => {
         enemy.draw(camera.getPos);
+        enemy._bullets.forEach(bullet => {
+            bullet.draw(camera.getPos);
+        });
     })
     minion.draw(camera.getPos);
 }
