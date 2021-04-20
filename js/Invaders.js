@@ -263,49 +263,7 @@ class Enemy {
 
     move (dt,playerPos,playerSize) 
     {
-       
-        let distance = Vec2.distance(playerPos,this._pos);
-
-        if(distance < this._activateDistance && distance > 200 && !this._active)
-        {
-           this._active = true;
-        }
-        else if (distance < this._activateshootingdistance && distance > 200 && !this._shoot)
-        {
-            this._shoot = true;
-        }
-        else if( distance > this._activateDistance && this._active)
-        {
-            this._active = !this._active;
-        }
-        else if( distance > this._activateshootingdistance && this._shoot)
-        {
-            this._shoot = !this._shoot;
-        }
-        else if( distance <=  200 && this._shoot && this._active)
-        {
-            this._shoot = !this._shoot;
-            this._active = !this._active;
-        }
-
-        if(this._active)
-        {
-            //not calculating appropriate rotation angle 
-           this.m_angle = Math.atan2(playerPos.y + playerSize.y/2 - (this._pos.y + this._size.y/2),playerPos.x + playerSize.x/2 - (this._pos.x + this._size.x/2));
-           this._velocity.x = Math.cos(this.m_angle) * this.m_speed * dt;
-           this._velocity.y = Math.sin(this.m_angle) * this.m_speed * dt;
-           this._pos.x += this._velocity.x;
-           this._pos.y += this._velocity.y;
-            
-           this._timer += dt;
-
-           if(this._shoot && this._timer >= this._bulletTimer)
-           {
-               let tempBullet = new Bullet(this._pos.x + this._size.x/2, this._pos.y + this._size.y/2, Math.atan2(playerPos.y - (this._pos.y + this._size.y/2),playerPos.x - (this._pos.x + this._size.x/2)));
-               this._bullets.push(tempBullet);
-               this._timer = 0;
-           }
-        }
+    
     }
 
     draw(cameraPos)
@@ -331,7 +289,6 @@ class Enemy {
     {
         return this._size;
     }
-
 }
 
 class EnemyMinion extends Enemy {
@@ -341,14 +298,60 @@ class EnemyMinion extends Enemy {
         super(_x, _y,_width, _height, _xVel, _yVel);
 
     }
-    move()
+    move(dt,playerPos,playerSize)
     {
+        let distance = Vec2.distance(playerPos,this._pos);
+        //if in chasing zone and not chasing
+        if(distance < this._activateDistance && distance > 200 && !this._active)
+        {
+           this._active = true;
+        } //if in shootinh zone and not shooting
+        else if (distance < this._activateshootingdistance && distance > 200 && !this._shoot)
+        {
+            this._shoot = true;
+        } // if outside chasing zone
+        else if( distance > this._activateDistance && this._active || distance < 200 && this._active )
+        {
+            this._active = false;
+        } // if outside shooting zone
+        else if( distance > this._activateshootingdistance && this._shoot)
+        {
+            this._shoot = false;
+        } //if to close to player, stop chasing
+        else if( distance <= 200  && this._active)
+        {
+            //this._shoot = false;
+            this._active = false;
+        }
 
+        // if chasing
+        if(this._active)
+        {
+            //not calculating appropriate rotation angle 
+           this.m_angle = Math.atan2(playerPos.y + playerSize.y/2 - (this._pos.y + this._size.y/2),playerPos.x + playerSize.x/2 - (this._pos.x + this._size.x/2));
+           this._velocity.x = Math.cos(this.m_angle) * this.m_speed * dt;
+           this._velocity.y = Math.sin(this.m_angle) * this.m_speed * dt;
+           this._pos.x += this._velocity.x;
+           this._pos.y += this._velocity.y;
+            
+          
+        }
+        //if shooting
+        if(this._shoot)
+        {
+            this._timer += dt;
+            if(this._timer >= this._bulletTimer)
+            {
+                let tempBullet = new Bullet(this._pos.x + this._size.x/2, this._pos.y + this._size.y/2, Math.atan2(playerPos.y - (this._pos.y + this._size.y/2),playerPos.x - (this._pos.x + this._size.x/2)));
+                this._bullets.push(tempBullet);
+                this._timer = 0;
+             }
+         }
     }
     draw(cameraPos)
     {
         c.beginPath();
-        c.drawImage(enemyMinionImage,0,0,this.m_width,this.m_height,this._pos.x - cameraPos.getVec2.x,this._pos.y - cameraPos.getVec2.y,this.m_width,this.m_height);
+        c.drawImage(enemyMinionImage,0,0,this._size.x,this._size.y,this._pos.x - cameraPos.getVec2.x,this._pos.y - cameraPos.getVec2.y,this._size.x,this._size.y);
         c.closePath();
     }
 }
@@ -420,13 +423,15 @@ const HEALTHVALUE_SIZE = new Vec2(296,96);
 let player = new Player(WORLD_WIDTH/2,WORLD_HEIGHT/2,114,66,'red');
 let bullets = new Array();
 let enemies = new Array();
+let minions = new Array();
 let collisionManager = new CollisionManager();
 let camera = new Camera(player.getPos.x - CANVAS_WIDTH/2,player.getPos.y - CANVAS_HEIGHT/2,CANVAS_WIDTH,CANVAS_HEIGHT);
 let pressedKeys = new Set();
-let minion = new EnemyMinion(player.getXPos,player.getYPos,53,100,-1,-1);
+let minion = new EnemyMinion(player.getPos.x,player.getPos.y,53,100,-1,-1);
 let dt = 0;
 let lastRender = 0;
 
+minions.push(minion);
 
 for(let i =0; i < ENEMY_COUNT; i++)
 {
@@ -497,14 +502,19 @@ function gameLoop(timestamp)
         enemy.move(dt,player.getPos,player.getSize);
     });
 
-    for(let e = 0; e < enemies.length; e++)
+    minions.forEach(minion => 
     {
-        for(let b = 0; b < enemies[e]._bullets.length; b++)
+        minion.move(dt,player.getPos,player.getSize);
+    });
+
+    for(let e = 0; e < minions.length; e++)
+    {
+        for(let b = 0; b < minions[e]._bullets.length; b++)
         {
-            enemies[e]._bullets[b].move(dt);
-            if(collisionManager.circleRectCollision(enemies[e]._bullets[b],player))
+            minions[e]._bullets[b].move(dt);
+            if(collisionManager.circleRectCollision(minions[e]._bullets[b],player))
             {
-                enemies[e]._bullets.splice(b,1);
+                minions[e]._bullets.splice(b,1);
                 b--;
                 player.setHealth = 0.1;
             }
@@ -587,6 +597,12 @@ function draw()
         enemy._bullets.forEach(bullet => {
             bullet.draw(camera.getPos);
         });
-    })
-    minion.draw(camera.getPos);
+    });
+
+    minions.forEach( minion => {
+        minion.draw(camera.getPos);
+        minion._bullets.forEach(bullet => {
+            bullet.draw(camera.getPos);
+        });
+    });
 }
