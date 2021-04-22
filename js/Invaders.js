@@ -295,8 +295,22 @@ class EnemyMinion extends Enemy {
 
     constructor (_x, _y,_width, _height, _xVel, _yVel)
     {
-        super(_x, _y,_width, _height, _xVel, _yVel);
+        super(_x, _y,_width, _height, _xVel,_yVel);
+        console.log(_xVel,_yVel);
+        this._alignmentDistance = 50;
+        this._cohesionDistance = 450;
+        this._seperationDistance = 90;
+        this._acceleration = new Vec2(0,0);
+        this._VelocityLength = 0;
+        this._maxSpeed = 2;
+        this._maxForce = 1;
+        this._seperationWeight = 2;
+        this._cohesionWieght = 1;
+        this._alignmentWeight = 1;
 
+        this._alignment = new Vec2(0,0);
+        this._cohesion = new Vec2(0,0);
+        this._seperation = new Vec2(0,0);
     }
     move(dt,playerPos,playerSize)
     {
@@ -348,6 +362,112 @@ class EnemyMinion extends Enemy {
              }
          }
     }
+
+
+    flock(minions, dt)
+    {     
+        this._alignment = this.alignment(minions);
+        this._cohesion = this.cohesion(minions);
+        this._seperation = this.seperation(minions);
+
+        this._acceleration.addVec = this._cohesion;
+        this._acceleration.addVec = this._alignment;
+        this._acceleration.addVec =  this._seperation;
+      
+       this._velocity.addVec = this._acceleration;
+       
+       this._velocity.x += this._velocity.x * dt;
+       this._velocity.y += this._velocity.y * dt;
+
+       this._velocity.setMagnitude = this._maxSpeed;
+
+       this._pos.addVec = this._velocity;
+       this._acceleration = new Vec2(0,0);
+    }
+
+    alignment(minions)
+    {
+        let distance = new Vec2(0,0);
+        let tally = 0;
+        let steering = new Vec2(0,0);
+
+        minions.forEach(minion =>
+        {
+            distance = Vec2.distance( this._pos,minion.getPos);
+
+            if( minion != this && distance < this._alignmentDistance)
+            {
+                steering.addVec = minion._velocity;
+                tally++;
+            }
+        });
+
+        if(tally > 0)
+        {
+            steering.div = tally;  
+            steering.setMagnitude = this._maxSpeed;
+            steering = Vec2.subtractVec(steering, this._velocity);
+        }
+        return steering;
+    }
+
+    cohesion(minions)
+    {
+        let distance = new Vec2(0,0);
+        let tally = 0;
+        let steering = new Vec2(0,0);
+
+        minions.forEach(minion =>
+        {
+            distance = Vec2.distance( this._pos,minion.getPos);
+
+            if( minion != this && distance < this._cohesionDistance)
+            {
+                steering.addVec = minion._pos;
+                tally++;
+            }
+        });
+
+        if(tally > 0)
+        {   
+            steering.div = tally;
+            steering = Vec2.subtractVec(steering,this._pos);
+            steering.setMagnitude = this._maxSpeed;
+            steering =  Vec2.subtractVec(steering,this._velocity);
+            steering = Vec2.limit(steering,this._maxForce);
+        }
+        return steering;
+    }
+
+    seperation(minions)
+    {
+        let distance = new Vec2(0,0);
+        let tally = 0;
+        let steering = new Vec2(0,0);
+
+        minions.forEach(minion =>
+        {
+            //GET DISTANCE BETWEEN NEIGBHOUR AND OBJECT
+            distance = Vec2.distance( this._pos,minion.getPos);
+            
+            if( minion != this && distance < this._seperationDistance)
+            {
+                // GET VECTOR POINTING AWAY FROM NEIGHBOUR
+                let diff = new Vec2(this._pos.x - minion._pos.x, this._pos.y - minion._pos.y);
+                diff = Vec2.normalise(diff);
+                steering.addVec = diff;
+                tally++;
+            }
+        });
+
+        if(tally > 0)
+        {
+            steering.div = tally;
+            steering = Vec2.subtractVec(steering, this._velocity);
+        }
+        return steering;
+    }
+
     draw(cameraPos)
     {
         c.beginPath();
@@ -364,28 +484,61 @@ class Vec2
         this.x = x;
         this.y = y;
     }
-
     get getVec2()
     {
         return this;
     }
-
-    set setVec2(vec)
+    set addVec(vec)
     {
         this.x += vec.x;
         this.y += vec.y;
     }
+    set div(value)
+    {
+        this.x /= value;
+        this.y /= value;
+    }
+    set setMagnitude(value)
+    {
+        let mag = Vec2.length(this);
+        this.x = this.x * value / mag;
+        this.y = this.y * value / mag;
+    }
+    static subtractVec(one, two)
+    {
+        return new Vec2(one.x - two.x,one.y - two.y); 
+    }
 
+    static limit(vec,value)
+    {
+        let msq = vec.x * vec.x +  vec.y * vec.y;
+    
+        if(msq > value * value)
+        {
+            vec.div = Math.sqrt(msq);
+            vec.x *= value;
+            vec.y *= value;
+        }
+        return vec;
+    }
+
+    static length(vec)
+    {
+        let length = vec.x* vec.x + vec.y * vec.y;
+        return Math.sqrt(length);
+    }
     static distance(a, b)
     {
         let  distance = new Vec2(a.x - b.x , a.y - b.y);
-        distance.x = distance.x * distance.x;
-        distance.y = distance.y * distance.y;
+        return  Vec2.length(distance);
+    }
+    static normalise(vec)
+    {
+        let len = this.length(vec);
+        if( len > 0)
+             vec = new Vec2(vec.x/len,vec.y/len);
 
-        let absolouteDistance = distance.x + distance.y;
-        absolouteDistance = Math.sqrt(absolouteDistance);
-
-        return absolouteDistance;
+        return vec;
     }
 }
 
@@ -409,6 +562,7 @@ const WORLD_HEIGHT = 3376;
 const WORLD_WIDTH = 6000;
 const CANVAS_MIN = 0;
 const ENEMY_COUNT = 5;
+const MINION_COUNT = 5;
 
 const HEARTH_POS = new Vec2(0,0);
 const HEARTH_SIZE = new Vec2(100,100);
@@ -431,13 +585,19 @@ let minion = new EnemyMinion(player.getPos.x,player.getPos.y,53,100,-1,-1);
 let dt = 0;
 let lastRender = 0;
 
-minions.push(minion);
 
 for(let i =0; i < ENEMY_COUNT; i++)
 {
    let tempEnemy = new Enemy(Math.floor(Math.random() * WORLD_WIDTH),Math.floor(Math.random() * WORLD_HEIGHT), 102, 177 ,-1, -1);
-   //let tempEnemy = new Enemy(player.getXPos + 200,player.getYPos, 102, 177 ,-1, -1);
    enemies.push(tempEnemy);
+}
+function getRandomInt(max) {
+    return Math.floor(Math.random() * max);
+  }
+for(let i =0; i < MINION_COUNT; i++)
+{
+   let tempMinion = new EnemyMinion(player.getPos.x + 150 * i, player.getPos.y + 10 * i, 102, 177 ,Math.random(1) + -1, Math.random(1) + -1);
+   minions.push(tempMinion);
 }
 
 /*------------------------------------------------------- -----------------------------------------------------------------------------------------------*/
@@ -465,7 +625,7 @@ window.requestAnimationFrame(gameLoop);
 
 function gameLoop(timestamp)
 {
-    dt = timestamp  - lastRender;
+    dt = timestamp - lastRender;
     
     bullets.forEach(bullet => {
         bullet.move(dt);
@@ -501,10 +661,11 @@ function gameLoop(timestamp)
     {
         enemy.move(dt,player.getPos,player.getSize);
     });
-
+   
     minions.forEach(minion => 
     {
-        minion.move(dt,player.getPos,player.getSize);
+        //minion.move(dt,player.getPos,player.getSize);
+        minion.flock(minions, dt);
     });
 
     for(let e = 0; e < minions.length; e++)
@@ -524,8 +685,6 @@ function gameLoop(timestamp)
     inputHandling();
     draw();
 
-   
-    
     lastRender = timestamp;
     window.requestAnimationFrame(gameLoop);
 }
