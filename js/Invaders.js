@@ -147,12 +147,12 @@ class CollisionManager {
     constructor(){}
 
 
-    circleRectCollision(_a,_b)
+    RectCollision(_a,_b)
     {
         if(_a.getPos.x  < _b.getPos.x &&
-            _a.getPos.x  + _a.m_radius * 2 > _b.getPos.x &&
+            _a.getPos.x  + _a.getSize.x > _b.getPos.x &&
             _a.getPos.y  < _b.getPos.y  + _b.getSize.y &&
-            _a.getPos.y  + _a.m_radius * 2 > _b.getPos.y)
+            _a.getPos.y  + _a.getSize.y > _b.getPos.y)
         {
            return true;
         }
@@ -253,7 +253,7 @@ class Enemy {
         
         this._active = false;
         this._shoot = false;
-        this._activateDistance = 750;
+        this._activateDistance = 500;
         this._activateshootingdistance = this._activateDistance/2;
 
         this._bullets = new Array();
@@ -296,83 +296,74 @@ class EnemyMinion extends Enemy {
     constructor (_x, _y,_width, _height, _xVel, _yVel)
     {
         super(_x, _y,_width, _height, _xVel,_yVel);
-        console.log(_xVel,_yVel);
+      
         this._alignmentDistance = 50;
         this._cohesionDistance = 450;
         this._seperationDistance = 90;
+
         this._acceleration = new Vec2(0,0);
         this._VelocityLength = 0;
         this._maxSpeed = 2;
         this._maxForce = 1;
-        this._seperationWeight = 2;
+
+        this._seperationWeight = 30;
         this._cohesionWieght = 1;
         this._alignmentWeight = 1;
+        this._seekWeight = 1;
 
         this._alignment = new Vec2(0,0);
         this._cohesion = new Vec2(0,0);
         this._seperation = new Vec2(0,0);
+        this._seek = new Vec2(0,0);
+        EnemyMinion._seekPoint = new Vec2(Math.random() + WORLD_WIDTH, Math.random() + WORLD_HEIGHT);
     }
-    move(dt,playerPos,playerSize)
+    move(playerPos)
     {
-        let distance = Vec2.distance(playerPos,this._pos);
-        //if in chasing zone and not chasing
-        if(distance < this._activateDistance && distance > 200 && !this._active)
-        {
-           this._active = true;
-        } //if in shootinh zone and not shooting
-        else if (distance < this._activateshootingdistance && distance > 200 && !this._shoot)
-        {
-            this._shoot = true;
-        } // if outside chasing zone
-        else if( distance > this._activateDistance && this._active || distance < 200 && this._active )
-        {
-            this._active = false;
-        } // if outside shooting zone
-        else if( distance > this._activateshootingdistance && this._shoot)
-        {
-            this._shoot = false;
-        } //if to close to player, stop chasing
-        else if( distance <= 200  && this._active)
-        {
-            //this._shoot = false;
-            this._active = false;
-        }
-
-        // if chasing
         if(this._active)
-        {
-            //not calculating appropriate rotation angle 
-           this.m_angle = Math.atan2(playerPos.y + playerSize.y/2 - (this._pos.y + this._size.y/2),playerPos.x + playerSize.x/2 - (this._pos.x + this._size.x/2));
-           this._velocity.x = Math.cos(this.m_angle) * this.m_speed * dt;
-           this._velocity.y = Math.sin(this.m_angle) * this.m_speed * dt;
-           this._pos.x += this._velocity.x;
-           this._pos.y += this._velocity.y;
-            
-          
-        }
-        //if shooting
-        if(this._shoot)
-        {
-            this._timer += dt;
-            if(this._timer >= this._bulletTimer)
+        { 
+            if(!this._shoot && Vec2.distance(this._pos, playerPos) < this._activateshootingdistance)
             {
-                let tempBullet = new Bullet(this._pos.x + this._size.x/2, this._pos.y + this._size.y/2, Math.atan2(playerPos.y - (this._pos.y + this._size.y/2),playerPos.x - (this._pos.x + this._size.x/2)));
-                this._bullets.push(tempBullet);
-                this._timer = 0;
-             }
-         }
+                this._shoot = true;
+            }
+            else if(this._shoot && Vec2.distance(this._pos, playerPos) > this._activateshootingdistance)
+            {
+                this._shoot = false;
+            }
+        }
+    }
+
+    generateSeekPoint(pos)
+    {
+        if(!this._active && Vec2.distance(this._pos,pos) < this._activateDistance)
+        {
+            this._active = true;
+            EnemyMinion._seekPoint = pos;
+        }
+        else if (this._active && Vec2.distance(this._pos,pos) > this._activateDistance)
+        {
+            this._active = false;
+            EnemyMinion._seekPoint = new Vec2(Math.random() + WORLD_WIDTH, Math.random() + WORLD_HEIGHT);
+        }
     }
 
 
-    flock(minions, dt)
+    flock(minions, pos, dt)
     {     
-        this._alignment = this.alignment(minions);
-        this._cohesion = this.cohesion(minions);
-        this._seperation = this.seperation(minions);
+       this.move(pos);
+       this.generateSeekPoint(pos);
+       this._alignment = this.alignment(minions);
+       this._cohesion = this.cohesion(minions);
+       this._seperation = this.seperation(minions);
+       this._seek = this.seek(EnemyMinion._seekPoint);
+    
+       if(this._shoot == false)
+       {
+            this._acceleration.addVec = new Vec2(this._cohesion.x * this._cohesionWieght, this._cohesion.y * this._cohesionWieght);
+            this._acceleration.addVec = new Vec2(this._alignment.x * this._alignmentWeight,this._alignment.y * this._alignmentWeight);
+            this._acceleration.addVec =  new Vec2(this._seperation.x * this._seperationWeight, this._seperation.y * this._seperationWeight);
+       }
 
-        this._acceleration.addVec = this._cohesion;
-        this._acceleration.addVec = this._alignment;
-        this._acceleration.addVec =  this._seperation;
+       this._acceleration.addVec =  this._seek;
       
        this._velocity.addVec = this._acceleration;
        
@@ -383,6 +374,18 @@ class EnemyMinion extends Enemy {
 
        this._pos.addVec = this._velocity;
        this._acceleration = new Vec2(0,0);
+    }
+
+
+    seek(pos)
+    {
+        let steering = new Vec2(0,0);
+        let direction = new Vec2(pos.x - this._pos.x, pos.y - this._pos.y);
+        steering = Vec2.normalise(direction);
+        steering = Vec2.subtractVec(steering, this._velocity);
+        steering.setMagnitude = this._maxSpeed;
+        
+        return steering;
     }
 
     alignment(minions)
@@ -509,6 +512,12 @@ class Vec2
         return new Vec2(one.x - two.x,one.y - two.y); 
     }
 
+    set multiply(value)
+    {
+        this.x *= value;
+        this.y *= value;
+    }
+
     static limit(vec,value)
     {
         let msq = vec.x * vec.x +  vec.y * vec.y;
@@ -581,7 +590,6 @@ let minions = new Array();
 let collisionManager = new CollisionManager();
 let camera = new Camera(player.getPos.x - CANVAS_WIDTH/2,player.getPos.y - CANVAS_HEIGHT/2,CANVAS_WIDTH,CANVAS_HEIGHT);
 let pressedKeys = new Set();
-let minion = new EnemyMinion(player.getPos.x,player.getPos.y,53,100,-1,-1);
 let dt = 0;
 let lastRender = 0;
 
@@ -639,7 +647,7 @@ function gameLoop(timestamp)
         {
             if( bullets.length > 0)
             {
-                if(collisionManager.circleRectCollision(bullets[b],enemies[e]) == true)
+                if(collisionManager.RectCollision(bullets[b],enemies[e]) == true)
                 {
                     enemies.splice(e,1);
                     e--;
@@ -664,20 +672,18 @@ function gameLoop(timestamp)
    
     minions.forEach(minion => 
     {
-        //minion.move(dt,player.getPos,player.getSize);
-        minion.flock(minions, dt);
+        minion.flock(minions, player.getPos,dt);
+       
     });
 
     for(let e = 0; e < minions.length; e++)
     {
-        for(let b = 0; b < minions[e]._bullets.length; b++)
+        if(minions[e]._shoot)
         {
-            minions[e]._bullets[b].move(dt);
-            if(collisionManager.circleRectCollision(minions[e]._bullets[b],player))
+            if(collisionManager.RectCollision(minions[e], player))
             {
-                minions[e]._bullets.splice(b,1);
-                b--;
-                player.setHealth = 0.1;
+                minions.splice(e,1);
+                e--;
             }
         }
     }
