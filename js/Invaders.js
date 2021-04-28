@@ -251,10 +251,8 @@ class Enemy {
         this.m_angle = 90;
         this.m_speed = 0.2;
         
-        this._active = false;
-        this._shoot = false;
-        this._activateDistance = 500;
-        this._activateshootingdistance = this._activateDistance/2;
+        this._attack = false;
+        this._attackDistance = 500;
 
         this._bullets = new Array();
         this._bulletTimer = 2000;
@@ -307,63 +305,76 @@ class EnemyMinion extends Enemy {
         this._maxForce = 1;
 
         this._seperationWeight = 30;
-        this._cohesionWieght = 1;
+        this._cohesionWieght = 2;
         this._alignmentWeight = 1;
-        this._seekWeight = 1;
+        this._seekWeight = 1.5;
 
         this._alignment = new Vec2(0,0);
         this._cohesion = new Vec2(0,0);
         this._seperation = new Vec2(0,0);
         this._seek = new Vec2(0,0);
-        EnemyMinion._seekPoint = new Vec2(Math.random() + WORLD_WIDTH, Math.random() + WORLD_HEIGHT);
-    }
-    move(playerPos)
-    {
-        if(this._active)
-        { 
-            if(!this._shoot && Vec2.distance(this._pos, playerPos) < this._activateshootingdistance)
-            {
-                this._shoot = true;
-            }
-            else if(this._shoot && Vec2.distance(this._pos, playerPos) > this._activateshootingdistance)
-            {
-                this._shoot = false;
-            }
-        }
     }
 
-    generateSeekPoint(pos)
-    {
-        if(!this._active && Vec2.distance(this._pos,pos) < this._activateDistance)
+
+    static generateFlockPoint(minions, playerPos , flockPoint, dt)
+    {    
+        let avgPos = new Vec2(0,0);
+        //we know the tally of the array, remove and replace with array.length?
+        let tally = 0;
+    
+        minions.forEach(minion => 
         {
-            this._active = true;
-            EnemyMinion._seekPoint = pos;
-        }
-        else if (this._active && Vec2.distance(this._pos,pos) > this._activateDistance)
-        {
-            this._active = false;
-            EnemyMinion._seekPoint = new Vec2(Math.random() + WORLD_WIDTH, Math.random() + WORLD_HEIGHT);
-        }
+            avgPos.addVec = minion.getPos;
+            tally++;   
+        });
+
+        if( tally > 0)
+        avgPos.div = tally;
+
+         // if not chasing and average flock pos is less than 50. generate new flockpoint
+         if(Vec2.distance(avgPos, flockPoint) < 50) 
+         { 
+             flockPoint.x = Math.random() * WORLD_WIDTH;
+             flockPoint.y = Math.random() * WORLD_HEIGHT;
+             console.log("Bezingaaaaa");
+         }
+         
+        minions.forEach(minion => 
+        {            
+            if(Vec2.distance(avgPos, playerPos) < minion._attackDistance)
+            {   
+                if(!minion._attack)
+                {
+                    minion._attack = true;
+                    //alter weight vlaues here
+                }
+                flockPoint.x = playerPos.x;
+                flockPoint.y = playerPos.y;
+            } //if chasing but the player gets away, seek  to new point set active to false
+            else if(Vec2.distance(avgPos, playerPos) > minion._attackDistance && minion._attack)
+            {
+                //Being set for every minion, just needs to be set once
+                flockPoint.x = Math.random() * WORLD_WIDTH;
+                flockPoint.y = Math.random() * WORLD_HEIGHT;
+                minion._attack = false;
+                //alter weight values here
+            }
+            minion.flock(minions,dt,flockPoint);
+        });
     }
 
-
-    flock(minions, pos, dt)
+    flock(minions,dt, flockPoint)
     {     
-       this.move(pos);
-       this.generateSeekPoint(pos);
+      
        this._alignment = this.alignment(minions);
        this._cohesion = this.cohesion(minions);
        this._seperation = this.seperation(minions);
-       this._seek = this.seek(EnemyMinion._seekPoint);
+       this._seek = this.seek(flockPoint);
     
-       if(this._shoot == false)
-       {
-            this._acceleration.addVec = new Vec2(this._cohesion.x * this._cohesionWieght, this._cohesion.y * this._cohesionWieght);
-            this._acceleration.addVec = new Vec2(this._alignment.x * this._alignmentWeight,this._alignment.y * this._alignmentWeight);
-            this._acceleration.addVec =  new Vec2(this._seperation.x * this._seperationWeight, this._seperation.y * this._seperationWeight);
-       }
-
-       this._acceleration.addVec =  this._seek;
+       this._acceleration.addVec = new Vec2(this._cohesion.x * this._cohesionWieght, this._cohesion.y * this._cohesionWieght);
+       this._acceleration.addVec = new Vec2(this._alignment.x * this._alignmentWeight,this._alignment.y * this._alignmentWeight);
+       this._acceleration.addVec =  new Vec2(this._seperation.x * this._seperationWeight, this._seperation.y * this._seperationWeight);
+       this._acceleration.addVec =  new Vec2(this._seek.x * this._seekWeight, this._seek.y * this._seekWeight);
       
        this._velocity.addVec = this._acceleration;
        
@@ -572,6 +583,7 @@ const WORLD_WIDTH = 6000;
 const CANVAS_MIN = 0;
 const ENEMY_COUNT = 5;
 const MINION_COUNT = 5;
+const MINION_FLOCK_COUNT = 5;
 
 const HEARTH_POS = new Vec2(0,0);
 const HEARTH_SIZE = new Vec2(100,100);
@@ -587,9 +599,11 @@ let player = new Player(WORLD_WIDTH/2,WORLD_HEIGHT/2,114,66,'red');
 let bullets = new Array();
 let enemies = new Array();
 let minions = new Array();
+let flockPoints = [];
 let collisionManager = new CollisionManager();
 let camera = new Camera(player.getPos.x - CANVAS_WIDTH/2,player.getPos.y - CANVAS_HEIGHT/2,CANVAS_WIDTH,CANVAS_HEIGHT);
 let pressedKeys = new Set();
+
 let dt = 0;
 let lastRender = 0;
 
@@ -599,13 +613,23 @@ for(let i =0; i < ENEMY_COUNT; i++)
    let tempEnemy = new Enemy(Math.floor(Math.random() * WORLD_WIDTH),Math.floor(Math.random() * WORLD_HEIGHT), 102, 177 ,-1, -1);
    enemies.push(tempEnemy);
 }
-function getRandomInt(max) {
-    return Math.floor(Math.random() * max);
-  }
-for(let i =0; i < MINION_COUNT; i++)
+function getRandomInt(max)
 {
-   let tempMinion = new EnemyMinion(player.getPos.x + 150 * i, player.getPos.y + 10 * i, 102, 177 ,Math.random(1) + -1, Math.random(1) + -1);
-   minions.push(tempMinion);
+    return Math.floor(Math.random() * max);
+}
+
+for(let row = 0; row < MINION_FLOCK_COUNT; row++)
+{
+    let tempMinions = [];
+    let flockPoint = new Vec2(Math.random() * WORLD_WIDTH, Math.random() * WORLD_HEIGHT);
+
+    for(let col = 0; col < MINION_COUNT; col++)
+    {
+        let tempMinion = new EnemyMinion(flockPoint.x + 150 * col, flockPoint.y + 10 * col, 102, 177 ,Math.random(1) + -1, Math.random(1) + -1);
+        tempMinions.push(tempMinion);
+    }
+    minions.push(tempMinions);
+    flockPoints.push(new Vec2(Math.random() * WORLD_WIDTH, Math.random() * WORLD_HEIGHT));
 }
 
 /*------------------------------------------------------- -----------------------------------------------------------------------------------------------*/
@@ -641,49 +665,29 @@ function gameLoop(timestamp)
    
     collisionManager.playerBoundaryCollision(player);
 
-    for(let b = 0; b < bullets.length; b++)
-    {
-        for(let e =0; e < enemies.length; e++)
-        {
-            if( bullets.length > 0)
-            {
-                if(collisionManager.RectCollision(bullets[b],enemies[e]) == true)
-                {
-                    enemies.splice(e,1);
-                    e--;
-                    /* problem occurs when there is more than one bullet, it enters the sequence when b = -1 as its not incremented due to it being on the outer loop.
-                     Could also just break here. less efficient? but may avoid future bugs?                                         */
-                    bullets.splice(b,1);
-                    if( b > 0)
-                    {
-                        b--;
-                    }  
-                }
-            }
-        }
-    }
-
-    
 
     enemies.forEach(enemy => 
     {
         enemy.move(dt,player.getPos,player.getSize);
     });
-   
-    minions.forEach(minion => 
-    {
-        minion.flock(minions, player.getPos,dt);
-       
-    });
 
-    for(let e = 0; e < minions.length; e++)
+    //for every array, allocate seek point and move the flock
+   for( let row = 0; row < minions.length; row++)
+   {
+       EnemyMinion.generateFlockPoint(minions[row], player.getPos, flockPoints[row], dt);
+   }
+   // for all minions if attacking and collide with player, delete the minion
+    for(let row = 0; row < minions.length; row++)
     {
-        if(minions[e]._shoot)
-        {
-            if(collisionManager.RectCollision(minions[e], player))
+        for(let col = 0; col < minions[row].length; col++)
+        {   //potential bug here?
+            if(minions[row][col]._attack)
             {
-                minions.splice(e,1);
-                e--;
+                if(collisionManager.RectCollision(minions[row][col], player))
+                {
+                    minions[row].splice(col,1);
+                    col--;
+                }
             }
         }
     }
@@ -764,10 +768,11 @@ function draw()
         });
     });
 
-    minions.forEach( minion => {
-        minion.draw(camera.getPos);
-        minion._bullets.forEach(bullet => {
-            bullet.draw(camera.getPos);
-        });
+    minions.forEach(array => 
+    {
+        array.forEach(minion =>
+        {
+            minion.draw(camera.getPos);
+        }); 
     });
 }
