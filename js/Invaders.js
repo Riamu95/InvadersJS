@@ -56,7 +56,8 @@ class Player {
     {
         this._pos = new Vec2(x,y);
         this._size = new Vec2(w,h);
-
+        this._rect = new Rect(this._pos, this._size);
+        
         this._health = 1;
 
         this.m_speed = 0.1;
@@ -82,6 +83,8 @@ class Player {
         c.fill();
         c.closePath();
         c.restore();
+
+        this._rect.draw(cameraPos);
     }
 
     move(dt)
@@ -89,7 +92,8 @@ class Player {
         this._velocity.x =  Math.cos(this.m_angle  * Math.PI / 180) * this.m_acceleration *this.m_speed * dt;
         this._velocity.y =  Math.sin(this.m_angle  * Math.PI / 180)* this.m_acceleration * this.m_speed * dt;
         this._pos.x += this._velocity.x;
-        this._pos.y += this._velocity.y;      
+        this._pos.y += this._velocity.y; 
+        this._rect.updatePoints(this._velocity); 
     }
 
     get getPos()
@@ -194,6 +198,28 @@ class CollisionManager {
         {
             return false;
         }
+    }
+
+    static SATCollision(obejct1, object2)
+    {
+        for(let i = 0 ; i < 2; i++)
+        {
+
+            // for each edge of object
+                //calculate perpindicular unit vector = axis, dor product of both pints, normalised
+
+                
+            //for number of points in object 1
+
+                //for number of ppints in object 2
+
+            //calculate projected axis
+                //calulate all shadowed values
+                
+            //if not colliding 
+            return false;
+        }
+        return true;
     }
 }
 
@@ -336,7 +362,6 @@ class EnemyMinion extends Enemy {
          { 
              flockPoint.x = Math.random() * WORLD_WIDTH;
              flockPoint.y = Math.random() * WORLD_HEIGHT;
-             console.log("Bezingaaaaa");
          }
          
         minions.forEach(minion => 
@@ -488,6 +513,86 @@ class EnemyMinion extends Enemy {
         c.drawImage(enemyMinionImage,0,0,this._size.x,this._size.y,this._pos.x - cameraPos.getVec2.x,this._pos.y - cameraPos.getVec2.y,this._size.x,this._size.y);
         c.closePath();
     }
+}
+
+const Rect = function(pos,size){
+    
+    this._pos = pos;
+    this._size = size;
+    this._origin = new Vec2(this._pos.x + this._size.x/2,this._pos.y + this._size.y/2);
+    this._points = [];
+    this._angle = 0;
+    this._points.push(new Vec2(this._pos.x,this._pos.y));
+    this._points.push(new Vec2(this._pos.x + this._size.x,this._pos.y));
+    this._points.push(new Vec2(this._pos.x + this._size.x,this._pos.y + this._size.y));
+    this._points.push(new Vec2(this._pos.x,this._pos.y + this._size.y));
+}
+
+Rect.prototype.getPoints = function()
+{
+    return this._points;
+}
+
+Rect.prototype.rotate = function(angle, pos)
+{
+    //potential problem with angle or rotation alogrithm?
+    //this.setPos(pos);
+    //this.updatePoints();
+    let cos = Math.cos(angle);
+    let sin = Math.sin(angle);
+    this._points.forEach(point =>
+    {
+       //translate point to origin
+       let translated_x = point.x - this._origin.x;
+       let translated_y = point.y - this._origin.y;
+       //apply rotation to point and re translate
+       point.x = translated_x * cos - translated_y * sin + this._origin.x;
+       point.y = translated_x * sin + translated_y * cos + this._origin.y;
+    });
+}
+
+Rect.prototype.setPos = function(pos)
+{
+    this._pos = pos;
+    this._origin.x = this._pos.x + this._size.x/2;
+    this._origin.y = this._pos.y + this._size.y/2;
+}
+Rect.prototype.updatePoints = function(velocity)
+{
+    this._origin.x += velocity.x;
+    this._origin.y += velocity.y;
+    
+    this._points[0].x += velocity.x;
+    this._points[0].y += velocity.y;
+
+    this._points[1].x += velocity.x;
+    this._points[1].y += velocity.y;
+
+    this._points[2].x += velocity.x;
+    this._points[2].y += velocity.y;
+
+    this._points[3].x += velocity.x;
+    this._points[3].y += velocity.y;
+
+}
+
+Rect.prototype.draw = function(cameraPos)
+{
+    
+    c.beginPath();
+    c.strokeStyle = 'red';
+    c.moveTo(this._points[0].x - cameraPos.x, this._points[0].y  - cameraPos.y);
+    c.lineTo(this._points[1].x - cameraPos.x, this._points[1].y - cameraPos.y);
+    c.lineTo(this._points[2].x - cameraPos.x, this._points[2].y - cameraPos.y);
+    c.lineTo(this._points[3].x - cameraPos.x, this._points[3].y - cameraPos.y);
+    c.lineTo(this._points[0].x - cameraPos.x, this._points[0].y - cameraPos.y);
+    c.stroke();
+
+    c.beginPath();
+    c.strokeStyle = 'red';
+    c.arc(this._origin.x - cameraPos.x, this._origin.y - cameraPos.y, 15, 0, 2 * Math.PI);
+    c.fill();
+
 }
 
 
@@ -683,7 +788,7 @@ function gameLoop(timestamp)
         {   //potential bug here?
             if(minions[row][col]._attack)
             {
-                if(collisionManager.RectCollision(minions[row][col], player))
+                if(CollisionManager.SATCollision(minions[row][col], player))
                 {
                     minions[row].splice(col,1);
                     col--;
@@ -735,10 +840,14 @@ function inputHandling()
     if(pressedKeys['d'])
     {
         player.setAngle = player.getRotationSpeed;
+        player._rect._angle = player.getRotationSpeed;
+        player._rect.rotate((Math.PI/180) * player._rect._angle, this._pos);
     }
     if(pressedKeys['a'])
     {
         player.setAngle = -player.getRotationSpeed;
+        player._rect._angle = -player.getRotationSpeed;
+        player._rect.rotate((Math.PI/180) * player._rect._angle, this._pos);
     }
 }
 
