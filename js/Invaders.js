@@ -202,22 +202,49 @@ class CollisionManager {
 
     static SATCollision(obejct1, object2)
     {
+        let objOne = obejct1;
+        let objTwo = object2;
+
         for(let i = 0 ; i < 2; i++)
         {
-
+         //swap objects
+            if(i == 1)
+            {
+                objOne = object2;
+                objTwo = obejct1;
+            }
             // for each edge of object
-                //calculate perpindicular unit vector = axis, dor product of both pints, normalised
-
-                
-            //for number of points in object 1
-
-                //for number of ppints in object 2
-
-            //calculate projected axis
-                //calulate all shadowed values
-                
-            //if not colliding 
-            return false;
+            for(let a = 0; a < objOne.length; a++)
+            {
+                //get index ahead of current index, including 0 wrap around
+                let b = (a+1) % objOne.length;
+                //get the distance and direction vector of point a - b
+                let edgeVector = new Vec2(objOne[b].x - objOne[a].x, objOne[b].y - objOne[a].y);
+                //get the normal to the edge
+                let projectedAxis = new Vec2(-edgeVector.y,edgeVector.x);
+                //min and max values for objects
+                let min_o1 = Infinity;
+                let max_o1 = -Infinity;
+                let min_o2 = Infinity;
+                let max_o2 = -Infinity;
+                //for all objOne points get the scaled min and max points along the projected axis
+                for(let p = 0; p < objOne.length; p++)
+                {
+                    let point = Vec2.dotProduct(objOne[p], projectedAxis);
+                    min_o1 = Math.min(min_o1,point);
+                    max_o1 = Math.max(max_o1,point);
+                }
+                //repeat above for the second object
+                for(let p = 0; p < objTwo.length; p++)
+                {
+                    let point = Vec2.dotProduct(objTwo[p], projectedAxis);
+                    min_o2 = Math.min(min_o2,point);
+                    max_o2 = Math.max(max_o2,point);
+                }
+                //check for overlap, if they dont overlap return flase, otherwise continue
+                if(!(max_o2 >= min_o1 && max_o1 >= min_o2))
+                    return false;
+            }
         }
         return true;
     }
@@ -272,7 +299,7 @@ class Enemy {
      {
         this._pos = new Vec2(_x,_y);
         this._size = new Vec2(_width,_height);
-      
+        this._rect = new Rect(this._pos,this._size);
         this._velocity = new Vec2(_xVel, _yVel);
         this.m_angle = 90;
         this.m_speed = 0.2;
@@ -409,6 +436,7 @@ class EnemyMinion extends Enemy {
        this._velocity.setMagnitude = this._maxSpeed;
 
        this._pos.addVec = this._velocity;
+       this._rect.updatePoints(this._velocity);
        this._acceleration = new Vec2(0,0);
     }
 
@@ -512,6 +540,7 @@ class EnemyMinion extends Enemy {
         c.beginPath();
         c.drawImage(enemyMinionImage,0,0,this._size.x,this._size.y,this._pos.x - cameraPos.getVec2.x,this._pos.y - cameraPos.getVec2.y,this._size.x,this._size.y);
         c.closePath();
+        this._rect.draw(cameraPos);
     }
 }
 
@@ -535,9 +564,6 @@ Rect.prototype.getPoints = function()
 
 Rect.prototype.rotate = function(angle, pos)
 {
-    //potential problem with angle or rotation alogrithm?
-    //this.setPos(pos);
-    //this.updatePoints();
     let cos = Math.cos(angle);
     let sin = Math.sin(angle);
     this._points.forEach(point =>
@@ -561,7 +587,7 @@ Rect.prototype.updatePoints = function(velocity)
 {
     this._origin.x += velocity.x;
     this._origin.y += velocity.y;
-    
+
     this._points[0].x += velocity.x;
     this._points[0].y += velocity.y;
 
@@ -578,7 +604,6 @@ Rect.prototype.updatePoints = function(velocity)
 
 Rect.prototype.draw = function(cameraPos)
 {
-    
     c.beginPath();
     c.strokeStyle = 'red';
     c.moveTo(this._points[0].x - cameraPos.x, this._points[0].y  - cameraPos.y);
@@ -587,12 +612,7 @@ Rect.prototype.draw = function(cameraPos)
     c.lineTo(this._points[3].x - cameraPos.x, this._points[3].y - cameraPos.y);
     c.lineTo(this._points[0].x - cameraPos.x, this._points[0].y - cameraPos.y);
     c.stroke();
-
-    c.beginPath();
-    c.strokeStyle = 'red';
-    c.arc(this._origin.x - cameraPos.x, this._origin.y - cameraPos.y, 15, 0, 2 * Math.PI);
-    c.fill();
-
+    c.closePath();
 }
 
 
@@ -665,6 +685,10 @@ class Vec2
 
         return vec;
     }
+    static dotProduct(vec1, vec2)
+    {
+       return vec1.x * vec2.x + vec1.y + vec2.y;
+    }
 }
 
 /*------------------------------------------------------- -----------------------------------------------------------------------------------------------*/
@@ -730,7 +754,7 @@ for(let row = 0; row < MINION_FLOCK_COUNT; row++)
 
     for(let col = 0; col < MINION_COUNT; col++)
     {
-        let tempMinion = new EnemyMinion(flockPoint.x + 150 * col, flockPoint.y + 10 * col, 102, 177 ,Math.random(1) + -1, Math.random(1) + -1);
+        let tempMinion = new EnemyMinion(flockPoint.x + 150 * col, flockPoint.y + 10 * col, 53, 100 ,Math.random(1) + -1, Math.random(1) + -1);
         tempMinions.push(tempMinion);
     }
     minions.push(tempMinions);
@@ -770,7 +794,7 @@ function gameLoop(timestamp)
    
     collisionManager.playerBoundaryCollision(player);
 
-
+    
     enemies.forEach(enemy => 
     {
         enemy.move(dt,player.getPos,player.getSize);
@@ -786,14 +810,14 @@ function gameLoop(timestamp)
     {
         for(let col = 0; col < minions[row].length; col++)
         {   //potential bug here?
-            if(minions[row][col]._attack)
-            {
-                if(CollisionManager.SATCollision(minions[row][col], player))
+           // if(minions[row][col]._attack)
+            //{
+                if(CollisionManager.SATCollision(minions[row][col]._rect.getPoints(), player._rect.getPoints()))
                 {
                     minions[row].splice(col,1);
                     col--;
                 }
-            }
+            //}
         }
     }
 
@@ -869,7 +893,6 @@ function draw()
     bullets.forEach(bullet => {
         bullet.draw(camera.getPos);
     });  
-
     enemies.forEach( enemy => {
         enemy.draw(camera.getPos);
         enemy._bullets.forEach(bullet => {
