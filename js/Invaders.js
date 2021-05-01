@@ -84,7 +84,7 @@ class Player {
         c.closePath();
         c.restore();
 
-        this._rect.draw(cameraPos);
+        this._rect.draw(cameraPos, this.m_color);
     }
 
     move(dt)
@@ -210,6 +210,7 @@ class CollisionManager {
          //swap objects
             if(i == 1)
             {
+                //refference error here 
                 objOne = object2;
                 objTwo = obejct1;
             }
@@ -242,7 +243,7 @@ class CollisionManager {
                     max_o2 = Math.max(max_o2,point);
                 }
                 //check for overlap, if they dont overlap return flase, otherwise continue
-                if(!(max_o2 >= min_o1 && max_o1 >= min_o2))
+                if(!(max_o2 > min_o1 && max_o1 > min_o2))
                     return false;
             }
         }
@@ -366,6 +367,7 @@ class EnemyMinion extends Enemy {
         this._cohesion = new Vec2(0,0);
         this._seperation = new Vec2(0,0);
         this._seek = new Vec2(0,0);
+        this.m_color = 'blue';
     }
 
 
@@ -540,7 +542,7 @@ class EnemyMinion extends Enemy {
         c.beginPath();
         c.drawImage(enemyMinionImage,0,0,this._size.x,this._size.y,this._pos.x - cameraPos.getVec2.x,this._pos.y - cameraPos.getVec2.y,this._size.x,this._size.y);
         c.closePath();
-        this._rect.draw(cameraPos);
+        this._rect.draw(cameraPos, this.m_color);
     }
 }
 
@@ -602,10 +604,10 @@ Rect.prototype.updatePoints = function(velocity)
 
 }
 
-Rect.prototype.draw = function(cameraPos)
+Rect.prototype.draw = function(cameraPos,color)
 {
     c.beginPath();
-    c.strokeStyle = 'red';
+    c.strokeStyle = color;
     c.moveTo(this._points[0].x - cameraPos.x, this._points[0].y  - cameraPos.y);
     c.lineTo(this._points[1].x - cameraPos.x, this._points[1].y - cameraPos.y);
     c.lineTo(this._points[2].x - cameraPos.x, this._points[2].y - cameraPos.y);
@@ -687,7 +689,7 @@ class Vec2
     }
     static dotProduct(vec1, vec2)
     {
-       return vec1.x * vec2.x + vec1.y + vec2.y;
+       return vec1.x * vec2.x + vec1.y * vec2.y;
     }
 }
 
@@ -710,9 +712,9 @@ const CANVAS_HEIGHT = canvas.height;
 const WORLD_HEIGHT = 3376;
 const WORLD_WIDTH = 6000;
 const CANVAS_MIN = 0;
-const ENEMY_COUNT = 5;
-const MINION_COUNT = 5;
-const MINION_FLOCK_COUNT = 5;
+const ENEMY_COUNT = 1;
+const MINION_COUNT = 1;
+const MINION_FLOCK_COUNT = 1;
 
 const HEARTH_POS = new Vec2(0,0);
 const HEARTH_SIZE = new Vec2(100,100);
@@ -724,7 +726,7 @@ const HEALTHVALUE_POS = new Vec2(0,0);
 const HEALTHVALUE_SIZE = new Vec2(296,96);
 
 
-let player = new Player(WORLD_WIDTH/2,WORLD_HEIGHT/2,114,66,'red');
+let player = new Player(WORLD_WIDTH/2,WORLD_HEIGHT/2,114,64,'red');
 let bullets = new Array();
 let enemies = new Array();
 let minions = new Array();
@@ -754,7 +756,8 @@ for(let row = 0; row < MINION_FLOCK_COUNT; row++)
 
     for(let col = 0; col < MINION_COUNT; col++)
     {
-        let tempMinion = new EnemyMinion(flockPoint.x + 150 * col, flockPoint.y + 10 * col, 53, 100 ,Math.random(1) + -1, Math.random(1) + -1);
+        //let tempMinion = new EnemyMinion(flockPoint.x + 150 * col, flockPoint.y + 10 * col, 39, 98 ,Math.random(1) + -1, Math.random(1) + -1);
+        let tempMinion = new EnemyMinion(player.getPos.x + 150 * col, player.getPos.y + 10 * col, 39, 98 ,Math.random(1) + -1, Math.random(1) + -1);
         tempMinions.push(tempMinion);
     }
     minions.push(tempMinions);
@@ -814,8 +817,14 @@ function gameLoop(timestamp)
             //{
                 if(CollisionManager.SATCollision(minions[row][col]._rect.getPoints(), player._rect.getPoints()))
                 {
-                    minions[row].splice(col,1);
-                    col--;
+                    player.m_color = 'green';
+                    minions[row][col].m_color = 'white';
+                    //minions[row].splice(col,1);
+                    //col--;
+                }
+                else{
+                    player.m_color = 'red';
+                    minions[row][col].m_color = 'blue';
                 }
             //}
         }
