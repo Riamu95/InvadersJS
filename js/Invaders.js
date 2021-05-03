@@ -144,12 +144,15 @@ class Player {
     {
         this._health -= value;
     }
+    get getRect()
+    {
+        return this._rect;
+    }
 }
 
 class CollisionManager {
     
     constructor(){}
-
 
     RectCollision(_a,_b)
     {
@@ -249,16 +252,52 @@ class CollisionManager {
         }
         return true;
     }
+
+    static CircleRectCollision(obj1, obj2)
+    {
+        // o1 = circle , 02 = rect  obj
+        let circlePos = new Vec2(obj1.getCircle.getPos().x,obj1.getCircle.getPos().y);
+        let test = new Vec2(circlePos.x,circlePos.y);
+        let circleRadius = obj1.getCircle.getRadius();
+
+        let rectPoints = obj2.getPoints();
+       
+        //check for closest edge
+        if(circlePos.x < rectPoints[0].x)
+        {
+            test.x = rectPoints[0].x;
+        }
+        else if (circlePos.x > rectPoints[1].x)
+        {
+            test.x = rectPoints[1].x;
+        }
+
+        if(circlePos.y < rectPoints[0].y)
+        {
+            test.y = rectPoints[0].y;
+        }
+        else if (circlePos.y  > rectPoints[2].y)
+        {
+            test.y = rectPoints[2].y;
+        }
+        //get distance between edge point and circle pos
+        let dist = Vec2.distance(circlePos,test);
+        //if lesser than the radius, collision = true
+        if(dist <= circleRadius)
+        {
+            return true;
+        }
+        return false;
+    }
 }
 
 
 class Bullet {
-    constructor(x,y,_angle)
+    constructor(pos,radius,_angle)
     {
-        this._pos = new Vec2(x,y);
+        this._circle = new Circle(pos, radius);
         this.m_angle = _angle;
-        this.m_radius = 5;
-        this.m_color = 'Red';
+        this._color = 'Red';
         this._velocity = new Vec2(0,0);
     }
 
@@ -266,17 +305,17 @@ class Bullet {
     {
         this._velocity.x = Math.cos(this.m_angle) * dt;
         this._velocity.y = Math.sin(this.m_angle) * dt;
-        this._pos.x += this._velocity.x;
-        this._pos.y += this._velocity.y;
+        this._circle._pos.x += this._velocity.x;
+        this._circle._pos.y += this._velocity.y;
     }
 
     draw(cameraPos)
     {
         c.save();
         c.beginPath();
-        c.translate(this._pos.x - cameraPos.x, this._pos.y - cameraPos.y);
-        c.arc(0, 0, this.m_radius, 0, 2 * Math.PI);
-        c.fillStyle = 'green';
+        c.translate(this._circle._pos.x - cameraPos.x, this._circle._pos.y - cameraPos.y);
+        c.arc(0, 0, this._circle._radius, 0, 2 * Math.PI);
+        c.fillStyle = this._color;
         c.fill();
         c.closePath();
         c.restore();
@@ -290,6 +329,11 @@ class Bullet {
     get getPos()
     {
         return this._pos;
+    }
+
+    get getCircle()
+    {
+        return this._circle;
     }
 }
 
@@ -340,6 +384,10 @@ class Enemy {
     get getSize()
     {
         return this._size;
+    }
+    get getRect()
+    {
+        return this._rect;
     }
 }
 
@@ -546,6 +594,21 @@ class EnemyMinion extends Enemy {
     }
 }
 
+
+const Circle = function(pos,radius){
+    this._pos = new Vec2(pos.x,pos.y);
+    this._radius = radius;
+}
+Circle.prototype.getPos = function()
+{
+    return this._pos;
+}
+Circle.prototype.getRadius = function()
+{
+    return this._radius;
+}
+
+
 const Rect = function(pos,size){
     
     this._pos = pos;
@@ -562,6 +625,10 @@ const Rect = function(pos,size){
 Rect.prototype.getPoints = function()
 {
     return this._points;
+}
+Rect.prototype.getOrigin = function()
+{
+    return this._origin;
 }
 
 Rect.prototype.rotate = function(angle, pos)
@@ -712,9 +779,9 @@ const CANVAS_HEIGHT = canvas.height;
 const WORLD_HEIGHT = 3376;
 const WORLD_WIDTH = 6000;
 const CANVAS_MIN = 0;
-const ENEMY_COUNT = 1;
-const MINION_COUNT = 1;
-const MINION_FLOCK_COUNT = 1;
+const ENEMY_COUNT = 5;
+const MINION_COUNT = 5;
+const MINION_FLOCK_COUNT = 5;
 
 const HEARTH_POS = new Vec2(0,0);
 const HEARTH_SIZE = new Vec2(100,100);
@@ -756,8 +823,8 @@ for(let row = 0; row < MINION_FLOCK_COUNT; row++)
 
     for(let col = 0; col < MINION_COUNT; col++)
     {
-        //let tempMinion = new EnemyMinion(flockPoint.x + 150 * col, flockPoint.y + 10 * col, 39, 98 ,Math.random(1) + -1, Math.random(1) + -1);
-        let tempMinion = new EnemyMinion(player.getPos.x + 150 * col, player.getPos.y + 10 * col, 39, 98 ,Math.random(1) + -1, Math.random(1) + -1);
+        let tempMinion = new EnemyMinion(flockPoint.x + 150 * col, flockPoint.y + 10 * col, 39, 98 ,Math.random(1) + -1, Math.random(1) + -1);
+       // let tempMinion = new EnemyMinion(player.getPos.x + 250 , player.getPos.y + 210, 39, 98 ,Math.random(1) + -1, Math.random(1) + -1);
         tempMinions.push(tempMinion);
     }
     minions.push(tempMinions);
@@ -770,7 +837,7 @@ for(let row = 0; row < MINION_FLOCK_COUNT; row++)
 
 addEventListener('click', (event) =>
 {
-    let tempBullet = new Bullet(player.getPos.x + player.getSize.x/2, player.getPos.y + player.getSize.y/2, Math.atan2((event.y - ((player.getPos.y + player.getSize.y/2) - camera.getPos.y)), (event.x - ((player.getPos.x + player.getSize.x/2) - camera.getPos.x))));
+    let tempBullet = new Bullet(new Vec2(player.getPos.x + player.getSize.x/2, player.getPos.y + player.getSize.y/2),5, Math.atan2((event.y - ((player.getPos.y + player.getSize.y/2) - camera.getPos.y)), (event.x - ((player.getPos.x + player.getSize.x/2) - camera.getPos.x))));
     bullets.push(tempBullet);
 })
 
@@ -812,21 +879,28 @@ function gameLoop(timestamp)
     for(let row = 0; row < minions.length; row++)
     {
         for(let col = 0; col < minions[row].length; col++)
-        {   //potential bug here?
-           // if(minions[row][col]._attack)
-            //{
-                if(CollisionManager.SATCollision(minions[row][col]._rect.getPoints(), player._rect.getPoints()))
+        {  
+        //quad tree detection
+            if(CollisionManager.SATCollision(minions[row][col].getRect.getPoints(), player.getRect.getPoints()))
+            {
+                minions[row].splice(col,1);
+                col--;
+            }
+        }
+    }
+
+    for(let b = 0; b < bullets.length; b++)
+    {
+        for( let row = 0; row < minions.length; row++)
+        {
+            for( let col = 0; col < minions[row].length; col++)
+            {   //pass the circle and rect object in
+                if(CollisionManager.CircleRectCollision(bullets[b], minions[row][col].getRect))
                 {
-                    player.m_color = 'green';
-                    minions[row][col].m_color = 'white';
-                    //minions[row].splice(col,1);
-                    //col--;
+                   //remove bullets
+                   //remove minion
                 }
-                else{
-                    player.m_color = 'red';
-                    minions[row][col].m_color = 'blue';
-                }
-            //}
+            }
         }
     }
 
