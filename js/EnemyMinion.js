@@ -192,11 +192,11 @@ class EnemyMinion extends Enemy {
         return steering;
     }
 
-    draw(cameraPos)
+    draw(ctx,cameraPos)
     {
-        c.beginPath();
-        c.drawImage(enemyMinionImage,0,0,this._size.x,this._size.y,this._pos.x - cameraPos.getVec2.x,this._pos.y - cameraPos.getVec2.y,this._size.x,this._size.y);
-        c.closePath();
-        this._rect.draw(c,cameraPos, this.m_color);
+        ctx.beginPath();
+        ctx.drawImage(enemyMinionImage,0,0,this._size.x,this._size.y,this._pos.x - cameraPos.getVec2.x,this._pos.y - cameraPos.getVec2.y,this._size.x,this._size.y);
+        ctx.closePath();
+        this._rect.draw(ctx,cameraPos, this.m_color);
     }
 }

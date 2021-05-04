@@ -1,5 +1,5 @@
 const canvas = document.querySelector('canvas');
-const c = canvas.getContext('2d');
+const ctx = canvas.getContext('2d');
 const background = document.getElementById('background');
 const playerIMG = document.getElementById('player');
 const enemyOne = document.getElementById('enemyOne');

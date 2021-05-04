@@ -15,16 +15,16 @@ class Bullet {
         this._circle._pos.y += this._velocity.y;
     }
 
-    draw(cameraPos)
+    draw(ctx,cameraPos)
     {
-        c.save();
-        c.beginPath();
-        c.translate(this._circle._pos.x - cameraPos.x, this._circle._pos.y - cameraPos.y);
-        c.arc(0, 0, this._circle._radius, 0, 2 * Math.PI);
-        c.fillStyle = this._color;
-        c.fill();
-        c.closePath();
-        c.restore();
+        ctx.save();
+        ctx.beginPath();
+        ctx.translate(this._circle._pos.x - cameraPos.x, this._circle._pos.y - cameraPos.y);
+        ctx.arc(0, 0, this._circle._radius, 0, 2 * Math.PI);
+        ctx.fillStyle = this._color;
+        ctx.fill();
+        ctx.closePath();
+        ctx.restore();
     }
 
     get getVel()

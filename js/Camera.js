@@ -1,4 +1,3 @@
-
 class Camera
 {
     constructor(x,y,width,height)
@@ -32,9 +31,9 @@ class Camera
         }
     }
 
-    draw()
+    draw(ctx)
     {
-        c.drawImage(background,this._pos.x,this._pos.y,this._size.x,this._size.y,0,0,this._size.x,this._size.y);
+        ctx.drawImage(background,this._pos.x,this._pos.y,this._size.x,this._size.y,0,0,this._size.x,this._size.y);
     }
 
     get getPos()
