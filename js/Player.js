@@ -5,7 +5,7 @@ class Player {
         this._pos = new Vec2(x,y);
         this._size = new Vec2(w,h);
         this._rect = new Rect(this._pos, this._size);
-        
+        this._collisionRect = new Rect(new Vec2(this._rect._origin.x - (this._rect._size.x * 1.5), this._rect._origin.y - (this._rect._size.y * 2)), new Vec2(this._rect._size.x * 3, this._rect._size.y * 4));
         this._health = 1;
 
         this.m_speed = 0.1;
@@ -33,6 +33,7 @@ class Player {
         ctx.restore();
 
         this._rect.draw(ctx,cameraPos, this.m_color);
+        this._collisionRect.draw(ctx,cameraPos, 'blue');
     }
 
     move(dt)
@@ -42,6 +43,7 @@ class Player {
         this._pos.x += this._velocity.x;
         this._pos.y += this._velocity.y; 
         this._rect.updatePoints(this._velocity); 
+        this._collisionRect.updatePoints(this._velocity);
     }
 
     get getPos()
@@ -95,5 +97,9 @@ class Player {
     get getRect()
     {
         return this._rect;
+    }
+    get getCollisionRect()
+    {
+        return this._collisionRect;
     }
 }

@@ -15,6 +15,8 @@ const CANVAS_MIN = 0;
 const ENEMY_COUNT = 5;
 const MINION_COUNT = 5;
 const MINION_FLOCK_COUNT = 5;
+const MINION_SPAWN_XOFFSET = 250;
+const MINION_SPAWN_YOFFSET = 138;
 
 const HEARTH_POS = new Vec2(0,0);
 const HEARTH_SIZE = new Vec2(100,100);

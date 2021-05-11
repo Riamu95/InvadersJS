@@ -1,4 +1,3 @@
-
 /*------------------------------------------------------- -----------------------------------------------------------------------------------------------*/
 /*---------------------------Variables + objects ----------------------------------------------------------------------------------------------------------*/
 /*------------------------------------------------------- -----------------------------------------------------------------------------------------------*/
@@ -14,6 +13,8 @@ let pressedKeys = new Set();
 let dt = 0;
 let lastRender = 0;
 
+let qt = new QuadTree(new Vec2(0,0),new Vec2(WORLD_WIDTH,WORLD_HEIGHT), 3);
+
 for(let i =0; i < ENEMY_COUNT; i++)
 {
    let tempEnemy = new Enemy(Math.floor(Math.random() * WORLD_WIDTH),Math.floor(Math.random() * WORLD_HEIGHT), 102, 177 ,-1, -1);
@@ -27,16 +28,30 @@ function getRandomInt(max)
 for(let row = 0; row < MINION_FLOCK_COUNT; row++)
 {
     let tempMinions = [];
-    let flockPoint = new Vec2(Math.random() * WORLD_WIDTH, Math.random() * WORLD_HEIGHT);
+    let flockPoint = new Vec2(Math.random() * (WORLD_WIDTH - MINION_SPAWN_XOFFSET), Math.random() * (WORLD_HEIGHT - MINION_SPAWN_YOFFSET));
 
     for(let col = 0; col < MINION_COUNT; col++)
     {
-        let tempMinion = new EnemyMinion(flockPoint.x + 150 * col, flockPoint.y + 10 * col, 39, 98 ,Math.random(1) + -1, Math.random(1) + -1);
+       
+        let tempMinion = new EnemyMinion(flockPoint.x + 50 * col, flockPoint.y + 10 * col, 39, 98 ,Math.random(1) + -1, Math.random(1) + -1);
        // let tempMinion = new EnemyMinion(player.getPos.x + 250 , player.getPos.y + 210, 39, 98 ,Math.random(1) + -1, Math.random(1) + -1);
         tempMinions.push(tempMinion);
     }
     minions.push(tempMinions);
     flockPoints.push(new Vec2(Math.random() * WORLD_WIDTH, Math.random() * WORLD_HEIGHT));
+}
+
+for(let row = 0; row < minions.length; row++ ) 
+{
+    for(let col = 0; col < minions[row].length; col++)
+    {
+       let result = qt.insert(minions[row][col].getRect);
+       if(!result)
+       {
+        console.log(minions[row][col].getPos);
+        console.log('failed');
+       }
+    }
 }
 
 /*------------------------------------------------------- -----------------------------------------------------------------------------------------------*/
@@ -79,12 +94,22 @@ function gameLoop(timestamp)
     });
 
     //for every array, allocate seek point and move the flock
-   for( let row = 0; row < minions.length; row++)
+  /* for( let row = 0; row < minions.length; row++)
    {
        EnemyMinion.generateFlockPoint(minions[row], player.getPos, flockPoints[row], dt);
-   }
+   }*/
    // for all minions if attacking and collide with player, delete the minion
-    for(let row = 0; row < minions.length; row++)
+   let collidable = [];
+   collidable = qt.query(player.getCollisionRect, collidable);
+   for(let i =0; i < collidable.length; i++)
+   {
+        if(CollisionManager.SATCollision(collidable[i].getPoints(), player.getRect.getPoints()))
+        {
+            collidable.splice(i,1);
+            i--;
+        }
+   }
+    /*for(let row = 0; row < minions.length; row++)
     {
         for(let col = 0; col < minions[row].length; col++)
         {  
@@ -95,7 +120,7 @@ function gameLoop(timestamp)
                 col--;
             }
         }
-    }
+    }*/
 
     for(let b = 0; b < bullets.length; b++)
     {
@@ -122,7 +147,7 @@ function gameLoop(timestamp)
             }
         }
     }
-
+    
     inputHandling();
     draw();
 
@@ -182,7 +207,7 @@ function draw()
     ctx.clearRect(0,0,canvas.width,canvas.height);
 
     camera.draw(ctx);
-  
+    qt.draw(ctx,camera.getPos);
     
 
     bullets.forEach(bullet => {
