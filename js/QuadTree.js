@@ -57,15 +57,12 @@ QuadTree.prototype.query = function (rect,objects) {
         {
             if (obj.intersects(rect)) {
                 objects.push(obj);
-                console.log('pushed');
-            }
-           
+            }     
         });
     }   
 
     if(this._divided)
     {
-        //when not intersecting returns undeifned which is added to array
        this._northEast.query(rect,objects);
        this._northWest.query(rect,objects);
        this._southWest.query(rect,objects);
@@ -73,8 +70,7 @@ QuadTree.prototype.query = function (rect,objects) {
     }
     
     return objects;
-}
-
+} 
 QuadTree.prototype.draw = function(ctx,cameraPos)
 {
     ctx.save();

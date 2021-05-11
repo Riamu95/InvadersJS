@@ -12,8 +12,8 @@ let pressedKeys = new Set();
 
 let dt = 0;
 let lastRender = 0;
-
-let qt = new QuadTree(new Vec2(0,0),new Vec2(WORLD_WIDTH,WORLD_HEIGHT), 3);
+let fps = 0;
+let qt = new QuadTree(new Vec2(0,0),new Vec2(WORLD_WIDTH,WORLD_HEIGHT), 5);
 
 for(let i =0; i < ENEMY_COUNT; i++)
 {
@@ -53,7 +53,7 @@ for(let row = 0; row < minions.length; row++ )
        }
     }
 }
-
+ctx.font = "30px Arial";
 /*------------------------------------------------------- -----------------------------------------------------------------------------------------------*/
 /*---------------------------------------------GAME LOOP -----------------------------------------------------------------------------------------------*/
 /*------------------------------------------------------ -----------------------------------------------------------------------------------------------*/
@@ -80,26 +80,40 @@ window.requestAnimationFrame(gameLoop);
 function gameLoop(timestamp)
 {
     dt = timestamp - lastRender;
-    
+    fps = 1000/ dt;
+
     bullets.forEach(bullet => {
         bullet.move(dt);
     })
-   
-    collisionManager.playerBoundaryCollision(player);
-
     
     enemies.forEach(enemy => 
     {
         enemy.move(dt,player.getPos,player.getSize);
     });
 
-    //for every array, allocate seek point and move the flock
-  /* for( let row = 0; row < minions.length; row++)
+//for every array, allocate seek point and move the flock
+   for( let row = 0; row < minions.length; row++)
    {
        EnemyMinion.generateFlockPoint(minions[row], player.getPos, flockPoints[row], dt);
-   }*/
+   }
+   
+
+    collisions();
+    inputHandling();
+    draw();
+
+    lastRender = timestamp;
+    window.requestAnimationFrame(gameLoop);
+}
+
+
+function collisions()
+{
+
+    collisionManager.playerBoundaryCollision(player);
+
    // for all minions if attacking and collide with player, delete the minion
-   let collidable = [];
+   /*let collidable = [];
    collidable = qt.query(player.getCollisionRect, collidable);
    for(let i =0; i < collidable.length; i++)
    {
@@ -108,52 +122,54 @@ function gameLoop(timestamp)
             collidable.splice(i,1);
             i--;
         }
+   }*/
+   for(let row = 0; row < minions.length; row++)
+   {
+       for(let col = 0; col < minions[row].length; col++)
+       {  
+       //quad tree detection
+           if(CollisionManager.SATCollision(minions[row][col].getRect.getPoints(), player.getRect.getPoints()))
+           {
+               minions[row].splice(col,1);
+               col--;
+           }
+       }
    }
-    /*for(let row = 0; row < minions.length; row++)
-    {
-        for(let col = 0; col < minions[row].length; col++)
-        {  
-        //quad tree detection
-            if(CollisionManager.SATCollision(minions[row][col].getRect.getPoints(), player.getRect.getPoints()))
-            {
-                minions[row].splice(col,1);
-                col--;
-            }
-        }
-    }*/
 
-    for(let b = 0; b < bullets.length; b++)
-    {
-        for( let row = 0; row < minions.length; row++)
-        {
-            for( let col = 0; col < minions[row].length; col++)
-            {   //pass the circle and rect object in
-                if(CollisionManager.CircleRectCollision(bullets[b], minions[row][col].getRect))
-                {
-                    minions[row].splice(col,1);
-                    col --;
-                    
-                    bullets.splice(b,1);
-
-                    if(bullets.length > 0)
-                    {
-                        b--;
-                    }
-                    else
-                    {
-                        break;
-                    }
-                }
-            }
-        }
-    }
-    
-    inputHandling();
-    draw();
-
-    lastRender = timestamp;
-    window.requestAnimationFrame(gameLoop);
+     // change to quad tree ?
+     loop1:
+     for(let b = 0; b < bullets.length; b++)
+     {
+         loop2:
+         for( let row = 0; row < minions.length; row++)
+         {
+             loop3:
+             for( let col = 0; col < minions[row].length; col++)
+             {   //pass the circle and rect object in
+                 if(CollisionManager.CircleRectCollision(bullets[b], minions[row][col].getRect))
+                 {
+                     minions[row].splice(col,1);
+                     col --;
+                     
+                     bullets.splice(b,1);
+                     if(b == -1)
+                     {
+                         let i =0;
+                     }
+                     if(bullets.length > 0)
+                     {
+                         b--;
+                     }
+                     else
+                     {
+                         break loop1;
+                     }
+                 }
+             }
+         }
+     }
 }
+
 
 function inputHandling()
 {
@@ -240,4 +256,8 @@ function draw()
         //render width based off health
         ctx.drawImage(healthValue,0,0,HEALTHVALUE_SIZE.x,HEALTHVALUE_SIZE.y,(camera._pos.x + (camera._size.x * 0.81)) - camera._pos.x,(camera._pos.y +  (camera._size.x / 30.1)) - camera._pos.y,HEALTHVALUE_SIZE.x * player.getHealth,HEALTHVALUE_SIZE.y);
     }
+
+    ctx.font = "30px Arial";
+    ctx.fillStyle = 'blue';
+    ctx.fillText(`fps : ${fps}`, (camera._pos.x + 100) - camera._pos.x,(camera._pos.y + 50) - camera._pos.y);
 }
