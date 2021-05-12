@@ -1,8 +1,8 @@
 class EnemyMinion extends Enemy {
 
-    constructor (_x, _y,_width, _height, _xVel, _yVel)
+    constructor (pos,size,vel)
     {
-        super(_x, _y,_width, _height, _xVel,_yVel);
+        super(pos,size,vel);
       
         this._alignmentDistance = 50;
         this._cohesionDistance = 450;

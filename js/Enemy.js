@@ -1,11 +1,11 @@
 class Enemy {
 
-    constructor (_x, _y,_width, _height, _xVel, _yVel)
+    constructor(pos,size,vel)
      {
-        this._pos = new Vec2(_x,_y);
-        this._size = new Vec2(_width,_height);
+        this._pos = new Vec2(pos.x,pos.y);
+        this._size = new Vec2(size.x,size.y);
         this._rect = new Rect(this._pos,this._size);
-        this._velocity = new Vec2(_xVel, _yVel);
+        this._velocity = new Vec2(vel.x, vel.y);
         this.m_angle = 90;
         this.m_speed = 0.2;
         

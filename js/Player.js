@@ -1,5 +1,7 @@
 
-class Player {
+class Player
+{
+    
     constructor(x, y, w ,h ,color)
     {
         this._pos = new Vec2(x,y);
@@ -18,6 +20,8 @@ class Player {
         this.m_angle = 0;
         this.m_rotationSpeed = 1.5;
         
+        this._ttl = 3;
+
         this.m_color = color;           
     }
 
@@ -101,5 +105,10 @@ class Player {
     get getCollisionRect()
     {
         return this._collisionRect;
+    }
+
+    get getTTL()
+    {
+        return this._ttl;
     }
 }

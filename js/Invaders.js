@@ -14,12 +14,9 @@ let dt = 0;
 let lastRender = 0;
 let fps = 0;
 let qt = new QuadTree(new Vec2(0,0),new Vec2(WORLD_WIDTH,WORLD_HEIGHT), 5);
+let bombers = [];
 
-for(let i =0; i < ENEMY_COUNT; i++)
-{
-   let tempEnemy = new Enemy(Math.floor(Math.random() * WORLD_WIDTH),Math.floor(Math.random() * WORLD_HEIGHT), 102, 177 ,-1, -1);
-   enemies.push(tempEnemy);
-}
+
 function getRandomInt(max)
 {
     return Math.floor(Math.random() * max);
@@ -29,28 +26,30 @@ for(let row = 0; row < MINION_FLOCK_COUNT; row++)
 {
     let tempMinions = [];
     let flockPoint = new Vec2(Math.random() * (WORLD_WIDTH - MINION_SPAWN_XOFFSET), Math.random() * (WORLD_HEIGHT - MINION_SPAWN_YOFFSET));
-
     for(let col = 0; col < MINION_COUNT; col++)
     {
        
-        let tempMinion = new EnemyMinion(flockPoint.x + 50 * col, flockPoint.y + 10 * col, 39, 98 ,Math.random(1) + -1, Math.random(1) + -1);
+        let tempMinion = new EnemyMinion(new Vec2(flockPoint.x + 50 * col, flockPoint.y + 10 * col), new Vec2(39, 98) ,new Vec2(Math.random(1) + -1, Math.random(1) + -1));
        // let tempMinion = new EnemyMinion(player.getPos.x + 250 , player.getPos.y + 210, 39, 98 ,Math.random(1) + -1, Math.random(1) + -1);
         tempMinions.push(tempMinion);
     }
     minions.push(tempMinions);
-    flockPoints.push(new Vec2(Math.random() * WORLD_WIDTH, Math.random() * WORLD_HEIGHT));
+    flockPoints.push(new Vec2(Math.random() * (WORLD_WIDTH - MINION_SPAWN_XOFFSET), Math.random() * (WORLD_HEIGHT - MINION_SPAWN_YOFFSET)));
+
+}
+
+for(let i = 0; i < BOMBER_COUNT; i++)
+{
+    let pos = new Vec2(Math.random() * WORLD_WIDTH, Math.random() * WORLD_HEIGHT);
+    let tempBomber = new Bomber(pos, new Vec2(102,177), new Vec2(0,0));
+    bombers.push(tempBomber);
 }
 
 for(let row = 0; row < minions.length; row++ ) 
 {
     for(let col = 0; col < minions[row].length; col++)
     {
-       let result = qt.insert(minions[row][col].getRect);
-       if(!result)
-       {
-        console.log(minions[row][col].getPos);
-        console.log('failed');
-       }
+        qt.insert(minions[row][col].getRect);
     }
 }
 ctx.font = "30px Arial";
@@ -80,18 +79,13 @@ window.requestAnimationFrame(gameLoop);
 function gameLoop(timestamp)
 {
     dt = timestamp - lastRender;
-    fps = 1000/ dt;
+    fps = 1000 / dt;
 
     bullets.forEach(bullet => {
         bullet.move(dt);
     })
-    
-    enemies.forEach(enemy => 
-    {
-        enemy.move(dt,player.getPos,player.getSize);
-    });
 
-//for every array, allocate seek point and move the flock
+    //for every array, allocate seek point and move the flock
    for( let row = 0; row < minions.length; row++)
    {
        EnemyMinion.generateFlockPoint(minions[row], player.getPos, flockPoints[row], dt);
@@ -152,11 +146,7 @@ function collisions()
                      col --;
                      
                      bullets.splice(b,1);
-                     if(b == -1)
-                     {
-                         let i =0;
-                     }
-                     if(bullets.length > 0)
+                     if(b > 0)
                      {
                          b--;
                      }
@@ -168,6 +158,22 @@ function collisions()
              }
          }
      }
+
+
+
+    for(let i = 0; i < bullets.length; i++)
+    {
+        let time = performance.now();
+        time = time - bullets[i].getTTL();
+        time /= 1000;
+        time = Math.round(time);
+       // console.log(time);
+        if (time >= player.getTTL)
+        {
+            bullets.splice(i,1);
+            i--;
+        }
+    }
 }
 
 
@@ -230,6 +236,11 @@ function draw()
         bullet.draw(ctx,camera.getPos);
     }); 
 
+    bombers.forEach(bomber =>
+    {
+        bomber.draw(ctx,camera.getPos);
+    });
+
     player.draw(ctx,camera.getPos);
 
     minions.forEach(array => 
@@ -238,13 +249,6 @@ function draw()
         {
             minion.draw(ctx,camera.getPos);
         }); 
-    });
-
-    enemies.forEach( enemy => {
-        enemy.draw(ctx,camera.getPos);
-        enemy._bullets.forEach(bullet => {
-            bullet.draw(ctx,camera.getPos);
-        });
     });
     
     if(player.getHealth > 0)

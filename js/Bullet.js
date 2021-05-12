@@ -5,6 +5,7 @@ class Bullet {
         this.m_angle = _angle;
         this._color = 'Red';
         this._velocity = new Vec2(0,0);
+        this._ttl = performance.now();
     }
 
     move(dt)
@@ -36,9 +37,16 @@ class Bullet {
     {
         return this._pos;
     }
-
     get getCircle()
     {
         return this._circle;
+    }
+    getTTL()
+    {
+        return this._ttl;
+    } 
+    set setTTL(val)
+    {
+        this._ttl += val;
     }
 }
