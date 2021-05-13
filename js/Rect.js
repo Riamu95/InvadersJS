@@ -1,4 +1,5 @@
-const Rect = function(pos,size){
+const Rect = function(pos,size)
+{
     
     this._pos = pos;
     this._size = size;
@@ -18,6 +19,11 @@ Rect.prototype.getPoints = function()
 Rect.prototype.getOrigin = function()
 {
     return this._origin;
+}
+
+Rect.prototype.getPos = function()
+{
+    return this._pos;
 }
 
 Rect.prototype.rotate = function(angle, pos)

@@ -1,10 +1,8 @@
-class Enemy {
-
+class Enemy
+{
     constructor(pos,size,vel)
      {
-        this._pos = new Vec2(pos.x,pos.y);
-        this._size = new Vec2(size.x,size.y);
-        this._rect = new Rect(this._pos,this._size);
+        this._rect = new Rect(pos,size);
         this._velocity = new Vec2(vel.x, vel.y);
         this.m_angle = 90;
         this.m_speed = 0.2;
@@ -13,13 +11,10 @@ class Enemy {
         this._attackDistance = 500;
 
         this._bullets = new Array();
-        this._bulletTimer = 2000;
-        this._timer = 0;
     }
 
     move (dt,playerPos,playerSize) 
     {
-    
     }
 
     draw(ctx,cameraPos)
@@ -49,4 +44,5 @@ class Enemy {
     {
         return this._rect;
     }
+    
 }
