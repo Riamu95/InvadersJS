@@ -1,6 +1,6 @@
 const Rect = function(pos,size)
 {
-    
+    //refers to top left point
     this._pos = pos;
     this._size = size;
     this._origin = new Vec2(this._pos.x + this._size.x/2,this._pos.y + this._size.y/2);
@@ -26,19 +26,19 @@ Rect.prototype.getPos = function()
     return this._pos;
 }
 
-Rect.prototype.rotate = function(angle, pos)
+Rect.prototype.rotate = function(angle,previousAngle)
 {
-    let cos = Math.cos(angle);
-    let sin = Math.sin(angle);
-    this._points.forEach(point =>
-    {
-       //translate point to origin
-       let translated_x = point.x - this._origin.x;
-       let translated_y = point.y - this._origin.y;
-       //apply rotation to point and re translate
-       point.x = translated_x * cos - translated_y * sin + this._origin.x;
-       point.y = translated_x * sin + translated_y * cos + this._origin.y;
-    });
+        let cos = Math.cos(angle);
+        let sin = Math.sin(angle);
+        this._points.forEach(point =>
+        {
+        //translate point to origin
+        let translated_x = point.x - this._origin.x;
+        let translated_y = point.y - this._origin.y;
+        //apply rotation to point and re translate
+        point.x = translated_x * cos - translated_y * sin + this._origin.x;
+        point.y = translated_x * sin + translated_y * cos + this._origin.y;
+        });
 }
 
 Rect.prototype.setPos = function(pos)
