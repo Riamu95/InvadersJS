@@ -41,7 +41,8 @@ for(let row = 0; row < MINION_FLOCK_COUNT; row++)
 for(let i = 0; i < BOMBER_COUNT; i++)
 {
     let pos = new Vec2(Math.random() * WORLD_WIDTH, Math.random() * WORLD_HEIGHT);
-    let tempBomber = new Bomber(pos, new Vec2(102,177), new Vec2(0,0));
+    let flockPoint = new Vec2(Math.random() * WORLD_WIDTH, Math.random() * WORLD_HEIGHT);
+    let tempBomber = new Bomber(pos, new Vec2(177,102), new Vec2(0,0),flockPoint);
     bombers.push(tempBomber);
 }
 
@@ -89,6 +90,11 @@ function gameLoop(timestamp)
    for( let row = 0; row < minions.length; row++)
    {
        EnemyMinion.generateFlockPoint(minions[row], player.getPos, flockPoints[row], dt);
+   }
+
+   for(let i = 0; i < bombers.length; i++ )
+   {
+       bombers[i].move(dt);
    }
    
 
