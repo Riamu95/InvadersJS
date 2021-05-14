@@ -1,7 +1,5 @@
-
 class Player
 {
-    
     constructor(x, y, w ,h ,color)
     {
         this._pos = new Vec2(x,y);

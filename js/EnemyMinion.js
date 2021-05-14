@@ -34,7 +34,7 @@ class EnemyMinion extends Enemy {
     
         minions.forEach(minion => 
         {
-            avgPos.addVec = minion.getPos;
+            avgPos.addVec = minion.getRect.getPos();
             tally++;   
         });
 
@@ -92,7 +92,7 @@ class EnemyMinion extends Enemy {
 
        this._velocity.setMagnitude = this._maxSpeed;
 
-       this._pos.addVec = this._velocity;
+       this._rect.getPos().addVec = this._velocity;
        this._rect.updatePoints(this._velocity);
        this._acceleration = new Vec2(0,0);
     }
@@ -101,7 +101,7 @@ class EnemyMinion extends Enemy {
     seek(pos)
     {
         let steering = new Vec2(0,0);
-        let direction = new Vec2(pos.x - this._pos.x, pos.y - this._pos.y);
+        let direction = new Vec2(pos.x - this._rect.getPos().x, pos.y - this._rect.getPos().y);
         steering = Vec2.normalise(direction);
         steering = Vec2.subtractVec(steering, this._velocity);
         steering.setMagnitude = this._maxSpeed;
@@ -117,7 +117,7 @@ class EnemyMinion extends Enemy {
 
         minions.forEach(minion =>
         {
-            distance = Vec2.distance( this._pos,minion.getPos);
+            distance = Vec2.distance(this._rect.getPos(),minion.getRect.getPos());
 
             if( minion != this && distance < this._alignmentDistance)
             {
@@ -143,11 +143,11 @@ class EnemyMinion extends Enemy {
 
         minions.forEach(minion =>
         {
-            distance = Vec2.distance( this._pos,minion.getPos);
+            distance = Vec2.distance(this._rect.getPos(),minion.getRect.getPos());
 
             if( minion != this && distance < this._cohesionDistance)
             {
-                steering.addVec = minion._pos;
+                steering.addVec = minion.getRect.getPos();
                 tally++;
             }
         });
@@ -155,7 +155,7 @@ class EnemyMinion extends Enemy {
         if(tally > 0)
         {   
             steering.div = tally;
-            steering = Vec2.subtractVec(steering,this._pos);
+            steering = Vec2.subtractVec(steering,this._rect.getPos());
             steering.setMagnitude = this._maxSpeed;
             steering =  Vec2.subtractVec(steering,this._velocity);
             steering = Vec2.limit(steering,this._maxForce);
@@ -172,18 +172,17 @@ class EnemyMinion extends Enemy {
         minions.forEach(minion =>
         {
             //GET DISTANCE BETWEEN NEIGBHOUR AND OBJECT
-            distance = Vec2.distance( this._pos,minion.getPos);
+            distance = Vec2.distance(this._rect.getPos(),minion.getRect.getPos());
             
             if( minion != this && distance < this._seperationDistance)
             {
                 // GET VECTOR POINTING AWAY FROM NEIGHBOUR
-                let diff = new Vec2(this._pos.x - minion._pos.x, this._pos.y - minion._pos.y);
+                let diff = new Vec2(this._rect.getPos().x - minion.getRect.getPos().x, this._rect.getPos().y - minion.getRect.getPos().y);
                 diff = Vec2.normalise(diff);
                 steering.addVec = diff;
                 tally++;
             }
         });
-
         if(tally > 0)
         {
             steering.div = tally;
@@ -195,7 +194,7 @@ class EnemyMinion extends Enemy {
     draw(ctx,cameraPos)
     {
         ctx.beginPath();
-        ctx.drawImage(enemyMinionImage,0,0,this._size.x,this._size.y,this._pos.x - cameraPos.getVec2.x,this._pos.y - cameraPos.getVec2.y,this._size.x,this._size.y);
+        ctx.drawImage(enemyMinionImage,0,0,this._rect._size.x,this._rect._size.y,this._rect.getPos().x - cameraPos.getVec2.x,this._rect.getPos().y - cameraPos.getVec2.y,this._rect._size.x,this._rect._size.y);
         ctx.closePath();
         //this._rect.draw(ctx,cameraPos, this.m_color);
     }

@@ -41,7 +41,8 @@ for(let row = 0; row < MINION_FLOCK_COUNT; row++)
 for(let i = 0; i < BOMBER_COUNT; i++)
 {
     let pos = new Vec2(Math.random() * WORLD_WIDTH, Math.random() * WORLD_HEIGHT);
-    let tempBomber = new Bomber(pos, new Vec2(102,177), new Vec2(0,0));
+    let flockPoint = new Vec2(Math.random() * WORLD_WIDTH, Math.random() * WORLD_HEIGHT);
+    let tempBomber = new Bomber(pos, new Vec2(177,102), new Vec2(0,0),flockPoint);
     bombers.push(tempBomber);
 }
 
@@ -81,7 +82,8 @@ function gameLoop(timestamp)
     dt = timestamp - lastRender;
     fps = 1000 / dt;
 
-    bullets.forEach(bullet => {
+    bullets.forEach(bullet =>
+    {
         bullet.move(dt);
     })
 
@@ -89,6 +91,16 @@ function gameLoop(timestamp)
    for( let row = 0; row < minions.length; row++)
    {
        EnemyMinion.generateFlockPoint(minions[row], player.getPos, flockPoints[row], dt);
+   }
+
+   for(let i = 0; i < bombers.length; i++ )
+   {
+       bombers[i].move(dt,player.getRect.getPos(),camera.getPos);
+
+       for(let b = 0; b < bombers[i]._bullets.length; b++)
+       {
+            bombers[i]._bullets[b].move(dt);
+       } 
    }
    
 
@@ -174,6 +186,41 @@ function collisions()
             i--;
         }
     }
+
+    /*  For all bombers bullets check bullet ttl */
+    for(let i = 0; i < bombers.length; i++)
+    {
+        for(let b = 0; b < bombers[i]._bullets.length; b++)
+        {
+            let time = performance.now();
+            time = time -  bombers[i]._bullets[b].getTTL();
+            time /= 1000;
+            time = Math.round(time);
+       
+            if (time >= Bomber.ttl)
+             {
+                 //implode bomb
+                bombers[i]._bullets.splice(b,1);
+                b--;
+            }
+        }
+    }
+     /*  For all bombers bullets check player bullet collision */
+     for(let i = 0; i < bombers.length; i++)
+    {
+        for(let b = 0; b < bombers[i]._bullets.length; b++)
+        {
+            if(CollisionManager.CircleRectCollision(bombers[i]._bullets[b],player.getRect))
+            {
+                //implode bomb
+                //delete bomb
+
+                //reduce player health
+            }
+        }
+    }
+
+
 }
 
 
@@ -214,13 +261,13 @@ function inputHandling()
     {
         player.setAngle = player.getRotationSpeed;
         player._rect._angle = player.getRotationSpeed;
-        player._rect.rotate((Math.PI/180) * player._rect._angle, this._pos);
+        player._rect.rotate((Math.PI/180) * player._rect._angle);
     }
     if(pressedKeys['a'])
     {
         player.setAngle = -player.getRotationSpeed;
         player._rect._angle = -player.getRotationSpeed;
-        player._rect.rotate((Math.PI/180) * player._rect._angle, this._pos);
+        player._rect.rotate((Math.PI/180) * player._rect._angle);
     }
 }
 
@@ -232,13 +279,18 @@ function draw()
     qt.draw(ctx,camera.getPos);
     
 
-    bullets.forEach(bullet => {
+    bullets.forEach(bullet =>
+    {
         bullet.draw(ctx,camera.getPos);
     }); 
 
     bombers.forEach(bomber =>
     {
         bomber.draw(ctx,camera.getPos);
+        for(let b = 0; b< bomber._bullets.length; b++)
+        {
+             bomber._bullets[b].draw(ctx,camera.getPos);
+        } 
     });
 
     player.draw(ctx,camera.getPos);
