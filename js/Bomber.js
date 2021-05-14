@@ -14,13 +14,14 @@ class Bomber extends Enemy
         this._reloadTimer = 5;
         this._previousflockPoint = new Vec2(0,0);
         this._previousAngle = 0;
+
     }
 
    
-    move (dt,playerPos) 
+    move (dt,playerPos,cameraPos) 
     {
         this.generateFlockPoint();
-        this.attack(dt,playerPos);
+        this.attack(playerPos,cameraPos);
         let seek = this.seek();
         this._acceleration.addVec = seek;
 
@@ -51,7 +52,7 @@ class Bomber extends Enemy
         }
     }
 
-    attack(dt,playerPos)
+    attack(playerPos,cameraPos)
     {
         if (!(Vec2.distance(this._rect.getOrigin(), playerPos) <= this._attackDistance))
         {
@@ -73,13 +74,12 @@ class Bomber extends Enemy
        
         //if we can shoot, create a bullet, update timer and set it so we cant attack again
         if (this._attack) 
-        {
-            //create bullet
-            console.log("fired");
+        { 
+            let tempBullet = new Bullet(this._rect._origin,5,Math.atan2(playerPos.y - this._rect._origin.y, playerPos.x - this._rect._origin.x));
+            this._bullets.push(tempBullet);
             this._attackTimer = performance.now();
             this._attack = false;
         }
-
     }
 
     seek()
@@ -105,5 +105,12 @@ class Bomber extends Enemy
         ctx.restore();
 
         this._rect.draw(ctx,cameraPos, this.m_color);
+    }
+
+    static ttl = 5;
+
+    get getTTL()
+    {
+        return this._ttl;
     }
 }

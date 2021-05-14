@@ -1,4 +1,5 @@
-class Bullet {
+class Bullet
+{
     constructor(pos,radius,_angle)
     {
         this._circle = new Circle(pos, radius);
