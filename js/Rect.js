@@ -21,12 +21,27 @@ Rect.prototype.getOrigin = function()
     return this._origin;
 }
 
+Rect.prototype.getAngle = function()
+{
+    return this._angle;
+}
+
+Rect.prototype.setAngle = function(_val)
+{
+   this._angle = _val;
+}
+
+Rect.prototype.addAngle = function(_val)
+{
+   this._angle += _val;
+}
+
 Rect.prototype.getPos = function()
 {
     return this._pos;
 }
 
-Rect.prototype.rotate = function(angle,previousAngle)
+Rect.prototype.rotate = function(angle)
 {
         let cos = Math.cos(angle);
         let sin = Math.sin(angle);
@@ -93,4 +108,13 @@ Rect.prototype.draw = function(ctx,cameraPos,color)
     ctx.lineTo(this._points[0].x - cameraPos.x, this._points[0].y - cameraPos.y);
     ctx.stroke();
     ctx.closePath();
+
+    ctx.save();
+    ctx.beginPath();
+    ctx.translate(this._origin.x - cameraPos.x, this._origin.y  - cameraPos.y);
+    ctx.arc(0, 0, 2, 0, 2 * Math.PI);
+    ctx.fillStyle = 'white';
+    ctx.fill();
+    ctx.closePath();
+    ctx.restore();
 }
