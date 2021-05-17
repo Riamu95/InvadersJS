@@ -95,7 +95,7 @@ function gameLoop(timestamp)
 
    for(let i = 0; i < bombers.length; i++ )
    {
-       bombers[i].move(dt,player.getRect.getPos(),camera.getPos);
+       bombers[i].move(dt,player.getRect.getOrigin(),camera.getPos);
 
        for(let b = 0; b < bombers[i]._bullets.length; b++)
        {
@@ -143,6 +143,7 @@ function collisions()
    }
 
      // change to quad tree ?
+     /*
      loop1:
      for(let b = 0; b < bullets.length; b++)
      {
@@ -152,7 +153,7 @@ function collisions()
              loop3:
              for( let col = 0; col < minions[row].length; col++)
              {   //pass the circle and rect object in
-                 if(CollisionManager.CircleRectCollision(bullets[b], minions[row][col].getRect))
+                 if(CollisionManager.CircleRectCollision(bullets[b], minions[row][col].getRect, 0))
                  {
                      minions[row].splice(col,1);
                      col --;
@@ -170,7 +171,7 @@ function collisions()
              }
          }
      }
-
+*/
 
 
     for(let i = 0; i < bullets.length; i++)
@@ -210,8 +211,10 @@ function collisions()
     {
         for(let b = 0; b < bombers[i]._bullets.length; b++)
         {
-            if(CollisionManager.CircleRectCollision(bombers[i]._bullets[b],player.getRect))
+            if(CollisionManager.CircleRectCollision(bombers[i]._bullets[b],player.getRect,player.getAngle))
             {
+                bombers[i]._bullets.splice(b,1);
+                b--;
                 //implode bomb
                 //delete bomb
 
@@ -260,12 +263,14 @@ function inputHandling()
     if(pressedKeys['d'])
     {
         player.setAngle = player.getRotationSpeed;
+        //console.log(player.m_angle);
         player._rect._angle = player.getRotationSpeed;
         player._rect.rotate((Math.PI/180) * player._rect._angle);
     }
     if(pressedKeys['a'])
     {
         player.setAngle = -player.getRotationSpeed;
+       // console.log(player.m_angle);
         player._rect._angle = -player.getRotationSpeed;
         player._rect.rotate((Math.PI/180) * player._rect._angle);
     }

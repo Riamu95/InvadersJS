@@ -86,6 +86,19 @@ class Player
     }
     set setAngle(_angle)
     {
+        if (this.m_angle + _angle > 360)
+        {
+            this.m_angle = 0;
+            this.m_angle += _angle;
+            return;
+        }
+        else if (this.m_angle + _angle < -360)
+        {
+           
+            this.m_angle = 0;
+            this.m_angle += _angle;
+            return;
+        }
         this.m_angle += _angle;
     }
     set setAcceleration(_accel)

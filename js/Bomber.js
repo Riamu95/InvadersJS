@@ -32,11 +32,11 @@ class Bomber extends Enemy
 
         this._velocity.setMagnitude = this._maxSpeed;
         //rotate object back to origin
-        this._rect.rotate(-this.m_angle * Math.PI/180,this._previousAngle);
+        this._rect.rotate(-this.m_angle * Math.PI/180);
         //rotate points by direction of
         this.m_angle = Math.atan2(this._velocity.y,this._velocity.x) * 180 / Math.PI;
         //rotate object in direction of velocity
-        this._rect.rotate(this.m_angle * Math.PI/180,this._previousAngle);
+        this._rect.rotate(this.m_angle * Math.PI/180);
             
 
         this._rect.getPos().addVec = this._velocity;

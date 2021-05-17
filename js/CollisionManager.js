@@ -102,15 +102,62 @@ class CollisionManager {
         return true;
     }
 
-    static CircleRectCollision(obj1, obj2)
+    static CircleRectCollision(obj1, obj2,_angle)
     {
-        // o1 = circle , 02 = rect  obj
+        //convert rect angle to radians
+        let angle = _angle * (Math.PI/180);
+        //rotate rect back to align with the x axis
+        obj2.rotate(-angle);
+        
+        let rectPoints = obj2.getPoints();
+
+        //rotated circle origin
+        let circlePos = new Vec2(obj1.getCircle.getPos().x,obj1.getCircle.getPos().y);
+
+        circlePos.x = Math.cos(-angle) * (circlePos.x - obj2.getOrigin().x) - Math.sin(-angle) *
+        (circlePos.y - obj2.getOrigin().y) + obj2.getOrigin().x;
+        
+        circlePos.y =  Math.sin(-angle) * (circlePos.x - obj2.getOrigin().x) + Math.cos(-angle) *
+        (circlePos.y - obj2.getOrigin().y) + obj2.getOrigin().y;
+
+        let collisionVec = new Vec2(circlePos.x,circlePos.y);
+
+        //calcualte point of collision
+        if(circlePos.x < rectPoints[0].x)
+        {
+            collisionVec.x = rectPoints[0].x;
+        }
+        else if (circlePos.x > rectPoints[1].x)
+        {
+            collisionVec.x = rectPoints[1].x;
+        }
+
+        if(circlePos.y < rectPoints[0].y)
+        {
+            collisionVec.y = rectPoints[0].y;
+        }
+        else if (circlePos.y  > rectPoints[2].y)
+        {
+            collisionVec.y = rectPoints[2].y;
+        }
+        //check for ditance between circle origin and collision point
+        let dist = Vec2.distance(circlePos,collisionVec);
+
+        if(dist <= obj1.getCircle.getRadius())
+        {
+            obj2.rotate(angle);
+            return true;
+        }
+        obj2.rotate(angle);
+        return false;
+
+        /*o1 = circle , 02 = rect  obj
         let circlePos = new Vec2(obj1.getCircle.getPos().x,obj1.getCircle.getPos().y);
         let test = new Vec2(circlePos.x,circlePos.y);
         let circleRadius = obj1.getCircle.getRadius();
 
         let rectPoints = obj2.getPoints();
-       
+
         //check for closest edge
         if(circlePos.x < rectPoints[0].x)
         {
@@ -136,7 +183,7 @@ class CollisionManager {
         {
             return true;
         }
-        return false;
+        return false;*/
     }
 }
 
