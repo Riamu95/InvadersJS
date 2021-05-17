@@ -30,7 +30,6 @@ class Player
         ctx.translate((this._pos.x + this._size.x/2) - cameraPos.x,(this._pos.y + this._size.y/2) - cameraPos.y);
         ctx.rotate(Math.PI/180 * this.m_angle);
         ctx.drawImage(playerIMG,0,0,this._size.x,this._size.y,-this._size.x/2,-this._size.y/2,this._size.x,this._size.y);
-        ctx.fill();
         ctx.closePath();
         ctx.restore();
 

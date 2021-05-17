@@ -21,6 +21,21 @@ Rect.prototype.getOrigin = function()
     return this._origin;
 }
 
+Rect.prototype.getAngle = function()
+{
+    return this._angle;
+}
+
+Rect.prototype.setAngle = function(_val)
+{
+   this._angle = _val;
+}
+
+Rect.prototype.addAngle = function(_val)
+{
+   this._angle += _val;
+}
+
 Rect.prototype.getPos = function()
 {
     return this._pos;
