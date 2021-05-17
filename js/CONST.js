@@ -8,6 +8,7 @@ const hearth = document.getElementById('heart');
 const healthBar = document.getElementById('healthBar');
 const healthValue = document.getElementById('healthValue');
 const BLACKHOLE_IMAGE = document.getElementById('blackhole');
+const BOMBER_BULLET_IMAGE = document.getElementById('blackhole');
 const CANVAS_WIDTH = canvas.width;
 const CANVAS_HEIGHT = canvas.height;
 const WORLD_HEIGHT = 3376;

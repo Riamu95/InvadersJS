@@ -37,7 +37,7 @@ function init()
         let flockPoint = new Vec2(Math.random() * (WORLD_WIDTH - MINION_SPAWN_XOFFSET), Math.random() * (WORLD_HEIGHT - MINION_SPAWN_YOFFSET));
         for(let col = 0; col < MINION_COUNT; col++)
         {
-            let tempMinion = new EnemyMinion(new Vec2(flockPoint.x + 50 * col, flockPoint.y + 10 * col), new Vec2(39, 98) ,new Vec2(Math.random(1) + -1, Math.random(1) + -1));
+            let tempMinion = new EnemyMinion(new Vec2(flockPoint.x + 50 * col, flockPoint.y + 10 * col), new Vec2(128, 128) ,new Vec2(Math.random(1) + -1, Math.random(1) + -1));
             tempMinions.push(tempMinion);
         }
         minions.push(tempMinions);
@@ -48,7 +48,7 @@ function init()
     {
         let pos = new Vec2(Math.random() * WORLD_WIDTH, Math.random() * WORLD_HEIGHT);
         let flockPoint = new Vec2(Math.random() * WORLD_WIDTH, Math.random() * WORLD_HEIGHT);
-        let tempBomber = new Bomber(pos, new Vec2(177,102), new Vec2(0,0),flockPoint);
+        let tempBomber = new Bomber(pos, new Vec2(128,158), new Vec2(0,0),flockPoint);
         bombers.push(tempBomber);
     }
 
@@ -334,7 +334,6 @@ function draw()
         ctx.drawImage(healthValue,0,0,HEALTHVALUE_SIZE.x,HEALTHVALUE_SIZE.y,(camera._pos.x + (camera._size.x * 0.81)) - camera._pos.x,(camera._pos.y +  (camera._size.x / 30.1)) - camera._pos.y,HEALTHVALUE_SIZE.x * player.getHealth,HEALTHVALUE_SIZE.y);
     }
 
-    ctx.font = "30px Arial";
     ctx.fillStyle = 'blue';
     ctx.fillText(`fps : ${fps}`, (camera._pos.x + 100) - camera._pos.x,(camera._pos.y + 50) - camera._pos.y);
 }
