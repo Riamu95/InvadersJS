@@ -1,6 +1,7 @@
 const QuadTree = function(pos,size,capacity)
 {    
     this._rect = new Rect(pos,size);
+
     this._capacity = capacity;
     this._rectangles = [];
     this._divided = false;

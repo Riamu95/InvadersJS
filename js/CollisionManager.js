@@ -1,5 +1,6 @@
 
-class CollisionManager {
+class CollisionManager
+{
     
     constructor(){}
 

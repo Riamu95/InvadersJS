@@ -1,6 +1,7 @@
 const BlackHole = function(pos,size)
 {
     this._rect = new Rect(pos,size);
+    
     this._acitve = false;
     this._activeDistance = 500;
 }

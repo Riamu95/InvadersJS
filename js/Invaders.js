@@ -7,6 +7,7 @@ let enemies = [];
 let minions = [];
 let flockPoints = [];
 let bombers = [];
+let asteroids = [];
 let blackHoles = [];
 let pressedKeys = new Set();
 
@@ -27,8 +28,14 @@ function init()
 {
     for(let i = 0; i < BLACK_HOLE_COUNT; i++)
     {
-        let  temp = new BlackHole(new Vec2(player.getPos.x,player.getPos.y), new Vec2(643,480));
+        let  temp = new BlackHole(new Vec2(Math.random() * WORLD_WIDTH - 643, Math.random() * WORLD_HEIGHT - 480), new Vec2(643,480));
         blackHoles.push(temp);
+    }
+
+    for(let i = 0; i < ASTEROID_COUNT; i++)
+    {
+        let  temp = new Asteroid(new Vec2(Math.random() * WORLD_WIDTH, Math.random() * WORLD_HEIGHT), new Vec2(98,99));
+        asteroids.push(temp);
     }
 
     for(let row = 0; row < MINION_FLOCK_COUNT; row++)
@@ -37,7 +44,7 @@ function init()
         let flockPoint = new Vec2(Math.random() * (WORLD_WIDTH - MINION_SPAWN_XOFFSET), Math.random() * (WORLD_HEIGHT - MINION_SPAWN_YOFFSET));
         for(let col = 0; col < MINION_COUNT; col++)
         {
-            let tempMinion = new EnemyMinion(new Vec2(flockPoint.x + 50 * col, flockPoint.y + 10 * col), new Vec2(128, 128) ,new Vec2(Math.random(1) + -1, Math.random(1) + -1));
+            let tempMinion = new EnemyMinion(new Vec2(flockPoint.x + 50 * col, flockPoint.y + 10 * col), new Vec2(90, 102) ,new Vec2(Math.random(1) + -1, Math.random(1) + -1));
             tempMinions.push(tempMinion);
         }
         minions.push(tempMinions);
@@ -68,7 +75,8 @@ function init()
 
 addEventListener('click', (event) =>
 {
-    let tempBullet = new Bullet(new Vec2(player.getPos.x + player.getSize.x/2, player.getPos.y + player.getSize.y/2),5, Math.atan2((event.y - ((player.getPos.y + player.getSize.y/2) - camera.getPos.y)), (event.x - ((player.getPos.x + player.getSize.x/2) - camera.getPos.x))));
+    let tempBullet = new Bullet(new Vec2(player.getPos.x + player.getSize.x/2, player.getPos.y + player.getSize.y/2),5,
+    Math.atan2((event.y - ((player.getPos.y + player.getSize.y/2) - camera.getPos.y)), (event.x - ((player.getPos.x + player.getSize.x/2) - camera.getPos.x))),player.getMaxBulletSpeed);
     bullets.push(tempBullet);
 })
 
@@ -103,7 +111,7 @@ function gameLoop(timestamp)
 
    for(let i = 0; i < bombers.length; i++ )
    {
-       bombers[i].move(dt,player.getRect.getOrigin(),camera.getPos);
+       bombers[i].move(dt,player._rect.getOrigin(),camera.getPos);
 
        for(let b = 0; b < bombers[i]._bullets.length; b++)
        {
@@ -115,6 +123,11 @@ function gameLoop(timestamp)
     {
         bh.update(dt);
     });
+
+    asteroids.forEach(ast =>
+    {
+        ast.update(dt);
+    })
 
     collisions();
     inputHandling();
@@ -146,7 +159,7 @@ function collisions()
        for(let col = 0; col < minions[row].length; col++)
        {  
        //quad tree detection
-           if(CollisionManager.SATCollision(minions[row][col].getRect.getPoints(), player.getRect.getPoints()))
+           if(CollisionManager.SATCollision(minions[row][col]._rect.getPoints(), player._shape.getPoints()))
            {
                minions[row].splice(col,1);
                col--;
@@ -218,12 +231,14 @@ function collisions()
             }
         }
     }
-     /*  For all bombers bullets check player bullet collision */
+
+
+     /*  For all bombers bullets/player collision */
      for(let i = 0; i < bombers.length; i++)
     {
         for(let b = 0; b < bombers[i]._bullets.length; b++)
         {
-            if(CollisionManager.CircleRectCollision(bombers[i]._bullets[b],player.getRect,player.getAngle))
+            if(CollisionManager.CircleRectCollision(bombers[i]._bullets[b],player._shape,player.getAngle))
             {
                 bombers[i]._bullets.splice(b,1);
                 b--;
@@ -236,6 +251,23 @@ function collisions()
     }
 
 
+    /* Asteroid/Player Collision */
+    for( let a = 0; a < asteroids.length; a++)
+    {
+        if(CollisionManager.SATCollision(asteroids[a].getRect().getPoints(),player.getShape.getPoints()))
+        {
+            console.log('collision');
+        }
+    }
+
+    /* Player Bomber */
+    for( let b = 0; b < bombers.length; b++)
+    {
+        if(CollisionManager.SATCollision(bombers[b].getRect.getPoints(),player.getShape.getPoints()))
+        {
+            console.log('collision');
+        }
+    }
 }
 
 
@@ -275,16 +307,20 @@ function inputHandling()
     if(pressedKeys['d'])
     {
         player.setAngle = player.getRotationSpeed;
+        player._shape._angle = player.getRotationSpeed;
+        player._shape.rotate((Math.PI/180) * player._shape._angle);
         //console.log(player.m_angle);
-        player._rect._angle = player.getRotationSpeed;
-        player._rect.rotate((Math.PI/180) * player._rect._angle);
+       // player._rect._angle = player.getRotationSpeed;
+        //player._rect.rotate((Math.PI/180) * player._rect._angle);
     }
     if(pressedKeys['a'])
     {
         player.setAngle = -player.getRotationSpeed;
+        player._shape._angle = -player.getRotationSpeed;
+        player._shape.rotate((Math.PI/180) * player._shape._angle);
        // console.log(player.m_angle);
-        player._rect._angle = -player.getRotationSpeed;
-        player._rect.rotate((Math.PI/180) * player._rect._angle);
+       // player._rect._angle = -player.getRotationSpeed;
+       // player._rect.rotate((Math.PI/180) * player._rect._angle);
     }
 }
 
@@ -300,6 +336,11 @@ function draw()
         bh.draw(ctx,camera.getPos)
     });
 
+    asteroids.forEach( ast =>
+    {
+        ast.draw(ctx,camera.getPos)
+    });
+
     bullets.forEach(bullet =>
     {
         bullet.draw(ctx,camera.getPos);
@@ -310,7 +351,7 @@ function draw()
         bomber.draw(ctx,camera.getPos);
         for(let b = 0; b< bomber._bullets.length; b++)
         {
-             bomber._bullets[b].draw(ctx,camera.getPos);
+             bomber._bullets[b].drawImage(ctx,camera.getPos,BOMBER_BULLET_IMAGE);
         } 
     });
 

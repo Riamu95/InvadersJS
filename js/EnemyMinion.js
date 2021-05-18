@@ -196,6 +196,6 @@ class EnemyMinion extends Enemy {
         ctx.beginPath();
         ctx.drawImage(enemyMinionImage,0,0,this._rect._size.x,this._rect._size.y,this._rect.getPos().x - cameraPos.getVec2.x,this._rect.getPos().y - cameraPos.getVec2.y,this._rect._size.x,this._rect._size.y);
         ctx.closePath();
-        //this._rect.draw(ctx,cameraPos, this.m_color);
+        this._rect.draw(ctx,cameraPos, this.m_color);
     }
 }
