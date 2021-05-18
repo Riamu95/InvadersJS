@@ -75,7 +75,7 @@ function init()
 
 addEventListener('click', (event) =>
 {
-    let tempBullet = new Bullet(new Vec2(player.getPos.x + player.getSize.x/2, player.getPos.y + player.getSize.y/2),5,
+    let tempBullet = new Bullet(new Vec2(player.getShape.getOrigin().x, player.getShape.getOrigin().y),new Vec2(90,17),
     Math.atan2((event.y - ((player.getPos.y + player.getSize.y/2) - camera.getPos.y)), (event.x - ((player.getPos.x + player.getSize.x/2) - camera.getPos.x))),player.getMaxBulletSpeed);
     bullets.push(tempBullet);
 })
@@ -154,6 +154,8 @@ function collisions()
             i--;
         }
    }*/
+
+   /*  Mininons and player */
    for(let row = 0; row < minions.length; row++)
    {
        for(let col = 0; col < minions[row].length; col++)
@@ -167,9 +169,7 @@ function collisions()
        }
    }
 
-     // change to quad tree ?
-     /*
-     loop1:
+   loop1:
      for(let b = 0; b < bullets.length; b++)
      {
          loop2:
@@ -178,7 +178,7 @@ function collisions()
              loop3:
              for( let col = 0; col < minions[row].length; col++)
              {   //pass the circle and rect object in
-                 if(CollisionManager.CircleRectCollision(bullets[b], minions[row][col].getRect, 0))
+                 if(CollisionManager.SATCollision(bullets[b].getRect.getPoints(), minions[row][col].getRect.getPoints(),))
                  {
                      minions[row].splice(col,1);
                      col --;
@@ -196,7 +196,6 @@ function collisions()
              }
          }
      }
-*/
 
 
     for(let i = 0; i < bullets.length; i++)
@@ -238,7 +237,7 @@ function collisions()
     {
         for(let b = 0; b < bombers[i]._bullets.length; b++)
         {
-            if(CollisionManager.CircleRectCollision(bombers[i]._bullets[b],player._shape,player.getAngle))
+            if(CollisionManager.SATCollision(bombers[i]._bullets[b].getRect.getPoints(),player.getShape.getPoints()))
             {
                 bombers[i]._bullets.splice(b,1);
                 b--;
@@ -343,17 +342,17 @@ function draw()
 
     bullets.forEach(bullet =>
     {
-        bullet.draw(ctx,camera.getPos);
+        bullet.draw(ctx,camera.getPos,PLAYER_BULLET_IMAGE);
     }); 
 
-    bombers.forEach(bomber =>
-    {
-        bomber.draw(ctx,camera.getPos);
-        for(let b = 0; b< bomber._bullets.length; b++)
+   for(let i =0; i < bombers.length; i ++)
+   {
+        bombers[i].draw(ctx,camera.getPos,BOMBER_IMAGE);
+        for(let b = 0; b < bombers[i]._bullets.length; b++)
         {
-             bomber._bullets[b].drawImage(ctx,camera.getPos,BOMBER_BULLET_IMAGE);
+             bombers[i]._bullets[b].draw(ctx,camera.getPos,BOMBER_BULLET_IMAGE);
         } 
-    });
+    };
 
     player.draw(ctx,camera.getPos);
 

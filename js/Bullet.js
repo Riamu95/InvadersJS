@@ -1,46 +1,38 @@
 class Bullet
 {
-    constructor(pos,radius,_angle,maxSpeed)
+    constructor(pos,size,_angle,maxSpeed)
     {
-        this._circle = new Circle(pos, radius);
-        this.m_angle = _angle;
+        this._rect = new Rect(pos,size);
+        this._rect.setAngle(_angle);
         this._color = 'Red';
         this._velocity = new Vec2(0,0);
         this._ttl = performance.now();
         this._maxSpeed = maxSpeed;
+        this._rect.rotate(this._rect.getAngle());
     }
 
     move(dt)
     {
-        this._velocity.x = Math.cos(this.m_angle) * dt;
-        this._velocity.y = Math.sin(this.m_angle) * dt;
+        //something wrogn with angle??? 
+        this._velocity.x = Math.cos(this._rect.getAngle()) * dt;
+        this._velocity.y = Math.sin(this._rect.getAngle()) * dt;
         this._velocity.setMagnitude = this._maxSpeed;
-        this._circle._pos.x += this._velocity.x;
-        this._circle._pos.y += this._velocity.y;
-        this._circle.addAngle(1);
+        this._rect._pos.x += this._velocity.x;
+        this._rect._pos.y += this._velocity.y;
+        this._rect.updatePoints(this._velocity);
     }
 
-    draw(ctx,cameraPos)
+    draw(ctx,cameraPos,Image)
     {
         ctx.save();
         ctx.beginPath();
-        ctx.translate(this._circle._pos.x - cameraPos.x, this._circle._pos.y - cameraPos.y);
-        ctx.arc(0, 0, this._circle._radius, 0, 2 * Math.PI);
-        ctx.fillStyle = this._color;
-        ctx.fill();
+        ctx.translate(this._rect.getOrigin().x - cameraPos.x, this._rect.getOrigin().y - cameraPos.y);
+        ctx.rotate(this._rect.getAngle());
+        ctx.drawImage(Image,0,0,this._rect._size.x,this._rect._size.y,-this._rect._size.x/2,-this._rect._size.y/2,this._rect._size.x,this._rect._size.y);
         ctx.closePath();
         ctx.restore();
-    }
 
-    drawImage(ctx,cameraPos,BOMBER_BULLET_IMAGE)
-    {
-        ctx.save();
-        ctx.beginPath();
-        ctx.translate(this._circle._pos.x - cameraPos.x, this._circle._pos.y - cameraPos.y);
-       // ctx.rotate(this._circle._angle * (Math.PI/180));
-        ctx.drawImage(BOMBER_BULLET_IMAGE,0,0,this._circle._radius,this._circle._radius,-this._circle._radius,-this._circle._radius,this._circle._radius,this._circle._radius);
-        ctx.closePath();
-        ctx.restore();
+        this._rect.draw(ctx,cameraPos);
     }
 
     get getVel()
@@ -63,5 +55,10 @@ class Bullet
     set setTTL(val)
     {
         this._ttl += val;
+    }
+
+    get getRect()
+    {
+        return this._rect;
     }
 }

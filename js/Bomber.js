@@ -15,6 +15,7 @@ class Bomber extends Enemy
         this._previousflockPoint = new Vec2(0,0);
         this._previousAngle = 0;
         this._maxBulletSpeed = 2;
+        this._bullets = new Array();
     }
 
    
@@ -32,14 +33,14 @@ class Bomber extends Enemy
 
         this._velocity.setMagnitude = this._maxSpeed;
         //rotate object back to origin
-        this._rect.rotate(-this.m_angle * Math.PI/180);
+        this._rect.rotate(-this._rect.getAngle() * Math.PI/180);
         //rotate points by direction of
-        this.m_angle = Math.atan2(this._velocity.y,this._velocity.x) * 180 / Math.PI;
+        this._rect.setAngle(Math.atan2(this._velocity.y,this._velocity.x) * 180 / Math.PI);
         //rotate object in direction of velocity
-        this._rect.rotate(this.m_angle * Math.PI/180);
+        this._rect.rotate(this._rect.getAngle() * Math.PI/180);
             
 
-        this._rect.getPos().addVec = this._velocity;
+        //this._rect.getPos().addVec = this._velocity;
         this._rect.updatePoints(this._velocity);
         this._acceleration = new Vec2(0,0);
     }
@@ -75,7 +76,7 @@ class Bomber extends Enemy
         //if we can shoot, create a bullet, update timer and set it so we cant attack again
         if (this._attack) 
         { 
-            let tempBullet = new Bullet(this._rect._origin,69,Math.atan2(playerPos.y - this._rect._origin.y, playerPos.x - this._rect._origin.x),this._maxBulletSpeed);
+            let tempBullet = new Bullet(new Vec2(this._rect.getOrigin().x,this._rect.getOrigin().y),new Vec2(69,69),Math.atan2(playerPos.y - this._rect.getOrigin().y, playerPos.x - this._rect.getOrigin().x),this._maxBulletSpeed);
             this._bullets.push(tempBullet);
             this._attackTimer = performance.now();
             this._attack = false;
@@ -93,18 +94,17 @@ class Bomber extends Enemy
         return steering;
     }
 
-    draw(ctx,cameraPos)
+    draw(ctx,cameraPos, BOMBER_IMAGE)
     {
         ctx.save();
         ctx.beginPath();
         ctx.translate((this._rect._origin.x) - cameraPos.x,(this._rect._origin.y) - cameraPos.y);
-        ctx.rotate(this.m_angle * Math.PI/180);
-        //this._rect.rotate(this.m_angle * Math.PI/180);
-        ctx.drawImage(enemyOne,0,0,this._rect._size.x,this._rect._size.y,-this._rect._size.x/2,-this._rect._size.y/2,this._rect._size.x,this._rect._size.y);
+        ctx.rotate(this._rect.getAngle() * Math.PI/180);
+        ctx.drawImage(BOMBER_IMAGE,0,0,this._rect._size.x,this._rect._size.y,-this._rect._size.x/2,-this._rect._size.y/2,this._rect._size.x,this._rect._size.y);
         ctx.closePath();
         ctx.restore();
 
-        this._rect.draw(ctx,cameraPos, this.m_color);
+        this._rect.draw(ctx,cameraPos,'green');
     }
 
     static ttl = 5;

@@ -3,7 +3,7 @@ const ctx = canvas.getContext('2d');
 
 const background = document.getElementById('background');
 const playerIMG = document.getElementById('player');
-const enemyOne = document.getElementById('enemyOne');
+const BOMBER_IMAGE = document.getElementById('bomber');
 const enemyMinionImage = document.getElementById('enemyMinion');
 const hearth = document.getElementById('heart');
 const healthBar = document.getElementById('healthBar');
@@ -11,6 +11,7 @@ const healthValue = document.getElementById('healthValue');
 const BLACKHOLE_IMAGE = document.getElementById('blackhole');
 const ASTEROID_IMAGE = document.getElementById('asteroid');
 const BOMBER_BULLET_IMAGE = document.getElementById('bomberBullet');
+const PLAYER_BULLET_IMAGE = document.getElementById('playerBullet');
 
 const CANVAS_WIDTH = canvas.width;
 const CANVAS_HEIGHT = canvas.height;
