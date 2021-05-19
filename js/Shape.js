@@ -53,10 +53,11 @@ Shape.prototype.addPos = function(val)
      this._pos.y += val.y;
 }
 
-Shape.prototype.rotate = function(angle)
+Shape.prototype.rotate = function()
 {
-        let cos = Math.cos(angle);
-        let sin = Math.sin(angle);
+        let radians = (Math.PI/180) * this._angle;
+        let cos = Math.cos(radians);
+        let sin = Math.sin(radians);
         this._points.forEach(point =>
         {
         //translate point to origin
