@@ -53,20 +53,20 @@ Shape.prototype.addPos = function(val)
      this._pos.y += val.y;
 }
 
-Shape.prototype.rotate = function()
+Shape.prototype.rotate = function(angle = (Math.PI/180) * this._angle )
 {
-        let radians = (Math.PI/180) * this._angle;
-        let cos = Math.cos(radians);
-        let sin = Math.sin(radians);
-        this._points.forEach(point =>
-        {
+    
+    let cos = Math.cos(angle);
+    let sin = Math.sin(angle);
+    this._points.forEach(point =>
+    {
         //translate point to origin
         let translated_x = point.x - this._origin.x;
         let translated_y = point.y - this._origin.y;
         //apply rotation to point and re translate
         point.x = translated_x * cos - translated_y * sin + this._origin.x;
         point.y = translated_x * sin + translated_y * cos + this._origin.y;
-        });
+    });
 }
 
 Shape.prototype.setPos = function(pos)

@@ -8,8 +8,6 @@ class Bomber extends Enemy
         this._VelocityLength = 0;
         this._maxSpeed = 0.5;
         this._maxForce = 1;
-        this._attackDistance = 500;
-        this._attack = false;
         this._attackTimer = 0;
         this._reloadTimer = 5;
         this._previousflockPoint = new Vec2(0,0);

@@ -164,6 +164,7 @@ function collisions()
        //quad tree detection
            if(CollisionManager.SATCollision(minions[row][col]._rect.getPoints(), player._shape.getPoints()))
            {
+               animationManager.addAnimation(5,0.5,minions[row][col].getRect.getOrigin(),EXPLOSION_IMAGE,new Vec2(256,256));
                minions[row].splice(col,1);
                col--;
            }
@@ -182,9 +183,10 @@ function collisions()
              {   //pass the circle and rect object in
                  if(CollisionManager.SATCollision(bullets[b].getRect.getPoints(), minions[row][col].getRect.getPoints()))
                  {
+                     animationManager.addAnimation(5,0.5,minions[row][col].getRect.getOrigin(),EXPLOSION_IMAGE,new Vec2(256,256));
                      minions[row].splice(col,1);
                      col --;
-                     
+                     animationManager.addAnimation(5,0.5,bullets[b].getRect.getOrigin(),BULLET_EXPLOSION_IMAGE,new Vec2(256,256));
                      bullets.splice(b,1);
                      if(b > 0)
                      {
@@ -206,14 +208,15 @@ function collisions()
         {
             if(CollisionManager.SATCollision(bullets[b].getRect.getPoints(), bombers[i].getRect.getPoints()))
             {
-                //decrease bomber health
+                //decrease bomber healthw   
                 bombers[i].setHealth = -10;
                 if(bombers[i].getHealth <= 0)
                 {
+                    animationManager.addAnimation(5,0.5,bombers[i].getRect.getOrigin(),EXPLOSION_IMAGE,new Vec2(256,256));
                     bombers.splice(i,1);
                     i--;
                 }
-
+                animationManager.addAnimation(5,0.5,bullets[b].getRect.getOrigin(),BULLET_EXPLOSION_IMAGE,new Vec2(256,256));
                 bullets.splice(b,1);
                 b--;
                 
@@ -234,10 +237,12 @@ function collisions()
                 asteroids[i].setHealth(-35);
                 if(asteroids[i].getHealth() <= 0)
                 {
+                   
+                    animationManager.addAnimation(5,0.5,asteroids[i].getRect().getOrigin(),EXPLOSION_IMAGE,new Vec2(256,256));
                     asteroids.splice(i,1);
                     i--;
                 }
-
+                animationManager.addAnimation(5,0.5,bullets[b].getRect.getOrigin(),BULLET_EXPLOSION_IMAGE,new Vec2(256,256));
                 bullets.splice(b,1);
                 b--;
                 
@@ -254,6 +259,7 @@ function collisions()
         {
             if(CollisionManager.SATCollision(bombers[i]._bullets[b].getRect.getPoints(),player.getShape.getPoints()))
             {
+                animationManager.addAnimation(5,0.5,bombers[i]._bullets[b].getRect.getOrigin(),EXPLOSION_IMAGE,new Vec2(256,256));
                 bombers[i]._bullets.splice(b,1);
                 b--;
                 //implode bomb
@@ -283,6 +289,7 @@ function collisions()
        // console.log(time);
         if (time >= player.getTTL)
         {
+            animationManager.addAnimation(5,0.5,bullets[i].getRect.getOrigin(),BULLET_EXPLOSION_IMAGE,new Vec2(256,256));
             bullets.splice(i,1);
             i--;
         }
@@ -301,6 +308,7 @@ function collisions()
             if (time >= Bomber.ttl)
              {
                  //implode bomb
+                animationManager.addAnimation(5,0.5,bombers[i]._bullets[b].getRect.getOrigin(),EXPLOSION_IMAGE,new Vec2(256,256));
                 bombers[i]._bullets.splice(b,1);
                 b--;
             }
@@ -312,7 +320,7 @@ function collisions()
     {
         if(CollisionManager.SATCollision(asteroids[a].getRect().getPoints(),player.getShape.getPoints()))
         {
-           animationManager.addAnimation(0,7,0.01,asteroids[a].getRect().getOrigin(),EXPLOSION_IMAGE,new Vec2(256,256));
+           animationManager.addAnimation(5,0.5,asteroids[a].getRect().getOrigin(),EXPLOSION_IMAGE,new Vec2(256,256));
            asteroids.splice(a,1);
            a--;
          //  startFrame,endFrame,transitionTime,pos,animate,image, width,height
@@ -356,13 +364,13 @@ function inputHandling()
     }
     if(pressedKeys['d'])
     {
-        player.setAngle = player.getRotationSpeed;
+        player.setSpriteAngle = player.getRotationSpeed;
         player.getShape.setAngle(player.getRotationSpeed);
         player.getShape.rotate();
     }
     if(pressedKeys['a'])
     {
-        player.setAngle = -player.getRotationSpeed;
+        player.setSpriteAngle = -player.getRotationSpeed;
         player.getShape.setAngle(-player.getRotationSpeed);
         player.getShape.rotate();
     }

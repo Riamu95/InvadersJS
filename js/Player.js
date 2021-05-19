@@ -15,10 +15,9 @@ class Player
         this.m_acceleration = 0;
         this.m_accelerationRate = 0.03;
         this.m_maxAcceleration = 5;
-        
-        this.m_angle = 0;
+    
         this.m_rotationSpeed = 1.5;
-        
+        this._spriteAngle = 0;
         this._ttl = 3;
         this._maxbulletSpeed = 8;
         this.m_color = 'red'; 
@@ -43,7 +42,7 @@ class Player
         ctx.save();
         ctx.beginPath();      
         ctx.translate((this._shape.getPos().x + this._shape.getSize().x/2) - cameraPos.x,(this._shape.getPos().y + this._shape.getSize().y/2) - cameraPos.y);
-        ctx.rotate(Math.PI/180 * this.m_angle);
+        ctx.rotate(this._spriteAngle * (Math.PI/180));
         ctx.drawImage(playerIMG,0,0,this._shape.getSize().x,this._shape.getSize().y,-this._shape.getSize().x/2,-this._shape.getSize().y/2,this._shape.getSize().x,this._shape.getSize().y);
         ctx.closePath();
         ctx.restore();
@@ -54,8 +53,8 @@ class Player
 
     move(dt)
     {        
-        this._velocity.x =  Math.cos(this.m_angle  * Math.PI / 180) * this.m_acceleration *this.m_speed * dt;
-        this._velocity.y =  Math.sin(this.m_angle  * Math.PI / 180)* this.m_acceleration * this.m_speed * dt;
+        this._velocity.x =  Math.cos(this._spriteAngle  * Math.PI / 180) * this.m_acceleration *this.m_speed * dt;
+        this._velocity.y =  Math.sin(this._spriteAngle  * Math.PI / 180)* this.m_acceleration * this.m_speed * dt;
         this._shape.addPos(this._velocity);
 
         this._shape.updatePoints(this._velocity);
@@ -66,17 +65,9 @@ class Player
     {
         return this._maxbulletSpeed;
     }
-        get getPos()
-    {
-        return this._pos;
-    }
     get getHealth()
     {
         return this._health;
-    }
-    get getSize()
-    {
-        return this._size;
     }
     get getDeccelerationRate()
     {
@@ -94,30 +85,9 @@ class Player
     {
         return this.m_maxAcceleration;
     }
-    get getAngle()
-    {
-        return this.m_angle;
-    }
     get getRotationSpeed()
     {
         return this.m_rotationSpeed;
-    }
-    set setAngle(_angle)
-    {
-        if (this.m_angle + _angle > 360)
-        {
-            this.m_angle = 0;
-            this.m_angle += _angle;
-            return;
-        }
-        else if (this.m_angle + _angle < -360)
-        {
-           
-            this.m_angle = 0;
-            this.m_angle += _angle;
-            return;
-        }
-        this.m_angle += _angle;
     }
     set setAcceleration(_accel)
     {
@@ -127,6 +97,10 @@ class Player
     {
         this._health -= value;
     }
+    set setSpriteAngle(val)
+    {
+        this._spriteAngle += val;
+    }
     get getShape()
     {
         return this._shape;
@@ -135,14 +109,8 @@ class Player
     {
         return this._collisionRect;
     }
-
     get getTTL()
     {
         return this._ttl;
-    }
-
-    get getShape()
-    {
-        return this._shape;
     }
 }
