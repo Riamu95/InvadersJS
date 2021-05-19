@@ -21,6 +21,11 @@ Shape.prototype.getOrigin = function()
 {
     return this._origin;
 }
+Shape.prototype.getSize = function()
+{
+    return this._size;
+}
+
 
 Shape.prototype.getAngle = function()
 {
@@ -40,6 +45,12 @@ Shape.prototype.addAngle = function(_val)
 Shape.prototype.getPos = function()
 {
     return this._pos;
+}
+
+Shape.prototype.addPos = function(val)
+{
+     this._pos.x += val.x;
+     this._pos.y += val.y;
 }
 
 Shape.prototype.rotate = function(angle)

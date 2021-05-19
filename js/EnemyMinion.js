@@ -8,7 +8,7 @@ class EnemyMinion extends Enemy {
         this._cohesionDistance = 450;
         this._seperationDistance = 90;
 
-        this._acceleration = new Vec2(0,0);
+       
         this._VelocityLength = 0;
         this._maxSpeed = 2;
         this._maxForce = 1;

@@ -5,7 +5,7 @@ class Enemy
         this._rect = new Rect(pos,size);
         this._velocity = new Vec2(vel.x, vel.y);
         this.m_speed = 0.2;
-        
+        this._acceleration = new Vec2(0,0);
         this._attack = false;
         this._attackDistance = 500;
     }
@@ -18,21 +18,12 @@ class Enemy
     {
     }
 
-    get getPos()
-    {
-        return this._pos;
-    }
     get getVel()
     {
         return this._velocity;
-    }
-    get getSize()
-    {
-        return this._size;
     }
     get getRect()
     {
         return this._rect;
     }
-    
 }

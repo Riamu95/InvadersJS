@@ -12,8 +12,8 @@ let blackHoles = [];
 let pressedKeys = new Set();
 
 let collisionManager = new CollisionManager();
-let player = new Player(WORLD_WIDTH/2,WORLD_HEIGHT/2,127,130,'red');
-let camera = new Camera(player.getPos.x - CANVAS_WIDTH/2,player.getPos.y - CANVAS_HEIGHT/2,CANVAS_WIDTH,CANVAS_HEIGHT);
+let player = new Player(new Vec2(WORLD_WIDTH/2,WORLD_HEIGHT/2),new Vec2(127,130));
+let camera = new Camera(player.getShape.getPos().x - CANVAS_WIDTH/2,player.getShape.getPos().y - CANVAS_HEIGHT/2,CANVAS_WIDTH,CANVAS_HEIGHT);
 let qt = new QuadTree(new Vec2(0,0),new Vec2(WORLD_WIDTH,WORLD_HEIGHT), 5);
 
 let dt = 0;
@@ -76,7 +76,7 @@ function init()
 addEventListener('click', (event) =>
 {
     let tempBullet = new Bullet(new Vec2(player.getShape.getOrigin().x, player.getShape.getOrigin().y),new Vec2(90,17),
-    Math.atan2((event.y - ((player.getPos.y + player.getSize.y/2) - camera.getPos.y)), (event.x - ((player.getPos.x + player.getSize.x/2) - camera.getPos.x))),player.getMaxBulletSpeed);
+    Math.atan2((event.y - ((player.getShape.getPos().y + player.getShape.getSize().y/2) - camera.getPos.y)), (event.x - ((player.getShape.getPos().x + player.getShape.getSize().x/2) - camera.getPos.x))),player.getMaxBulletSpeed);
     bullets.push(tempBullet);
 })
 
@@ -106,12 +106,12 @@ function gameLoop(timestamp)
     //for every array, allocate seek point and move the flock
    for( let row = 0; row < minions.length; row++)
    {
-       EnemyMinion.generateFlockPoint(minions[row], player.getPos, flockPoints[row], dt);
+       EnemyMinion.generateFlockPoint(minions[row], player.getShape.getPos(), flockPoints[row], dt);
    }
 
    for(let i = 0; i < bombers.length; i++ )
    {
-       bombers[i].move(dt,player._rect.getOrigin(),camera.getPos);
+       bombers[i].move(dt,player.getShape.getOrigin());
 
        for(let b = 0; b < bombers[i]._bullets.length; b++)
        {
@@ -141,7 +141,7 @@ function gameLoop(timestamp)
 function collisions()
 {
 
-    collisionManager.playerBoundaryCollision(player);
+    collisionManager.playerBoundaryCollision(player.getShape);
 
    // for all minions if attacking and collide with player, delete the minion
    /*let collidable = [];
@@ -178,7 +178,7 @@ function collisions()
              loop3:
              for( let col = 0; col < minions[row].length; col++)
              {   //pass the circle and rect object in
-                 if(CollisionManager.SATCollision(bullets[b].getRect.getPoints(), minions[row][col].getRect.getPoints(),))
+                 if(CollisionManager.SATCollision(bullets[b].getRect.getPoints(), minions[row][col].getRect.getPoints()))
                  {
                      minions[row].splice(col,1);
                      col --;
@@ -196,6 +196,26 @@ function collisions()
              }
          }
      }
+
+    for(let b = 0; b < bullets.length; b++)
+    {
+        for(let i = 0; i < bombers.length; i++)
+        {
+            if(CollisionManager.SATCollision(bullets[b].getRect.getPoints(), bombers[i].getRect.getPoints()))
+            {
+                //decrease bomber health
+
+                bullets.splice(b,1);
+                b--;
+                
+                if (b < 0) 
+                    break;      
+            }
+        }
+    }
+
+
+
 
 
     for(let i = 0; i < bullets.length; i++)
@@ -279,7 +299,7 @@ function inputHandling()
             player.setAcceleration = player.getAccelerationRate;
         } 
         player.move(dt); 
-        camera.update(player.getPos); 
+        camera.update(player.getShape.getPos()); 
     }
     else if(pressedKeys['s'])
     {
@@ -288,7 +308,7 @@ function inputHandling()
             player.setAcceleration = -player.getAccelerationRate;
         }  
         player.move(dt); 
-        camera.update(player.getPos);  
+        camera.update(player.getShape.getPos());  
     }
     else if(!pressedKeys['w'] && !pressedKeys['s'])
     {
@@ -301,25 +321,19 @@ function inputHandling()
             player.setAcceleration = player.getDeccelerationRate;
         }
         player.move(dt); 
-        camera.update(player.getPos);  
+        camera.update(player.getShape.getPos());  
     }
     if(pressedKeys['d'])
     {
         player.setAngle = player.getRotationSpeed;
-        player._shape._angle = player.getRotationSpeed;
-        player._shape.rotate((Math.PI/180) * player._shape._angle);
-        //console.log(player.m_angle);
-       // player._rect._angle = player.getRotationSpeed;
-        //player._rect.rotate((Math.PI/180) * player._rect._angle);
+        player.getShape.setAngle(player.getRotationSpeed);
+        player.getShape.rotate((Math.PI/180) * player._shape._angle);
     }
     if(pressedKeys['a'])
     {
         player.setAngle = -player.getRotationSpeed;
-        player._shape._angle = -player.getRotationSpeed;
-        player._shape.rotate((Math.PI/180) * player._shape._angle);
-       // console.log(player.m_angle);
-       // player._rect._angle = -player.getRotationSpeed;
-       // player._rect.rotate((Math.PI/180) * player._rect._angle);
+        player.getShape.setAngle(-player.getRotationSpeed);
+        player.getShape.rotate((Math.PI/180) * player._shape._angle);
     }
 }
 

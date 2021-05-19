@@ -19,10 +19,10 @@ class Bomber extends Enemy
     }
 
    
-    move (dt,playerPos,cameraPos) 
+    move (dt,playerPos) 
     {
         this.generateFlockPoint();
-        this.attack(playerPos,cameraPos);
+        this.attack(playerPos);
         let seek = this.seek();
         this._acceleration.addVec = seek;
 
@@ -53,7 +53,7 @@ class Bomber extends Enemy
         }
     }
 
-    attack(playerPos,cameraPos)
+    attack(playerPos)
     {
         if (!(Vec2.distance(this._rect.getOrigin(), playerPos) <= this._attackDistance))
         {
