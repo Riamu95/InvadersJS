@@ -13,7 +13,6 @@ class Bullet
 
     move(dt)
     {
-        //something wrogn with angle??? 
         this._velocity.x = Math.cos(this._rect.getAngle()) * dt;
         this._velocity.y = Math.sin(this._rect.getAngle()) * dt;
         this._velocity.setMagnitude = this._maxSpeed;

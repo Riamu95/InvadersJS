@@ -8,14 +8,7 @@ const BlackHole = function(pos,size)
 
 BlackHole.prototype.update = function(dt)
 {
-    if(this._rect.getAngle() >= 360)
-    {
-        this._rect.setAngle(0);
-    }
-    else
-    {
-        this._rect.addAngle(0.1);
-    }  
+    this._rect.getAngle() >= 360 ? this._rect.setAngle(0) : this._rect.addAngle(0.1);
 }
 
 BlackHole.prototype.draw = function(ctx,cameraPos)
