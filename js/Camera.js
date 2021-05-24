@@ -7,9 +7,9 @@ class Camera
         this._worldSize = new Vec2(WORLD_WIDTH,WORLD_HEIGHT);
     }
 
-    update(playerPos,width,height)
+    update(playerPos)
      {
-        
+        //dont use global variables here!!
         this._pos.x = playerPos.x - CANVAS_WIDTH/2;
         this._pos.y = playerPos.y - CANVAS_HEIGHT/2;
 

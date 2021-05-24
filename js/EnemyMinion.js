@@ -101,11 +101,11 @@ class EnemyMinion extends Enemy {
     seek(pos)
     {
         let steering = new Vec2(0,0);
-        let direction = new Vec2(pos.x - this._rect.getPos().x, pos.y - this._rect.getPos().y);
-        steering = Vec2.normalise(direction);
+        steering.x = pos.x - this._rect.getPos().x;
+        steering.y =  pos.y - this._rect.getPos().y;
         steering = Vec2.subtractVec(steering, this._velocity);
         steering.setMagnitude = this._maxSpeed;
-        
+
         return steering;
     }
 

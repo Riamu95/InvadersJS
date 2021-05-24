@@ -52,8 +52,7 @@ class Vec2
 
     static length(vec)
     {
-        let length = vec.x* vec.x + vec.y * vec.y;
-        return Math.sqrt(length);
+        return Math.sqrt(vec.x* vec.x + vec.y * vec.y);
     }
     static distance(a, b)
     {

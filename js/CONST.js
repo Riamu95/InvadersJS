@@ -12,6 +12,9 @@ const BLACKHOLE_IMAGE = document.getElementById('blackhole');
 const ASTEROID_IMAGE = document.getElementById('asteroid');
 const BOMBER_BULLET_IMAGE = document.getElementById('bomberBullet');
 const PLAYER_BULLET_IMAGE = document.getElementById('playerBullet');
+const EXPLOSION_IMAGE = document.getElementById('explosion');
+
+const BULLET_EXPLOSION_IMAGE = document.getElementById('bulletExplosion');
 
 const CANVAS_WIDTH = canvas.width;
 const CANVAS_HEIGHT = canvas.height;
