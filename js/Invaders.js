@@ -138,12 +138,11 @@ function gameLoop(timestamp)
     window.requestAnimationFrame(gameLoop);
 }
 
-
 function collisions()
 {
-
     collisionManager.playerBoundaryCollision(player.getShape);
-
+    objectCollisions();
+    bulletCollisions();
    /* for all minions if attacking and collide with player, delete the minion*/
    /*let collidable = [];
    collidable = qt.query(player.getCollisionRect, collidable);
@@ -154,9 +153,12 @@ function collisions()
             collidable.splice(i,1);
             i--;
         }
-   }*/
+   }*/   
+}
 
-   /*  Mininons and player */
+function objectCollisions()
+{
+    /*  Mininons and player */
    for(let row = 0; row < minions.length; row++)
    {
        for(let col = minions[row].length -1; col >= 0 ; col--)
@@ -169,8 +171,119 @@ function collisions()
            }
        }
    }
+   /* Player Bomber */
+   for( let b = 0; b < bombers.length; b++)
+   {
+       if(CollisionManager.SATCollision(bombers[b].getRect.getPoints(),player.getShape.getPoints()))
+       {
+           //MTV
+           //Reduce player and bomber health
+           //animation/particle affects
+           //check if player and bomber are still alive
+       }
+   }
+   
+   //bombers and minions
+   for( let b = bombers.length -1; b >= 0; b--)
+   {
+       for (let row = minions.length -1; row >= 0; row --)
+       {
+           for(let col = minions[row].length -1; col >= 0; col --)
+           {
+               if(CollisionManager.SATCollision(bombers[b].getRect.getPoints(), minions[row][col].getRect.getPoints()))
+               {
+                   animationManager.addAnimation(5,0.5,minions[row][col].getRect.getOrigin(),EXPLOSION_IMAGE,new Vec2(256,256));
+                   minions[row].splice(col,1);
 
-  /* Minion Player bullet collision */
+                   bombers[b].setHealth = -10;
+                   bombers[b].getHealth <= 0 && bombers.splice(b,1);
+                   //play explostion animation
+               }
+           }
+       }
+   }
+
+   /* Asteroid/Player Collision */
+   for( let a = asteroids.length - 1; a >= 0; a--)
+   {
+       if(CollisionManager.SATCollision(asteroids[a].getRect().getPoints(),player.getShape.getPoints()))
+       {
+          animationManager.addAnimation(5,0.5,asteroids[a].getRect().getOrigin(),EXPLOSION_IMAGE,new Vec2(256,256));
+          asteroids.splice(a,1);
+        //  startFrame,endFrame,transitionTime,pos,animate,image, width,height
+       }
+   }
+
+   //Asteroids and bombers
+   for( let b = bombers.length -1; b >= 0; b--)
+   {
+        for( let a = asteroids.length - 1; a >= 0; a--)
+        {
+            if(CollisionManager.SATCollision(asteroids[a].getRect().getPoints(),bombers[b].getRect.getPoints()))
+            {
+                //MTV 
+                bombers[b].setHealth = -20;
+                asteroids[a].setHealth(-20);
+                //colliison animation/Particle affects.
+
+                //checkif bomber or asteroid is still alive.
+                //&& shor cirucits upon first falsey value , so if there's still health, object is not deleted.
+                //blow up animation?
+               bombers[b].getHealth <= 0 && bombers.splice(b,1);
+               asteroids[a].getHealth() <= 0 && bombers.splice(a,1);
+            }
+        }
+  }
+
+//Asteroids and minions
+  for( let a = asteroids.length -1; a >= 0; a --)
+  {
+      for (let row = minions.length -1; row >= 0; row --)
+      {
+          for(let col = minions[row].length -1; col >= 0; col --)
+          {
+              if(CollisionManager.SATCollision(asteroids[a].getRect().getPoints(), minions[row][col].getRect.getPoints()))
+              {
+                  animationManager.addAnimation(5,0.5,minions[row][col].getRect.getOrigin(),EXPLOSION_IMAGE,new Vec2(256,256));
+                  minions[row].splice(col,1);
+
+                  asteroids[a].setHealth(-10);
+                  asteroids[a].getHealth() <= 0 && asteroids.splice(a,1);
+                  //asteroid blow up animation
+              }
+          }
+      }
+  }
+
+/* Asteroid on Asteroid 
+  for(let a = 0; a < asteroids.length -1; a++)
+  {
+      for(let b = a + 1; b < asteroids.length; b++)
+      {
+        if (CollisionManager.SATCollision(asteroids[a].getRect().getPoints(),asteroids[b].getRect().getPoints()))
+        {
+                //MTV
+        }
+      }
+  }*/
+
+  /* Bomber on Bomber 
+  for(let a = 0; a < bombers.length -1; a++)
+  {
+      for(let b = a + 1; b < bombers.length; b++)
+      {
+        if (CollisionManager.SATCollision(bombers[a].getRect().getPoints(),bombers[b].getRect().getPoints()))
+        {
+                //MTV
+        }
+      }
+  }*/
+
+}
+
+function bulletCollisions()
+{
+    /* Minion Player bullet collision */
     for( let row = 0; row < minions.length; row++)
     {
         for( let col = minions[row].length -1; col >= 0; col--)
@@ -191,8 +304,7 @@ function collisions()
             }
         }
     }
-
-     /*collision between Player bullets and bomber. */
+    /*collision between Player bullets and bomber. */
     for(let b =  bullets.length -1; b >= 0; b--)
     {
         for(let i = bombers.length -1; i >= 0; i--)
@@ -214,8 +326,7 @@ function collisions()
             }
         }
     }
-
-     /*collision between Player bullets and Asteroid. */
+    /*collision between Player bullets and Asteroid. */
     for(let b = bullets.length -1; b >= 0; b--)
     {
         for(let i = asteroids.length -1; i >= 0; i--)
@@ -237,9 +348,8 @@ function collisions()
             }
         }
     }
-
-     /*  For all bombers bullets/player collision */
-     for(let i = bombers.length -1; i >= 0; i--)
+    /*  For all bombers bullets/player collision */
+    for(let i = bombers.length -1; i >= 0; i--)
     {
         for(let b = bombers[i]._bullets.length -1; b >= 0 ; b--)
         {
@@ -254,15 +364,6 @@ function collisions()
             }
         }
     }
-
-    /* Player Bomber */
-    for( let b = 0; b < bombers.length; b++)
-    {
-        if(CollisionManager.SATCollision(bombers[b].getRect.getPoints(),player.getShape.getPoints()))
-        {
-        }
-    }
-
     /* Player Bullet timer Collision */
     for(let i = bullets.length -1 ; i >= 0; i--)
     {
@@ -295,19 +396,7 @@ function collisions()
             }
         }
     }
-
-    /* Asteroid/Player Collision */
-    for( let a = asteroids.length - 1; a >= 0; a--)
-    {
-        if(CollisionManager.SATCollision(asteroids[a].getRect().getPoints(),player.getShape.getPoints()))
-        {
-           animationManager.addAnimation(5,0.5,asteroids[a].getRect().getOrigin(),EXPLOSION_IMAGE,new Vec2(256,256));
-           asteroids.splice(a,1);
-         //  startFrame,endFrame,transitionTime,pos,animate,image, width,height
-        }
-    }
 }
-
 
 function inputHandling()
 {

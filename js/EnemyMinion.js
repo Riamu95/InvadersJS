@@ -87,8 +87,8 @@ class EnemyMinion extends Enemy {
       
        this._velocity.addVec = this._acceleration;
        
-       this._velocity.x += this._velocity.x * dt;
-       this._velocity.y += this._velocity.y * dt;
+       this._velocity.x = this._velocity.x * dt;
+       this._velocity.y = this._velocity.y * dt;
 
        this._velocity.setMagnitude = this._maxSpeed;
 

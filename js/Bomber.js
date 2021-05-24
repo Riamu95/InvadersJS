@@ -5,7 +5,7 @@ class Bomber extends Enemy
         super(pos,size,velocity);
         this._flockPoint = fp;
         this._acceleration = new Vec2(0,0);
-        this._maxSpeed = 2;
+        this._maxSpeed = 1;
         this._maxForce = 1;
         this._attackTimer = 0;
         this._reloadTimer = 5;
