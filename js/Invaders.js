@@ -116,7 +116,7 @@ function gameLoop(timestamp)
 
        for(let b = 0; b < bombers[i]._bullets.length; b++)
        {
-            bombers[i]._bullets[b].move(dt);
+            bombers[i]._bullets[b].seek(dt,player.getShape.getOrigin());
        } 
    }
    /* Black Holes update */
@@ -260,7 +260,6 @@ function collisions()
     {
         if(CollisionManager.SATCollision(bombers[b].getRect.getPoints(),player.getShape.getPoints()))
         {
-            console.log('collision');
         }
     }
 

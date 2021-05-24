@@ -5,16 +5,13 @@ class Bomber extends Enemy
         super(pos,size,velocity);
         this._flockPoint = fp;
         this._acceleration = new Vec2(0,0);
-        this._VelocityLength = 0;
-        this._maxSpeed = 0.5;
+        this._maxSpeed = 2;
         this._maxForce = 1;
         this._attackTimer = 0;
         this._reloadTimer = 5;
-        this._previousflockPoint = new Vec2(0,0);
-        this._previousAngle = 0;
-        this._maxBulletSpeed = 2;
+        this._maxBulletSpeed = 4;
         this._bullets = new Array();
-
+        this._seek = new Vec2(0,0);
         this._health = 100;
     }
 
@@ -23,19 +20,23 @@ class Bomber extends Enemy
     {
         this.generateFlockPoint();
         this.attack(playerPos);
-        let seek = this.seek();
-        this._acceleration.addVec = seek;
 
-        this._velocity.addVec = this._acceleration;
+        this._seek = this.seek();
         
-        this._velocity.x += this._velocity.x * dt;
-        this._velocity.y += this._velocity.y * dt;
+        this._acceleration.x = this._seek.x;
+        this._acceleration.y = this._seek.y;
 
+        this._velocity.x += this._acceleration.x;
+        this._velocity.y += this._acceleration.y;
+        
+        this._velocity.x = this._velocity.x * dt;
+        this._velocity.y = this._velocity.y * dt;
+       
         this._velocity.setMagnitude = this._maxSpeed;
+        
         //rotate object back to origin
         this._rect.setAngle(-this._rect.getAngle());
         this._rect.rotate();
-        this._rect.setAngle(-this._rect.getAngle());
         //rotate points by direction of
         this._rect.setAngle(Math.atan2(this._velocity.y,this._velocity.x) * 180 / Math.PI);
         //rotate object in direction of velocity
@@ -85,12 +86,12 @@ class Bomber extends Enemy
 
     seek()
     {
-        let steering = new Vec2(0,0);
-        let direction = new Vec2(this._flockPoint.x - this._rect.getOrigin().x, this._flockPoint.y - this._rect.getOrigin().y);
-        steering = Vec2.normalise(direction);
-        steering = Vec2.subtractVec(steering, this._velocity);
+        //Get direction from player to target
+        let steering = new Vec2(this._flockPoint.x - this._rect.getOrigin().x, this._flockPoint.y - this._rect.getOrigin().y);
+        //normalise vector and multiply by sacalar
         steering.setMagnitude = this._maxSpeed;
-        
+        //calcualte desired velocity by subtracting current velocity form diesred vel
+        steering = Vec2.subtractVec(steering, this._velocity);
         return steering;
     }
 

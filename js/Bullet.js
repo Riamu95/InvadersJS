@@ -9,6 +9,7 @@ class Bullet
         this._ttl = performance.now();
         this._maxSpeed = maxSpeed;
         this._rect.rotate(this._rect.getAngle());
+        this._steering = new Vec2(0,0);
     }
 
     move(dt)
@@ -16,8 +17,20 @@ class Bullet
         this._velocity.x = Math.cos(this._rect.getAngle()) * dt;
         this._velocity.y = Math.sin(this._rect.getAngle()) * dt;
         this._velocity.setMagnitude = this._maxSpeed;
-        this._rect._pos.x += this._velocity.x;
-        this._rect._pos.y += this._velocity.y;
+        this._rect.updatePoints(this._velocity);
+    }
+    seek(dt, playerPos)
+    {
+        this._steering.x = playerPos.x - this._rect.getOrigin().x;
+        this._steering.y = playerPos.y - this._rect.getOrigin().y;  
+        //normalise vector and multiply by sacalar
+        this._steering.setMagnitude = this._maxSpeed;
+        //calcualte desired velocity by subtracting current velocity form diesred vel
+        this._steering = Vec2.subtractVec(this._steering, this._velocity);
+
+        this._velocity.x = this._steering.x * dt;
+        this._velocity.y = this._steering.y * dt;
+        this._velocity.setMagnitude = this._maxSpeed;
         this._rect.updatePoints(this._velocity);
     }
 
@@ -42,10 +55,6 @@ class Bullet
     get getPos()
     {
         return this._pos;
-    }
-    get getCircle()
-    {
-        return this._circle;
     }
     getTTL()
     {
