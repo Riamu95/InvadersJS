@@ -72,22 +72,24 @@ function init()
 /*------------------------------------------------------- -----------------------------------------------------------------------------------------------*/
 /*---------------------------------------------GAME LOOP -----------------------------------------------------------------------------------------------*/
 /*------------------------------------------------------ -----------------------------------------------------------------------------------------------*/
-
-addEventListener('click', (event) =>
-{
-    let tempBullet = new Bullet(new Vec2(player.getShape.getOrigin().x, player.getShape.getOrigin().y),new Vec2(90,17),
-    Math.atan2((event.y - ((player.getShape.getPos().y + player.getShape.getSize().y/2) - camera.getPos.y)), (event.x - ((player.getShape.getPos().x + player.getShape.getSize().x/2) - camera.getPos.x))),player.getMaxBulletSpeed);
-    bullets.push(tempBullet);
-})
-
 document.addEventListener('keydown', (event) =>
-{
-    pressedKeys[event.key] = true;
-})
+{ 
+    if (event.key == 'w' || event.key == 'd' || event.key == 's' ||
+        event.key == 'a' || event.key == ' ')
+    {
+        pressedKeys[event.key] = true;
+        
+       // event.key == ' ' && player.setFireTimer(performance.now()); 
+    }
+});
 
 document.addEventListener('keyup', (event) =>
 {
-    pressedKeys[event.key] = false;
+    if (event.key == 'w' || event.key == 'd' || event.key == 's' ||
+    event.key == 'a' || event.key == ' ')
+    {
+        pressedKeys[event.key] = false;
+    }
 });
 
 window.requestAnimationFrame(gameLoop);
@@ -183,7 +185,7 @@ function objectCollisions()
        }
    }
    
-   //bombers and minions
+   //bombers andd minions
    for( let b = bombers.length -1; b >= 0; b--)
    {
        for (let row = minions.length -1; row >= 0; row --)
@@ -215,7 +217,7 @@ function objectCollisions()
    }
 
    //Asteroids and bombers
-   for( let b = bombers.length -1; b >= 0; b--)
+  /* for( let b = bombers.length -1; b >= 0; b--)
    {
         for( let a = asteroids.length - 1; a >= 0; a--)
         {
@@ -227,13 +229,13 @@ function objectCollisions()
                 //colliison animation/Particle affects.
 
                 //checkif bomber or asteroid is still alive.
-                //&& shor cirucits upon first falsey value , so if there's still health, object is not deleted.
+                //&& shorT cirucits upon first falsey value , so if there's still health, object is not deleted.
                 //blow up animation?
                bombers[b].getHealth <= 0 && bombers.splice(b,1);
                asteroids[a].getHealth() <= 0 && bombers.splice(a,1);
             }
         }
-  }
+   }*/
 
 //Asteroids and minions
   for( let a = asteroids.length -1; a >= 0; a --)
@@ -442,6 +444,14 @@ function inputHandling()
         player.setSpriteAngle = -player.getRotationSpeed;
         player.getShape.setAngle(-player.getRotationSpeed);
         player.getShape.rotate();
+    }
+
+    if(pressedKeys[' '] && Math.round((performance.now() - player.getFireTimer) /1000) > player.getFireRate)
+    {
+        let tempBullet = new Bullet(new Vec2(player.getShape.getPoints()[2].x, player.getShape.getPoints()[2].y),new Vec2(90,17),
+        (player.getSpriteAngle * (Math.PI/180)),player.getMaxBulletSpeed);
+        bullets.push(tempBullet);
+        player.setFireTimer(performance.now());
     }
 }
 

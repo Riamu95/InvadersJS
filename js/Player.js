@@ -21,7 +21,8 @@ class Player
         this._ttl = 3;
         this._maxbulletSpeed = 8;
         this.m_color = 'red'; 
-        
+        this._fireRate = 0.1;
+        this._fireTimer = 0;
         this.createShape();
     }
 
@@ -47,8 +48,17 @@ class Player
         ctx.closePath();
         ctx.restore();
 
+
+
         this._shape.draw(ctx,cameraPos, this.m_color);
         this._collisionRect.draw(ctx,cameraPos, 'blue');
+        ctx.save();
+        ctx.beginPath();   
+        ctx.translate(this._shape.getPoints()[2].x - cameraPos.x, this._shape.getPoints()[2].y - cameraPos.y);
+        ctx.arc(0, 0, 5, 0, 2 * Math.PI);
+        ctx.stroke();
+        ctx.closePath();
+        ctx.restore();
     }
 
     move(dt)
@@ -101,6 +111,10 @@ class Player
     {
         this._spriteAngle += val;
     }
+    get getSpriteAngle()
+    {
+        return this._spriteAngle;
+    }
     get getShape()
     {
         return this._shape;
@@ -112,5 +126,22 @@ class Player
     get getTTL()
     {
         return this._ttl;
+    }
+
+    get getFireRate()
+    {
+        return this._fireRate;
+    }
+    set setFireRate(val)
+    {
+        this._fireRate = val;
+    }
+    get getFireTimer()
+    {
+        return this._fireTimer;
+    }
+    setFireTimer(val)
+    {
+        this._fireTimer = val;
     }
 }
