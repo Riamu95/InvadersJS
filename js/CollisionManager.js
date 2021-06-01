@@ -57,7 +57,9 @@ class CollisionManager
     {
         let objOne = obejct1;
         let objTwo = object2;
-
+        let overlapMagnitude = Infinity;
+        let smallestAxis = null;
+   
         for(let i = 0 ; i < 2; i++)
         {
          //swap objects
@@ -98,8 +100,24 @@ class CollisionManager
                 //check for overlap, if they dont overlap return flase, otherwise continue
                 if(!(max_o2 > min_o1 && max_o1 > min_o2))
                     return false;
+
+               // for each projected axis, get the minimum overlap = magnitude
+               // let overlap = Math.min(max_o1,max_o2) - Math.max(min_o1,min_o2);
+               // if(overlap < overlapMagnitude)
+               // {
+                   // overlapMagnitude = overlap;
+                    //set direction of minimum overlap
+                   // smallestAxis = new Vec2(projectedAxis.x, projectedAxis.y);
+                   /*
+                   if (max_o1 > max_o2) {
+                      smallestAxis.x *= -1;
+                      smallestAxis.y *= -1;
+                   }*/
+              //  }
             }
         }
+
+       // smallestAxis.setMagnitude = overlapMagnitude;
         return true;
     }
 

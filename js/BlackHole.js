@@ -4,11 +4,38 @@ const BlackHole = function(pos,size)
     
     this._acitve = false;
     this._activeDistance = 500;
+    this._gravitationalForce = 0;
+    this._g = 9.81;
+    this._mass = 1000;
+
+    this._directionalForce = new Vec2(0,0);
+    this._forceMagnitude = 0;
 }
 
 BlackHole.prototype.update = function(dt)
 {
     this._rect.getAngle() >= 360 ? this._rect.setAngle(0) : this._rect.addAngle(0.1);
+
+}
+
+BlackHole.prototype.attract = function(origin, mass)
+{
+    if (Vec2.distance(this._rect.getOrigin(), origin) > this._activeDistance)  
+            return new Vec2(0,0);
+
+    //direction of force
+    this._directionalForce.x = this._rect.getOrigin().x - origin.x;
+    this._directionalForce.y = this._rect.getOrigin().y - origin.y;
+
+    let d =  Vec2.length(this._directionalForce);
+    
+    this._directionalForce = Vec2.normalise(this._directionalForce);
+
+    //magnitude of force
+    this._forceMagnitude = this._g * (this._mass * mass)/(d * d);
+   
+    this._directionalForce.setMagnitude = this._forceMagnitude;
+    return this._directionalForce;
 }
 
 BlackHole.prototype.draw = function(ctx,cameraPos)

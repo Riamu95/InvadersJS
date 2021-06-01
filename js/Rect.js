@@ -8,6 +8,7 @@ const Rect = function(pos,size)
     this._points.push(new Vec2(this._pos.x + this._size.x,this._pos.y + this._size.y));
     this._points.push(new Vec2(this._pos.x,this._pos.y + this._size.y));
 }
+
 Rect.prototype = Object.create(Shape.prototype);
 
 Rect.prototype.contains = function(rect)

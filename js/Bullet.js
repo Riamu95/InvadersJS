@@ -8,7 +8,7 @@ class Bullet
         this._velocity = new Vec2(0,0);
         this._ttl = performance.now();
         this._maxSpeed = maxSpeed;
-        this._rect.rotate(this._rect.getAngle());
+        //this._rect.rotate(this._rect.getAngle());
         this._steering = new Vec2(0,0);
     }
 
@@ -19,6 +19,7 @@ class Bullet
         this._velocity.setMagnitude = this._maxSpeed;
         this._rect.updatePoints(this._velocity);
     }
+
     seek(dt, playerPos)
     {
         this._steering.x = playerPos.x - this._rect.getOrigin().x;
@@ -39,7 +40,7 @@ class Bullet
         ctx.save();
         ctx.beginPath();
         ctx.translate(this._rect.getOrigin().x - cameraPos.x, this._rect.getOrigin().y - cameraPos.y);
-        ctx.rotate(this._rect.getAngle());
+        //ctx.rotate(this._rect.getAngle());
         ctx.drawImage(Image,0,0,this._rect._size.x,this._rect._size.y,-this._rect._size.x/2,-this._rect._size.y/2,this._rect._size.x,this._rect._size.y);
         ctx.closePath();
         ctx.restore();

@@ -28,7 +28,8 @@ function init()
     /* Create Black Holes*/
     for(let i = 0; i < BLACK_HOLE_COUNT; i++)
     {
-        let  temp = new BlackHole(new Vec2(Math.random() * WORLD_WIDTH - 643, Math.random() * WORLD_HEIGHT - 480), new Vec2(643,480));
+       // let  temp = new BlackHole(new Vec2(Math.random() * WORLD_WIDTH - 643, Math.random() * WORLD_HEIGHT - 480), new Vec2(643,480));
+       let  temp = new BlackHole(new Vec2(player.getShape.getOrigin().x, player.getShape.getOrigin().y + 400), new Vec2(643,480));
         blackHoles.push(temp);
     }
     /* Create Asteroids */
@@ -125,6 +126,8 @@ function gameLoop(timestamp)
     blackHoles.forEach( bh =>
     {
         bh.update(dt);
+        let force = bh.attract(player.getShape.getOrigin(),player.getMass);
+        player.getAcceleration.addVec = force;
     });
     /*  Asteroids update */
     asteroids.forEach(ast =>
@@ -143,8 +146,12 @@ function gameLoop(timestamp)
 function collisions()
 {
     collisionManager.playerBoundaryCollision(player.getShape);
+  
     objectCollisions();
     bulletCollisions();
+
+
+
    /* for all minions if attacking and collide with player, delete the minion*/
    /*let collidable = [];
    collidable = qt.query(player.getCollisionRect, collidable);
@@ -257,29 +264,34 @@ function objectCollisions()
       }
   }
 
-/* Asteroid on Asteroid 
+ // Asteroid on Asteroid 
   for(let a = 0; a < asteroids.length -1; a++)
   {
       for(let b = a + 1; b < asteroids.length; b++)
       {
         if (CollisionManager.SATCollision(asteroids[a].getRect().getPoints(),asteroids[b].getRect().getPoints()))
         {
-                //MTV
+            animationManager.addAnimation(5,0.5,asteroids[a].getRect().getOrigin(),EXPLOSION_IMAGE,new Vec2(256,256));
+            animationManager.addAnimation(5,0.5,asteroids[b].getRect().getOrigin(),EXPLOSION_IMAGE,new Vec2(256,256));
+            asteroids.splice(b,1);
+            asteroids.splice(a,1);
+            break;
+
         }
       }
-  }*/
+  }
 
-  /* Bomber on Bomber 
+  //Bomber on Bomber 
   for(let a = 0; a < bombers.length -1; a++)
   {
       for(let b = a + 1; b < bombers.length; b++)
       {
-        if (CollisionManager.SATCollision(bombers[a].getRect().getPoints(),bombers[b].getRect().getPoints()))
+        if (CollisionManager.SATCollision(bombers[a].getRect.getPoints(),bombers[b].getRect.getPoints()))
         {
                 //MTV
         }
       }
-  }*/
+  }
 
 }
 
@@ -402,34 +414,35 @@ function bulletCollisions()
 
 function inputHandling()
 {
-    if(pressedKeys['w'])
+   if(pressedKeys['w'])
     {
-        if(player.getAcceleration <= player.getMaxAcceleration)
+        if(player.getSpeed() <= player.getMaxAcceleration)
         {
-            player.setAcceleration = player.getAccelerationRate;
+            player.addSpeed(player.getAccelerationRate);
         } 
         player.move(dt); 
         camera.update(player.getShape.getPos()); 
     }
     else if(pressedKeys['s'])
     {
-        if(player.getAcceleration >= -player.getMaxAcceleration)
+        if(player.getSpeed() >= -player.getMaxAcceleration)
         {
-            player.setAcceleration = -player.getAccelerationRate;
+            player.addSpeed(-player.getAccelerationRate);
         }  
         player.move(dt); 
         camera.update(player.getShape.getPos());  
     }
     else if(!pressedKeys['w'] && !pressedKeys['s'])
     {
-        if(player.getAcceleration > 0)
+        if(player.getSpeed() > 0)
         {
-            player.setAcceleration = -player.getDeccelerationRate;
+            player.addSpeed(-player.getDeccelerationRate);
         }
-        else if(player.getAcceleration < 0)
+        else if(player.getSpeed() < 0)
         {
-            player.setAcceleration = player.getDeccelerationRate;
+            player.addSpeed(player.getDeccelerationRate);
         }
+       
         player.move(dt); 
         camera.update(player.getShape.getPos());  
     }
@@ -448,8 +461,8 @@ function inputHandling()
 
     if(pressedKeys[' '] && Math.round((performance.now() - player.getFireTimer) /1000) > player.getFireRate)
     {
-        let tempBullet = new Bullet(new Vec2(player.getShape.getPoints()[2].x, player.getShape.getPoints()[2].y),new Vec2(90,17),
-        (player.getSpriteAngle * (Math.PI/180)),player.getMaxBulletSpeed);
+        let tempBullet = new Bullet(new Vec2(player.getShape.getOrigin().x, player.getShape.getOrigin().y),new Vec2(30,30),
+        player.getSpriteAngle * Math.PI/180,player.getMaxBulletSpeed);
         bullets.push(tempBullet);
         player.setFireTimer(performance.now());
     }
