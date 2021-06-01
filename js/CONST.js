@@ -26,7 +26,7 @@ const CANVAS_MIN = 0;
 const ENEMY_COUNT = 5;
 const MINION_COUNT = 5;
 const MINION_FLOCK_COUNT = 5;
-const BLACK_HOLE_COUNT = 5;
+const BLACK_HOLE_COUNT = 3;
 const ASTEROID_COUNT = 10;
 const BOMBER_COUNT = 5;
 

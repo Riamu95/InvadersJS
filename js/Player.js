@@ -42,6 +42,32 @@ class Player
         this._shape.addPoint(new Vec2(this._shape.getPos().x, this._shape.getPos().y + 130));
     }
 
+    setShapePosition()
+    {
+        this._shape._points[0].x = this._shape.getPos().x;
+        this._shape._points[0].y = this._shape.getPos().y;
+
+        this._shape._points[1].x = this._shape.getPos().x + 32;
+        this._shape._points[1].y = this._shape.getPos().y;
+
+        this._shape._points[2].x = this._shape.getPos().x + 127;
+        this._shape._points[2].y =  this._shape.getPos().y + 59;
+
+        this._shape._points[3].x = this._shape.getPos().x + 127;
+        this._shape._points[3].y = this._shape.getPos().y + 70;
+
+        this._shape._points[4].x = this._shape.getPos().x + 32;
+        this._shape._points[4].y =  this._shape.getPos().y + 130;
+
+        this._shape._points[5].x = this._shape.getPos().x;
+        this._shape._points[5].y =  this._shape.getPos().y + 130;
+
+        
+        this._shape.rotate(this._spriteAngle  * Math.PI / 180);
+        
+        this._collisionRect.setRect(new Vec2(this._shape._origin.x - (this._shape._size.x * 1.5), this._shape._origin.y - (this._shape._size.y * 2)));
+    }
+
     draw(ctx,cameraPos)
     {
         ctx.save();

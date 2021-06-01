@@ -28,8 +28,7 @@ function init()
     /* Create Black Holes*/
     for(let i = 0; i < BLACK_HOLE_COUNT; i++)
     {
-       // let  temp = new BlackHole(new Vec2(Math.random() * WORLD_WIDTH - 643, Math.random() * WORLD_HEIGHT - 480), new Vec2(643,480));
-       let  temp = new BlackHole(new Vec2(player.getShape.getOrigin().x, player.getShape.getOrigin().y + 400), new Vec2(643,480));
+        let  temp = new BlackHole(new Vec2(Math.random() * WORLD_WIDTH - 643, Math.random() * WORLD_HEIGHT - 480), new Vec2(643,480));
         blackHoles.push(temp);
     }
     /* Create Asteroids */
@@ -126,9 +125,18 @@ function gameLoop(timestamp)
     blackHoles.forEach( bh =>
     {
         bh.update(dt);
-        let force = bh.attract(player.getShape.getOrigin(),player.getMass);
-        player.getAcceleration.addVec = force;
+        let [force, teleport] = bh.attract(player.getShape.getOrigin(),player.getMass);
+        if (!teleport)
+        {
+            player.getAcceleration.addVec = force;
+        }
+        else
+        {
+            player.getShape.setPos(force);
+            player.setShapePosition();
+        }
     });
+
     /*  Asteroids update */
     asteroids.forEach(ast =>
     {

@@ -29,5 +29,21 @@ Rect.prototype.getRect = function()
 {
     return this._points;
 }
+Rect.prototype.setRect = function(pos)
+{
+    this._pos.x = pos.x;
+    this._pos.y = pos.y;
 
+    this._points[0].x  = this._pos.x;
+    this._points[0].y  = this._pos.y;
+
+    this._points[1].x  = this._pos.x + this._size.x;
+    this._points[1].y  = this._pos.y;
+
+    this._points[2].x  = this._pos.x + this._size.x;
+    this._points[2].y  = this._pos.y + this._size.y;
+
+    this._points[3].x  = this._pos.x; 
+    this._points[3].y  = this._pos.y + this._size.y;
+}
 
