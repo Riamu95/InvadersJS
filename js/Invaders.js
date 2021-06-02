@@ -12,8 +12,8 @@ let pressedKeys = new Set();
 
 let collisionManager = new CollisionManager();
 let player = new Player(new Vec2(WORLD_WIDTH/2,WORLD_HEIGHT/2),new Vec2(127,130));
-let camera = new Camera(player.getShape.getPos().x - CANVAS_WIDTH/2,player.getShape.getPos().y - CANVAS_HEIGHT/2,CANVAS_WIDTH,CANVAS_HEIGHT);
-let qt = new QuadTree(new Vec2(0,0),new Vec2(WORLD_WIDTH,WORLD_HEIGHT), 5);
+let camera = new Camera(player.getShape.getOrigin().x - CANVAS_WIDTH/2,player.getShape.getOrigin().y - CANVAS_HEIGHT/2,CANVAS_WIDTH,CANVAS_HEIGHT);
+//let qt = new QuadTree(new Vec2(0,0),new Vec2(WORLD_WIDTH,WORLD_HEIGHT), 5);
 let animationManager = new AnimationManager();
 let dt = 0;
 let lastRender = 0;
@@ -58,14 +58,14 @@ function init()
         let tempBomber = new Bomber(pos, new Vec2(128,158), new Vec2(0,0),flockPoint);
         bombers.push(tempBomber);
     }
-    /* Insert minions into quad tree */
+     /*Insert minions into quad tree 
     for(let row = 0; row < minions.length; row++ ) 
     {
         for(let col = 0; col < minions[row].length; col++)
         {
             qt.insert(minions[row][col].getRect);
         }
-    }
+    }*/
 }
 
 
@@ -108,8 +108,8 @@ function gameLoop(timestamp)
     //for every array, allocate seek point and move the flock
    for( let row = 0; row < minions.length; row++)
    {
-       EnemyMinion.generateFlockPoint(minions[row], player.getShape.getPos(), flockPoints[row], dt);
-   }
+       EnemyMinion.generateFlockPoint(minions[row], player.getShape.getOrigin(), flockPoints[row], dt);
+     }
 
    /* Bomber and bomber bullet MOVE */
    for(let i = 0; i < bombers.length; i++ )
@@ -132,8 +132,9 @@ function gameLoop(timestamp)
         }
         else
         {
-            player.getShape.setPos(force);
+            player.getShape.setOrigin(force);
             player.setShapePosition();
+            //animate here apply initiala impulsesss
         }
     });
 
@@ -153,7 +154,7 @@ function gameLoop(timestamp)
 
 function collisions()
 {
-    collisionManager.playerBoundaryCollision(player.getShape);
+    //collisionManager.playerBoundaryCollision(player.getShape);
   
     objectCollisions();
     bulletCollisions();
@@ -193,7 +194,7 @@ function objectCollisions()
    {
        if(CollisionManager.SATCollision(bombers[b].getRect.getPoints(),player.getShape.getPoints()))
        {
-           //MTV
+           //impulse
            //Reduce player and bomber health
            //animation/particle affects
            //check if player and bomber are still alive
@@ -429,7 +430,7 @@ function inputHandling()
             player.addSpeed(player.getAccelerationRate);
         } 
         player.move(dt); 
-        camera.update(player.getShape.getPos()); 
+        camera.update(player.getShape.getOrigin()); 
     }
     else if(pressedKeys['s'])
     {
@@ -438,7 +439,7 @@ function inputHandling()
             player.addSpeed(-player.getAccelerationRate);
         }  
         player.move(dt); 
-        camera.update(player.getShape.getPos());  
+        camera.update(player.getShape.getOrigin());  
     }
     else if(!pressedKeys['w'] && !pressedKeys['s'])
     {
@@ -452,7 +453,7 @@ function inputHandling()
         }
        
         player.move(dt); 
-        camera.update(player.getShape.getPos());  
+        camera.update(player.getShape.getOrigin());  
     }
     if(pressedKeys['d'])
     {
@@ -483,9 +484,9 @@ function draw()
     ctx.clearRect(0,0,canvas.width,canvas.height);
     
     camera.draw(ctx);
-    qt.draw(ctx,camera.getPos);
+    //qt.draw(ctx,camera.getPos);
     /* Draw Black Holes */
-
+    
     blackHoles.forEach( bh =>
     {
         bh.draw(ctx,camera.getPos)
@@ -519,18 +520,17 @@ function draw()
             minion.draw(ctx,camera.getPos);
         }); 
     });
-    /*Scale health bar */
+    //Scale health bar 
     if(player.getHealth > 0)
     {
-        ctx.drawImage(hearth,0,0,HEARTH_SIZE.x,HEARTH_SIZE.y,(camera._pos.x + (camera._size.x * 0.75)) - camera._pos.x,(camera._pos.y +  (camera._size.x / 30)) - camera._pos.y,HEARTH_SIZE.x,HEARTH_SIZE.y);
+        ctx.drawImage(heart,0,0,HEART_SIZE.x,HEART_SIZE.y,(camera.getPos.x + (camera.getSize.x * 0.75)) - camera.getPos.x,(camera.getPos.y +  (camera.getSize.x / 30)) - camera.getPos.y,HEART_SIZE.x,HEART_SIZE.y);
         //heartBar
-        ctx.drawImage(healthBar,0,0,HEALTHBAR_SIZE.x,HEALTHBAR_SIZE.y,(camera._pos.x + (camera._size.x * 0.81)) - camera._pos.x,(camera._pos.y +  (camera._size.x / 30)) - camera._pos.y,HEALTHBAR_SIZE.x,HEALTHBAR_SIZE.y);
+        //ctx.drawImage(healthBar,0,0,HEALTHBAR_SIZE.x,HEALTHBAR_SIZE.y,(camera.getPos.x + (camera.getSize.x * 0.81)) - camera.getPos.x,(camera.getSize.y +  (camera.getSize.x / 30)) - camera.getPos.y,HEALTHBAR_SIZE.x,HEALTHBAR_SIZE.y);
         //heartValue
         //render width based off health
-        ctx.drawImage(healthValue,0,0,HEALTHVALUE_SIZE.x,HEALTHVALUE_SIZE.y,(camera._pos.x + (camera._size.x * 0.81)) - camera._pos.x,(camera._pos.y +  (camera._size.x / 30.1)) - camera._pos.y,HEALTHVALUE_SIZE.x * player.getHealth,HEALTHVALUE_SIZE.y);
+        ctx.drawImage(healthValue,0,0,HEALTHVALUE_SIZE.x,HEALTHVALUE_SIZE.y,(camera.getPos.x + (camera.getSize.x * 0.81)) - camera.getPos.x,(camera.getPos.y +  (camera.getSize.x / 30.1)) - camera.getPos.y,HEALTHVALUE_SIZE.x * player.getHealth,HEALTHVALUE_SIZE.y);
     }
     ctx.fillStyle = 'blue';
-    ctx.fillText(`fps : ${fps}`, (camera._pos.x + 100) - camera._pos.x,(camera._pos.y + 50) - camera._pos.y);
-    animationManager.draw(ctx,camera.getPos);
-   
+    ctx.fillText(`fps : ${fps}`, (camera.getPos.x + 100) - camera.getPos.x,(camera.getPos.y + 50) - camera.getPos.y);  
+    animationManager.draw(ctx,camera.getPos);    
 }

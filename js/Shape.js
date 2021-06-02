@@ -1,9 +1,7 @@
 const Shape = function(pos,size)
 {
-    //refers to top left point
-    this._pos = pos;
     this._size = size;
-    this._origin = new Vec2(this._pos.x + size.x/2 ,this._pos.y + size.y/2);
+    this._origin =  pos;
     this._points = [];
     this._angle = 0;
 }
@@ -17,15 +15,22 @@ Shape.prototype.getPoints = function()
 {
     return this._points;
 }
+
 Shape.prototype.getOrigin = function()
 {
     return this._origin;
 }
+
+Shape.prototype.setOrigin = function(pos)
+{
+    this._origin.x = pos.x;
+    this._origin.y = pos.y;
+}
+
 Shape.prototype.getSize = function()
 {
     return this._size;
 }
-
 
 Shape.prototype.getAngle = function()
 {
@@ -40,17 +45,6 @@ Shape.prototype.setAngle = function(_val)
 Shape.prototype.addAngle = function(_val)
 {
    this._angle += _val;
-}
-
-Shape.prototype.getPos = function()
-{
-    return this._pos;
-}
-
-Shape.prototype.addPos = function(val)
-{
-     this._pos.x += val.x;
-     this._pos.y += val.y;
 }
 
 Shape.prototype.rotate = function(angle = (Math.PI/180) * this._angle )
@@ -69,13 +63,6 @@ Shape.prototype.rotate = function(angle = (Math.PI/180) * this._angle )
     });
 }
 
-Shape.prototype.setPos = function(pos)
-{
-    this._pos = pos;
-    this._origin.x = this._pos.x + this._size.x/2;
-    this._origin.y = this._pos.y + this._size.y/2;
-}
-
 Shape.prototype.updatePoints = function(velocity)
 {
     this._origin.x += velocity.x;
@@ -90,9 +77,6 @@ Shape.prototype.updatePoints = function(velocity)
 
 Shape.prototype.draw = function(ctx,cameraPos,color)
 {
-   // if (!(this._points.length <= 0))
-   //         return;
-    
     ctx.beginPath();
     ctx.strokeStyle = color;
 
@@ -101,9 +85,7 @@ Shape.prototype.draw = function(ctx,cameraPos,color)
     {
         ctx.lineTo(this._points[i].x - cameraPos.x, this._points[i].y - cameraPos.y);
     }
-    
     ctx.lineTo(this._points[0].x - cameraPos.x, this._points[0].y - cameraPos.y);
-    
     ctx.stroke();
     ctx.closePath();
 

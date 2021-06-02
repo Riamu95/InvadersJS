@@ -4,7 +4,7 @@ class Player
     {
         this._shape = new Shape(pos,size,6);
         
-        this._collisionRect = new Rect(new Vec2(this._shape._origin.x - (this._shape._size.x * 1.5), this._shape._origin.y - (this._shape._size.y * 2))
+        this._collisionRect = new Rect(new Vec2(this._shape._origin.x , this._shape._origin.y)
         , new Vec2(this._shape._size.x * 3, this._shape._size.y * 4));
 
         this._health = 1;
@@ -34,45 +34,44 @@ class Player
     createShape()
     {
         //should be based around origin??
-        this._shape.addPoint(new Vec2(this._shape.getPos().x, this._shape.getPos().y));
-        this._shape.addPoint(new Vec2(this._shape.getPos().x + 32, this._shape.getPos().y));
-        this._shape.addPoint(new Vec2(this._shape.getPos().x + 127, this._shape.getPos().y + 59));
-        this._shape.addPoint(new Vec2(this._shape.getPos().x + 127, this._shape.getPos().y + 70));
-        this._shape.addPoint(new Vec2(this._shape.getPos().x + 32, this._shape.getPos().y + 130));
-        this._shape.addPoint(new Vec2(this._shape.getPos().x, this._shape.getPos().y + 130));
+        this._shape.addPoint(new Vec2(this._shape.getOrigin().x - this._shape.getSize().x/2, this._shape.getOrigin().y - this._shape.getSize().y/2));
+        this._shape.addPoint(new Vec2((this._shape.getOrigin().x - this._shape.getSize().x/2) + 32, this._shape.getOrigin().y - this._shape.getSize().y/2));
+        this._shape.addPoint(new Vec2(this._shape.getOrigin().x + this._shape.getSize().x/2, (this._shape.getOrigin().y - this._shape.getSize().y/2) + 59));
+        this._shape.addPoint(new Vec2(this._shape.getOrigin().x + this._shape.getSize().x/2, (this._shape.getOrigin().y - this._shape.getSize().y/2) + 70));
+        this._shape.addPoint(new Vec2((this._shape.getOrigin().x - this._shape.getSize().x/2) + 32, this._shape.getOrigin().y + this._shape.getSize().y/2));
+        this._shape.addPoint(new Vec2(this._shape.getOrigin().x - this._shape.getSize().x/2,this._shape.getOrigin().y + this._shape.getSize().y/2));
     }
 
     setShapePosition()
     {
-        this._shape._points[0].x = this._shape.getPos().x;
-        this._shape._points[0].y = this._shape.getPos().y;
+        this._shape._points[0].x = this._shape.getOrigin().x - this._shape.getSize().x/2;
+        this._shape._points[0].y = this._shape.getOrigin().y - this._shape.getSize().y/2;
 
-        this._shape._points[1].x = this._shape.getPos().x + 32;
-        this._shape._points[1].y = this._shape.getPos().y;
+        this._shape._points[1].x = (this._shape.getOrigin().x - this._shape.getSize().x/2) + 32;
+        this._shape._points[1].y = this._shape.getOrigin().y - this._shape.getSize().y/2;
 
-        this._shape._points[2].x = this._shape.getPos().x + 127;
-        this._shape._points[2].y =  this._shape.getPos().y + 59;
+        this._shape._points[2].x = this._shape.getOrigin().x + this._shape.getSize().x/2;
+        this._shape._points[2].y = (this._shape.getOrigin().y - this._shape.getSize().y/2) + 59;
 
-        this._shape._points[3].x = this._shape.getPos().x + 127;
-        this._shape._points[3].y = this._shape.getPos().y + 70;
+        this._shape._points[3].x = this._shape.getOrigin().x + this._shape.getSize().x/2;
+        this._shape._points[3].y = (this._shape.getOrigin().y - this._shape.getSize().y/2) + 70;
 
-        this._shape._points[4].x = this._shape.getPos().x + 32;
-        this._shape._points[4].y =  this._shape.getPos().y + 130;
+        this._shape._points[4].x = (this._shape.getOrigin().x - this._shape.getSize().x/2) + 32;
+        this._shape._points[4].y =  this._shape.getOrigin().y + this._shape.getSize().y/2;
 
-        this._shape._points[5].x = this._shape.getPos().x;
-        this._shape._points[5].y =  this._shape.getPos().y + 130;
+        this._shape._points[5].x = this._shape.getOrigin().x - this._shape.getSize().x/2;
+        this._shape._points[5].y =  this._shape.getOrigin().y + this._shape.getSize().y/2;
 
         
         this._shape.rotate(this._spriteAngle  * Math.PI / 180);
-        
-        this._collisionRect.setRect(new Vec2(this._shape._origin.x - (this._shape._size.x * 1.5), this._shape._origin.y - (this._shape._size.y * 2)));
+        this._collisionRect.setRect(new Vec2(this._shape.getOrigin().x, this._shape.getOrigin().y));
     }
 
     draw(ctx,cameraPos)
     {
         ctx.save();
         ctx.beginPath();      
-        ctx.translate((this._shape.getPos().x + this._shape.getSize().x/2) - cameraPos.x,(this._shape.getPos().y + this._shape.getSize().y/2) - cameraPos.y);
+        ctx.translate(this._shape.getOrigin().x - cameraPos.x,this._shape.getOrigin().y- cameraPos.y);
         ctx.rotate(this._spriteAngle * (Math.PI/180));
         ctx.drawImage(playerIMG,0,0,this._shape.getSize().x,this._shape.getSize().y,-this._shape.getSize().x/2,-this._shape.getSize().y/2,this._shape.getSize().x,this._shape.getSize().y);
         ctx.closePath();
@@ -82,6 +81,7 @@ class Player
 
         this._shape.draw(ctx,cameraPos, this._color);
         this._collisionRect.draw(ctx,cameraPos, 'blue');
+        
         ctx.save();
         ctx.beginPath();   
         ctx.translate(this._shape.getOrigin().x - cameraPos.x, this._shape.getOrigin().y - cameraPos.y);
@@ -105,7 +105,7 @@ class Player
         this._velocity.x =  this._acceleration.x * dt;
         this._velocity.y = this._acceleration.y * dt;
         
-        this._shape.addPos(this._velocity);
+        //this._shape.addPos(this._velocity);
 
         this._shape.updatePoints(this._velocity);
         this._collisionRect.updatePoints(this._velocity);

@@ -5,7 +5,7 @@ const background = document.getElementById('background');
 const playerIMG = document.getElementById('player');
 const BOMBER_IMAGE = document.getElementById('bomber');
 const enemyMinionImage = document.getElementById('enemyMinion');
-const hearth = document.getElementById('heart');
+const heart = document.getElementById('heart');
 const healthBar = document.getElementById('healthBar');
 const healthValue = document.getElementById('healthValue');
 const BLACKHOLE_IMAGE = document.getElementById('blackhole');
@@ -33,8 +33,8 @@ const BOMBER_COUNT = 5;
 const MINION_SPAWN_XOFFSET = 250;
 const MINION_SPAWN_YOFFSET = 138;
 
-const HEARTH_POS = new Vec2(0,0);
-const HEARTH_SIZE = new Vec2(100,100);
+const HEART_POS = new Vec2(0,0);
+const HEART_SIZE = new Vec2(100,100);
 
 const HEALTHBAR_POS = new Vec2(0,0);
 const HEALTHBAR_SIZE = new Vec2(300,100);
