@@ -79,22 +79,22 @@ class StartScene extends Scene
 
     MouseHover(e)
     {
-        if(e.target.src == 'file:///C:/Users/Predator/Desktop/SceneManager/Assets/buttons/play.png')
+        if(e.target.src == 'file:///C:/Users/Predator/Desktop/InvadersJs/Assets/buttons/play.png')
         {
-            e.target.src = 'file:///C:/Users/Predator/Desktop/SceneManager/Assets/buttons/playClicked.png';
+            e.target.src = 'file:///C:/Users/Predator/Desktop/InvadersJs/Assets/buttons/playClicked.png';
         } 
-        else if (e.target.src == 'file:///C:/Users/Predator/Desktop/SceneManager/Assets/buttons/playClicked.png')
+        else if (e.target.src == 'file:///C:/Users/Predator/Desktop/InvadersJs/Assets/buttons/playClicked.png')
         {
-            e.target.src = 'file:///C:/Users/Predator/Desktop/SceneManager/Assets/buttons/play.png';
+            e.target.src = 'file:///C:/Users/Predator/Desktop/InvadersJs/Assets/buttons/play.png';
         }
 
-        if(e.target.src == 'file:///C:/Users/Predator/Desktop/SceneManager/Assets/buttons/unquit.png')
+        if(e.target.src == 'file:///C:/Users/Predator/Desktop/InvadersJs/Assets/buttons/unquit.png')
         {
-            e.target.src = 'file:///C:/Users/Predator/Desktop/SceneManager/Assets/buttons/quitClicked.png';
+            e.target.src = 'file:///C:/Users/Predator/Desktop/InvadersJs/Assets/buttons/quitClicked.png';
         } 
-        else if (e.target.src == 'file:///C:/Users/Predator/Desktop/SceneManager/Assets/buttons/quitClicked.png')
+        else if (e.target.src == 'file:///C:/Users/Predator/Desktop/InvadersJs/Assets/buttons/quitClicked.png')
         {
-            e.target.src = 'file:///C:/Users/Predator/Desktop/SceneManager/Assets/buttons/unquit.png';
+            e.target.src = 'file:///C:/Users/Predator/Desktop/InvadersJs/Assets/buttons/unquit.png';
         }    
     }
 }
