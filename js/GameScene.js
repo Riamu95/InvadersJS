@@ -67,33 +67,40 @@ class GameScene extends Scene
                     return;
                 }
             }
-            if (this._bombers.length > 0 || this._asteroids.length > 0 || this._blackHoles.length > 0 )
+            if (this._bombers.length > 0)
             {
                 return; 
             }
+            //short circuits on the first falsey value
+            this._blackHoles.length > 0 &&  this._blackHoles.splice(0, this._blackHoles.length -1);
+            this._asteroids.length > 0 && this._asteroids.splice(0,this._asteroids.length -1);
 
             this._waveManager.nextWave();
-        
+            //this._waveManager.getSpawnPoint(Math.trunc(Math.random() * 32));
               /* Create Black Holes*/
+               
               for(let i = 0; i < this._waveManager.getBlackHoleCount(); i++)
               {
-                  let  temp = new BlackHole(new Vec2(Math.random() * WORLD_WIDTH - 643, Math.random() * WORLD_HEIGHT - 480), new Vec2(643,480));
+                  let pos = this._waveManager.getSpawnPoint(Math.trunc(Math.random() * SPAWN_POINTS));
+                  let  temp = new BlackHole(new Vec2(pos.x, pos.y), new Vec2(643,480));
                   this._blackHoles.push(temp);
               }
               /* Createthis._asteroids */
               for(let i = 0; i < this._waveManager.getAsteroidCount(); i++)
               {
-                  let  temp = new Asteroid(new Vec2(Math.random() * WORLD_WIDTH, Math.random() * WORLD_HEIGHT), new Vec2(98,99));
+                  let pos = this._waveManager.getSpawnPoint(Math.trunc(Math.random() * SPAWN_POINTS));
+                  let  temp = new Asteroid(new Vec2(pos.x, pos.y), new Vec2(98,99));
                   this._asteroids.push(temp);
               }
               /* Createthis._minions*/
               for(let row = 0; row < this._waveManager.getFlockCount(); row++)
               {
+                  let pos = this._waveManager.getSpawnPoint(Math.trunc(Math.random() * SPAWN_POINTS));
                   let tempMinions = [];
-                  let flockPoint = new Vec2(Math.random() * (WORLD_WIDTH - MINION_SPAWN_XOFFSET), Math.random() * (WORLD_HEIGHT - MINION_SPAWN_YOFFSET));
+                  //let flockPoint = new Vec2(Math.random() * (WORLD_WIDTH - MINION_SPAWN_XOFFSET), Math.random() * (WORLD_HEIGHT - MINION_SPAWN_YOFFSET));
                   for(let col = 0; col < this._waveManager.getMininonCount(); col++)
                   {
-                      let tempMinion = new EnemyMinion(new Vec2(flockPoint.x + 50 * col, flockPoint.y + 10 * col), new Vec2(90, 102) ,new Vec2(Math.random(1) + -1, Math.random(1) + -1));
+                      let tempMinion = new EnemyMinion(new Vec2(pos.x + (col * 20), pos.y + (row * 20)), new Vec2(90, 102) ,new Vec2(Math.random(1) + -1, Math.random(1) + -1));
                       tempMinions.push(tempMinion);
                   }
                   this._minions.push(tempMinions);
@@ -102,11 +109,12 @@ class GameScene extends Scene
               /* Create this._bombers*/
               for(let i = 0; i < this._waveManager.getBomberCount(); i++)
               {
-                  let pos = new Vec2(Math.random() * WORLD_WIDTH, Math.random() * WORLD_HEIGHT);
+                  let pos = this._waveManager.getSpawnPoint(Math.trunc(Math.random() * SPAWN_POINTS));
                   let flockPoint = new Vec2(Math.random() * WORLD_WIDTH, Math.random() * WORLD_HEIGHT);
-                  let tempBomber = new Bomber(pos, new Vec2(128,158), new Vec2(0,0),flockPoint);
+                  let tempBomber = new Bomber(new Vec2(pos.x,pos.y), new Vec2(128,158), new Vec2(0,0),flockPoint);
                   this._bombers.push(tempBomber);
               }
+              
     }
 
     update(dt)
@@ -256,11 +264,14 @@ class GameScene extends Scene
         }
         
         //this._bombers anddthis._minions
+        loop1:
         for( let b = this._bombers.length -1; b >= 0; b--)
         {
-            for (let row =this._minions.length -1; row >= 0; row --)
+            loop2:
+            for (let row = this._minions.length -1; row >= 0; row --)
             {
-                for(let col =this._minions[row].length -1; col >= 0; col --)
+                loop3:
+                for(let col = this._minions[row].length -1; col >= 0; col --)
                 {
                     if(CollisionManager.SATCollision(this._bombers[b].getRect.getPoints(),this._minions[row][col].getRect.getPoints()))
                     {
@@ -271,6 +282,10 @@ class GameScene extends Scene
                         this._bombers[b].getHealth <= 0 && this._bombers.splice(b,1);
 
                         this.spawn();
+
+                        if(this._bombers.length <= 0)
+                            break loop1;
+                        //break out  here 
                         //play explostion this._animation
                     }
                 }
@@ -312,10 +327,13 @@ class GameScene extends Scene
         }*/
 
         //Asteroids andthis._minions
+        loop1:
         for( let a = this._asteroids.length -1; a >= 0; a --)
         {
+            loop2:
             for (let row = this._minions.length -1; row >= 0; row --)
             {
+                loop3:
                 for(let col = this._minions[row].length -1; col >= 0; col --)
                 {
                     if(CollisionManager.SATCollision(this._asteroids[a].getRect().getPoints(),this._minions[row][col].getRect.getPoints()))
@@ -325,8 +343,10 @@ class GameScene extends Scene
 
                        this._asteroids[a].setHealth(-10);
                        this._asteroids[a].getHealth() <= 0 && this._asteroids.splice(a,1);
-
+                        //same issue here when inions collide with last aasteroid, need to break
                        this.spawn();
+                       if(this._asteroids.length <= 0)
+                            break loop1;
                         //asteroid blow up this._animation
                     }
                 }
@@ -533,7 +553,7 @@ class GameScene extends Scene
             ctx.drawImage(healthValue,0,0,HEALTHVALUE_SIZE.x,HEALTHVALUE_SIZE.y,(this._camera.getPos.x + (this._camera.getSize.x * 0.81)) - this._camera.getPos.x,(this._camera.getPos.y +  (this._camera.getSize.x / 30.1)) - this._camera.getPos.y,HEALTHVALUE_SIZE.x * this._player.getHealth,HEALTHVALUE_SIZE.y);
         }
         ctx.fillStyle = 'blue';
-        //ctx.fillText(`fps : ${fps}`, (this._camera.getPos.x + 100) - this._camera.getPos.x,(this._camera.getPos.y + 50) - this._camera.getPos.y);  
+        ctx.fillText(`fps : ${this._waveManager.getWave()}`, (this._camera.getPos.x + 100) - this._camera.getPos.x,(this._camera.getPos.y + 50) - this._camera.getPos.y);  
         this._animationManager.draw(ctx,this._camera.getPos);    
     }
 
@@ -544,3 +564,38 @@ class GameScene extends Scene
         this._scenes.shift();
     }
 }
+
+/*
+for(let i = 0; i < this._waveManager.getBlackHoleCount(); i++)
+{
+    let  temp = new BlackHole(new Vec2(Math.random() * WORLD_WIDTH - 643, Math.random() * WORLD_HEIGHT - 480), new Vec2(643,480));
+    this._blackHoles.push(temp);
+}
+// Createthis._asteroids 
+for(let i = 0; i < this._waveManager.getAsteroidCount(); i++)
+{
+    let  temp = new Asteroid(new Vec2(Math.random() * WORLD_WIDTH, Math.random() * WORLD_HEIGHT), new Vec2(98,99));
+    this._asteroids.push(temp);
+}
+// Createthis._minions
+for(let row = 0; row < this._waveManager.getFlockCount(); row++)
+{
+    let tempMinions = [];
+    let flockPoint = new Vec2(Math.random() * (WORLD_WIDTH - MINION_SPAWN_XOFFSET), Math.random() * (WORLD_HEIGHT - MINION_SPAWN_YOFFSET));
+    for(let col = 0; col < this._waveManager.getMininonCount(); col++)
+    {
+        let tempMinion = new EnemyMinion(new Vec2(flockPoint.x + 50 * col, flockPoint.y + 10 * col), new Vec2(90, 102) ,new Vec2(Math.random(1) + -1, Math.random(1) + -1));
+        tempMinions.push(tempMinion);
+    }
+    this._minions.push(tempMinions);
+    this._flockPoints.push(new Vec2(Math.random() * (WORLD_WIDTH - MINION_SPAWN_XOFFSET), Math.random() * (WORLD_HEIGHT - MINION_SPAWN_YOFFSET)));
+}
+// Create this._bombers
+for(let i = 0; i < this._waveManager.getBomberCount(); i++)
+{
+    let pos = new Vec2(Math.random() * WORLD_WIDTH, Math.random() * WORLD_HEIGHT);
+    let flockPoint = new Vec2(Math.random() * WORLD_WIDTH, Math.random() * WORLD_HEIGHT);
+    let tempBomber = new Bomber(pos, new Vec2(128,158), new Vec2(0,0),flockPoint);
+    this._bombers.push(tempBomber);
+}
+*/
