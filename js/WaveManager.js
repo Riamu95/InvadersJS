@@ -2,19 +2,19 @@ const WaveManager = function()
 {
     this._npcList = new Map();
     this._spawnPoints = new Map();
-        //minion,flock,bomber,asteroid,black hole
-    this._npcList.set(1,[5,3,1,1,1]);
-    this._npcList.set(2,[5,3,1,5,0]);
-    this._npcList.set(3,[5,5,2,5,2]);
-    this._npcList.set(4,[5,5,5,5,2]);
-    this._npcList.set(5,[5,5,5,5,3]);
+        //minion,flock,bomber,asteroid,black hole, power up
+    this._npcList.set(1,[5,3,1,1,1,3]);
+    this._npcList.set(2,[5,3,1,5,0,3]);
+    this._npcList.set(3,[5,5,2,5,2,3]);
+    this._npcList.set(4,[5,5,5,5,2,5]);
+    this._npcList.set(5,[5,5,5,5,3,5]);
 
     this._MINION_COUNT = 0;
     this._MINION_FLOCK_COUNT = 0;
     this._BLACK_HOLE_COUNT = 0;
     this._ASTEROID_COUNT = 0;
     this._BOMBER_COUNT = 0;
-    
+    this._POWER_UP_COUNT = 0;
     this._wave = 0;
     this.index = 0;
 
@@ -63,7 +63,7 @@ WaveManager.prototype.nextWave = function()
     if (this._wave < 5) 
     {
         this._wave++;
-        [this._MINION_COUNT,this._MINION_FLOCK_COUNT,this._BOMBER_COUNT,this._ASTEROID_COUNT,this._BLACK_HOLE_COUNT] = this._npcList.get(this._wave);
+        [this._MINION_COUNT,this._MINION_FLOCK_COUNT,this._BOMBER_COUNT,this._ASTEROID_COUNT,this._BLACK_HOLE_COUNT,this._POWER_UP_COUNT] = this._npcList.get(this._wave);
     }
 }
 
@@ -101,6 +101,10 @@ WaveManager.prototype.getBlackHoleCount = function()
 WaveManager.prototype.getBomberCount =  function()
 {
     return this._BOMBER_COUNT;
+}
+WaveManager.prototype.getPowerUpCount =  function()
+{
+    return this._POWER_UP_COUNT;
 }
 
 WaveManager.prototype.getSpawnPoint = function(i  =  Math.trunc(Math.random() * 32))

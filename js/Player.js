@@ -27,6 +27,10 @@ class Player
         this._fireRate = 0.1;
         this._fireTimer = 0;
         this._mass = 1;
+        this._powerUp = null;
+        this._usingPowerUp = false;
+        this._currentPowerUp = null;
+        this._nextPowerUp = null;
         this.createShape();
     }
 
@@ -207,6 +211,45 @@ class Player
     setDirection(val)
     {
         this._direction = val;
+    }
+
+    getPowerUpType()
+    {
+        return this._powerUp;
+    }
+    setPowerUpType(val)
+    {
+        return this._powerUp = val;
+    }
+
+    getCurrentPowerUp()
+    {
+        return this._currentPowerUp;
+    }
+
+    setCurrentPowerUp(val)
+    {
+        this._currentPowerUp = val;
+    }
+
+    getUsingPowerUp()
+    {
+        return this._usingPowerUp;
+    }
+
+    setUsingPowerUp(val)
+    {
+        this._usingPowerUp = val;
+    }
+
+    getNextPowerUp()
+    {
+        return this._nextPowerUp;
+    }
+
+    setNextPowerUp(val)
+    {
+        this._nextPowerUp = val;
     }
 
     get getDeccelerationRate()

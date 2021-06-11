@@ -12,7 +12,7 @@ class GameScene extends Scene
         this._asteroids = [];
         this._blackHoles = [];
         this._pressedKeys = new Set();
-
+        this.powerUps = [];
         this._collisionManager = new CollisionManager();
         this._player = new Player(new Vec2(WORLD_WIDTH/2,WORLD_HEIGHT/2),new Vec2(127,130));
         this._camera = new Camera(this._player.getShape.getOrigin().x - CANVAS_WIDTH/2,this._player.getShape.getOrigin().y - CANVAS_HEIGHT/2,CANVAS_WIDTH,CANVAS_HEIGHT);
@@ -40,7 +40,7 @@ class GameScene extends Scene
         document.addEventListener('keydown', (event) =>
         { 
             if (event.key == 'w' || event.key == 'd' || event.key == 's' ||
-                event.key == 'a' || event.key == ' ')
+                event.key == 'a' || event.key == ' ' || event.key == 'e')
             {
                 this._pressedKeys[event.key] = true;
                 
@@ -51,7 +51,7 @@ class GameScene extends Scene
         document.addEventListener('keyup', (event) =>
         {
             if (event.key == 'w' || event.key == 'd' || event.key == 's' ||
-            event.key == 'a' || event.key == ' ')
+            event.key == 'a' || event.key == ' ' || event.key == 'e')
             {
                 this._pressedKeys[event.key] = false;
             }
@@ -67,6 +67,7 @@ class GameScene extends Scene
                     return;
                 }
             }
+
             if (this._bombers.length > 0)
             {
                 return; 
@@ -74,11 +75,18 @@ class GameScene extends Scene
             //short circuits on the first falsey value
             this._blackHoles.length > 0 &&  this._blackHoles.splice(0, this._blackHoles.length -1);
             this._asteroids.length > 0 && this._asteroids.splice(0,this._asteroids.length -1);
+            this.powerUps.length > 0 && this.powerUps.splice(0,this.powerUps.length -1);
 
             this._waveManager.nextWave();
-            //this._waveManager.getSpawnPoint(Math.trunc(Math.random() * 32));
+            
+            //create Power Ups
+            for(let i = 0; i < this._waveManager.getPowerUpCount(); i++)
+            {
+                let  temp = new PowerUp(new Vec2(Math.random() * WORLD_WIDTH, Math.random() * WORLD_HEIGHT), new Vec2(300,300),PowerUpType.HEALTH,  Math.random() * 30);
+                this.powerUps.push(temp);
+            }
+
               /* Create Black Holes*/
-               
               for(let i = 0; i < this._waveManager.getBlackHoleCount(); i++)
               {
                   let pos = this._waveManager.getSpawnPoint(Math.trunc(Math.random() * SPAWN_POINTS));
@@ -156,12 +164,66 @@ class GameScene extends Scene
                 //animate here apply initiala impulsesss
             }
         });
+
+
+        this.powerUps.forEach( pu =>
+        {
+            pu.update(dt);
+        });
     
         /* this._asteroids update */
         this._asteroids.forEach(ast =>
         {
             ast.update(dt);
         })
+
+        if(this._player.getUsingPowerUp())
+        {
+            let time = performance.now();
+            PowerUp.currentPowerUpTimer = time -PowerUp.currentPowerUpTimer;
+            PowerUp.currentPowerUpTimer /= 1000;
+            PowerUp.currentPowerUpTimer = Math.round(time);
+           
+            switch(this._player.getCurrentPowerUp()) 
+            {
+                case PowerUpType.HEALTH:
+                   this._player.setHealth = -0.1;
+                   this._player.setUsingPowerUp(false);
+                   this._player.setCurrentPowerUp(null);
+                   if (this._player.getCurrentPowerUp() == null && this._player.getNextPowerUp() != null)
+                   {
+                       this._player.setCurrentPowerUp(this._player.getCurrentPowerUp());
+                       this._player.getNextPowerUp(null);
+                   }
+                    break;//timer based power up
+                case  PowerUpType.FIRE_RATE: 
+                    if (PowerUp.currentPowerUpTimer >= PowerUp.fireRateTimer)
+                    {
+                        this._player.setFireRate = 0.1;
+                        this._player.setUsingPowerUp(false);
+                        this._player.setCurrentPowerUp(null);
+                        if (this._player.getCurrentPowerUp() == null && this._player.getNextPowerUp() != null)
+                        {
+                            this._player.setCurrentPowerUp(this._player.getCurrentPowerUp());
+                            this._player.getNextPowerUp(null);
+                        }
+                    }  
+                    break;//timer based power up/ healthbased
+                case  PowerUpType.SHIELD:
+                    if (PowerUp.currentPowerUpTimer >= PowerUp.shieldTimer)
+                    {
+                        //reset power up timer
+                        this._player.setUsingPowerUp(false);
+                        this._player.setCurrentPowerUp(null);
+                        if (this._player.getCurrentPowerUp() == null && this._player.getNextPowerUp() != null)
+                        {
+                            this._player.setCurrentPowerUp(this._player.getCurrentPowerUp());
+                            this._player.getNextPowerUp(null);
+                        }
+                    }  
+                    break;
+            }
+        }
 
         this.inputHandling(dt);
         this.collisions();
@@ -224,6 +286,33 @@ class GameScene extends Scene
             this._bullets.push(tempBullet);
             this._player.setFireTimer(performance.now());
         }
+
+        if(this._pressedKeys['e'])
+        {
+            //use power up
+            //start /timer
+            switch(this._player.getCurrentPowerUp()) 
+            {
+                case PowerUpType.HEALTH:
+                    this._player.setUsingPowerUp(true);
+                    this._player.setPowerUpType(PowerUpType.HEALTH);
+                     PowerUp.currentPowerUpTimer = performance.now();
+                    break;//timer based power up
+                case  PowerUpType.FIRE_RATE:   
+                    this._player.setUsingPowerUp(true);
+                    this._player.setPowerUpType(PowerUpType.FIRE_RATE);
+                    PowerUp.currentPowerUpTimer = performance.now();
+                  //  this._player.getCurrentPowerUp() == null ? this._player.setCurrentPowerUp(PowerUpType.FIRE_RATE) : this._player.setNextPowerUp(PowerUpType.FIRE_RATE);
+                    break;//timer based power up/ healthbased
+                case  PowerUpType.SHIELD:
+                    this._player.setUsingPowerUp(true);
+                    this._player.setPowerUpType(PowerUpType.SHIELD);
+                    PowerUp.currentPowerUpTimer = performance.now();
+                   // this._player.getCurrentPowerUp() == null ? this._player.setCurrentPowerUp(PowerUpType.SHIELD) : this._player.setNextPowerUp(PowerUpType.SHIELD);
+                    break;
+            }
+
+        }
     }
 
     collisions()
@@ -234,6 +323,35 @@ class GameScene extends Scene
 
     objectCollisions()
     {
+        // Player and power ups 
+        for( let i = 0; i < this.powerUps.length; i++)
+        {
+            if(!this.powerUps[i].getActive())
+            {
+                continue;
+            }
+
+            if(CollisionManager.SATCollision(this.powerUps[i].getRect().getPoints(), this._player._shape.getPoints()))
+            {
+                switch(this.powerUps[i].getType()) 
+                {
+                    case PowerUpType.HEALTH:
+                        this._player.getCurrentPowerUp() == null ? this._player.setCurrentPowerUp(PowerUpType.HEALTH) : this._player.setNextPowerUp(PowerUpType.HEALTH);
+                      break;//timer based power up
+                    case  PowerUpType.FIRE_RATE:   
+                        this._player.getCurrentPowerUp() == null ? this._player.setCurrentPowerUp(PowerUpType.FIRE_RATE) : this._player.setNextPowerUp(PowerUpType.FIRE_RATE);
+                      break;//timer based power up/ healthbased
+                    case  PowerUpType.SHIELD:
+                        this._player.getCurrentPowerUp() == null ? this._player.setCurrentPowerUp(PowerUpType.SHIELD) : this._player.setNextPowerUp(PowerUpType.SHIELD);
+                      break;
+                }
+
+                this.powerUps[i].setActive(false);
+                //Make power up not active, once power up depleted remove power up
+                //destroy power up + animation
+            }
+        }
+
           /*  Mininons and player */
         for(let row = 0; row < this._minions.length; row++)
         {
@@ -542,6 +660,12 @@ class GameScene extends Scene
                 minion.draw(ctx,this._camera.getPos);
             }); 
         });
+
+        this.powerUps.forEach( pu =>
+        {
+            pu.draw(ctx,this._camera.getPos)
+        });
+
         //Scale health bar 
         if(this._player.getHealth > 0)
         {
