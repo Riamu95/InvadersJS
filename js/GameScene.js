@@ -134,6 +134,8 @@ class GameScene extends Scene
         {
             bullet.move(dt);
         })
+
+        this._player.getShield().update(dt);
     
         //for every array, allocate seek point and move the flock
         for( let row = 0; row < this._minions.length; row++)
@@ -311,6 +313,21 @@ class GameScene extends Scene
 
     objectCollisions()
     {
+        if(this._player.getShield().getActive())
+        {
+            for (let row = 0; row < this._minions.length; row ++)
+            {
+                for(let col = 0; col < this._minions[row].length; col ++)
+                {
+                    if(CollisionManager.SATCollision(this._minions[row][col].getRect.getPoints(),this._player.getCollisionRect.getPoints()))
+                    {
+                        this._player.getShield().addBullet(this._minions[row][col].getRect.getOrigin());
+                        console.log("colision");
+                    }
+                }
+            }
+        }
+
         // Player and power ups 
         for( let i = 0; i < this.powerUps.length; i++)
         {
