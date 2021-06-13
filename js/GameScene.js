@@ -192,7 +192,7 @@ class GameScene extends Scene
                 case  PowerUpType.FIRE_RATE: 
                     if (time >= PowerUp.prototype.fireRateTimer)
                     {
-                        this._player.setFireRate = 0.1;
+                        this._player.setFireRate = 0.5;
                         this._player.resetPowerUp();
                     }  
                     break;
@@ -325,6 +325,7 @@ class GameScene extends Scene
                 }
 
                 this.powerUps[i].setActive(false);
+                this.powerUps[i].setInactiveTimer(performance.now());
                 //Make power up not active, once power up depleted remove power up
                 //destroy power up + animation
             }

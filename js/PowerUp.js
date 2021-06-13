@@ -11,12 +11,14 @@ const PowerUp = function(pos,size,type, spawnTimer)
     this._type = type;
     this._spawnTimer = spawnTimer;
     this._active = true;
+    this._inactiveTimer = 0;
 }
 
 PowerUp.prototype.MaxPowerUpCount = 5;
 PowerUp.prototype.currentPowerUpTimer = 0;
 PowerUp.prototype.timeToLive = 5;
 PowerUp.prototype.shieldTimer = 20;
+PowerUp.prototype.resetTime = 20;
 PowerUp.prototype.fireRateTimer = 10;
 PowerUp.prototype.health_image = document.getElementById('health');
 PowerUp.prototype.fire_rate = document.getElementById('fireRate');
@@ -67,7 +69,24 @@ PowerUp.prototype.setActive = function(val)
 
 PowerUp.prototype.update = function(dt)
 {
+    if(!this._active && Math.round((performance.now() - this._inactiveTimer)/1000) > PowerUp.prototype.resetTime)
+    {
+        this.reset();
+    }
+
     this._rect.addAngle(0.2);
+}
+
+PowerUp.prototype.reset = function()
+{
+    this._active = true;
+    this._rect.pos = new Vec2(Math.random() * WORLD_WIDTH, Math.random() * WORLD_HEIGHT);
+    this._type = this.generateRandomType(Math.round(Math.random() * 2));
+}
+
+PowerUp.prototype.setInactiveTimer = function(val)
+{
+    this._inactiveTimer = val;
 }
 
 PowerUp.prototype.draw = function(ctx,cameraPos)
