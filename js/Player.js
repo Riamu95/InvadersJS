@@ -232,6 +232,14 @@ class Player
         this._currentPowerUp = val;
     }
 
+    resetPowerUp()
+    {
+        this.setUsingPowerUp(false);
+        this.setCurrentPowerUp(null);
+        this.setPowerUpType(null);
+        this.setUsingPowerUp(false);
+    }
+
     getUsingPowerUp()
     {
         return this._usingPowerUp;

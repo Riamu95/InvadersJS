@@ -180,48 +180,32 @@ class GameScene extends Scene
         if(this._player.getUsingPowerUp())
         {
             let time = performance.now();
-            PowerUp.currentPowerUpTimer = time -PowerUp.currentPowerUpTimer;
+            PowerUp.currentPowerUpTimer = time - PowerUp.currentPowerUpTimer;
             PowerUp.currentPowerUpTimer /= 1000;
             PowerUp.currentPowerUpTimer = Math.round(time);
            
-            switch(this._player.getCurrentPowerUp()) 
+            switch(this._player.getPowerUpType()) 
             {
                 case PowerUpType.HEALTH:
                    this._player.setHealth = -0.1;
-                   this._player.setUsingPowerUp(false);
-                   this._player.setCurrentPowerUp(null);
-                   if (this._player.getCurrentPowerUp() == null && this._player.getNextPowerUp() != null)
-                   {
-                       this._player.setCurrentPowerUp(this._player.getCurrentPowerUp());
-                       this._player.getNextPowerUp(null);
-                   }
-                    break;//timer based power up
+                   this._player.resetPowerUp();
+                    break;
                 case  PowerUpType.FIRE_RATE: 
                     if (PowerUp.currentPowerUpTimer >= PowerUp.fireRateTimer)
                     {
                         this._player.setFireRate = 0.1;
-                        this._player.setUsingPowerUp(false);
-                        this._player.setCurrentPowerUp(null);
-                        if (this._player.getCurrentPowerUp() == null && this._player.getNextPowerUp() != null)
-                        {
-                            this._player.setCurrentPowerUp(this._player.getCurrentPowerUp());
-                            this._player.getNextPowerUp(null);
-                        }
-                    }  
-                    break;//timer based power up/ healthbased
-                case  PowerUpType.SHIELD:
-                    if (PowerUp.currentPowerUpTimer >= PowerUp.shieldTimer)
-                    {
-                        //reset power up timer
-                        this._player.setUsingPowerUp(false);
-                        this._player.setCurrentPowerUp(null);
-                        if (this._player.getCurrentPowerUp() == null && this._player.getNextPowerUp() != null)
-                        {
-                            this._player.setCurrentPowerUp(this._player.getCurrentPowerUp());
-                            this._player.getNextPowerUp(null);
-                        }
+                        this._player.resetPowerUp();
                     }  
                     break;
+                case  PowerUpType.SHIELD:
+                    PowerUp.currentPowerUpTimer >= PowerUp.shieldTimer &&  this._player.resetPowerUp();
+                    break;
+            }
+
+            if (this._player.getCurrentPowerUp() == null && this._player.getNextPowerUp() != null)
+            {
+                this._player.setCurrentPowerUp(this._player.getNextPowerUp());
+                this._player.setNextPowerUp(null);
             }
         }
 
@@ -287,31 +271,24 @@ class GameScene extends Scene
             this._player.setFireTimer(performance.now());
         }
 
-        if(this._pressedKeys['e'])
+        if(this._pressedKeys['e']  && this._player.getCurrentPowerUp() != null)
         {
-            //use power up
-            //start /timer
+            this._player.setUsingPowerUp(true);
+            PowerUp.currentPowerUpTimer = performance.now();
+            
             switch(this._player.getCurrentPowerUp()) 
             {
                 case PowerUpType.HEALTH:
-                    this._player.setUsingPowerUp(true);
                     this._player.setPowerUpType(PowerUpType.HEALTH);
-                     PowerUp.currentPowerUpTimer = performance.now();
-                    break;//timer based power up
+                    break;
                 case  PowerUpType.FIRE_RATE:   
-                    this._player.setUsingPowerUp(true);
                     this._player.setPowerUpType(PowerUpType.FIRE_RATE);
-                    PowerUp.currentPowerUpTimer = performance.now();
-                  //  this._player.getCurrentPowerUp() == null ? this._player.setCurrentPowerUp(PowerUpType.FIRE_RATE) : this._player.setNextPowerUp(PowerUpType.FIRE_RATE);
-                    break;//timer based power up/ healthbased
+                    break;
                 case  PowerUpType.SHIELD:
-                    this._player.setUsingPowerUp(true);
                     this._player.setPowerUpType(PowerUpType.SHIELD);
-                    PowerUp.currentPowerUpTimer = performance.now();
-                   // this._player.getCurrentPowerUp() == null ? this._player.setCurrentPowerUp(PowerUpType.SHIELD) : this._player.setNextPowerUp(PowerUpType.SHIELD);
                     break;
             }
-
+            this._pressedKeys['e'] = false;
         }
     }
 
