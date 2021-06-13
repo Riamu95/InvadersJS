@@ -1,5 +1,5 @@
-const PowerUpType = {
-
+const PowerUpType = 
+{
     HEALTH : "health",
     FIRE_RATE : "fireRate",
     SHIELD : "shield"
@@ -23,16 +23,26 @@ PowerUp.prototype.fire_rate = document.getElementById('fireRate');
 PowerUp.prototype.shield_image = document.getElementById('shield');
 
 PowerUp.prototype.activatePowerUp = function()
-{
-    /*
-    switch(this._type)
-    {
-        case PowerUpType.fire_rate:
-            break;
-        case PowerUpType.SHIELD:
-            break;
-    }*/  
+{ 
 
+}
+PowerUp.prototype.generateRandomType = function(val)
+{
+    let type = "";
+    switch(val)
+    {
+        case  0:
+            type = "health";
+            break;
+        case 1:
+            type = "fireRate";
+            break;
+        case 2:
+            type = "shield";
+            break;
+    }
+    return type;
+    
 }
 
 PowerUp.prototype.getActive = function()

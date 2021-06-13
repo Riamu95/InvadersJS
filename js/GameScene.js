@@ -43,8 +43,11 @@ class GameScene extends Scene
                 event.key == 'a' || event.key == ' ' || event.key == 'e')
             {
                 this._pressedKeys[event.key] = true;
-                
-            // event.key == ' ' && player.setFireTimer(performance.now()); 
+                if( event.key == ' ' && !this._player.getFired())
+                {
+                    this._player.setFired(true);
+                    this._player.setFireTimer(performance.now()); 
+                }
             }
         });
 
@@ -82,7 +85,7 @@ class GameScene extends Scene
             //create Power Ups
             for(let i = 0; i < this._waveManager.getPowerUpCount(); i++)
             {
-                let  temp = new PowerUp(new Vec2(Math.random() * WORLD_WIDTH, Math.random() * WORLD_HEIGHT), new Vec2(300,300),PowerUpType.HEALTH,  Math.random() * 30);
+                let  temp = new PowerUp(new Vec2(Math.random() * WORLD_WIDTH, Math.random() * WORLD_HEIGHT), new Vec2(300,300),"fireRate",  Math.random() * 30);
                 this.powerUps.push(temp);
             }
 
@@ -178,12 +181,8 @@ class GameScene extends Scene
         })
 
         if(this._player.getUsingPowerUp())
-        {
-            let time = performance.now();
-            PowerUp.currentPowerUpTimer = time - PowerUp.currentPowerUpTimer;
-            PowerUp.currentPowerUpTimer /= 1000;
-            PowerUp.currentPowerUpTimer = Math.round(time);
-           
+        {                                          
+           let time  = Math.round((performance.now() - PowerUp.prototype.currentPowerUpTimer)/1000);  
             switch(this._player.getPowerUpType()) 
             {
                 case PowerUpType.HEALTH:
@@ -191,14 +190,14 @@ class GameScene extends Scene
                    this._player.resetPowerUp();
                     break;
                 case  PowerUpType.FIRE_RATE: 
-                    if (PowerUp.currentPowerUpTimer >= PowerUp.fireRateTimer)
+                    if (time >= PowerUp.prototype.fireRateTimer)
                     {
                         this._player.setFireRate = 0.1;
                         this._player.resetPowerUp();
                     }  
                     break;
                 case  PowerUpType.SHIELD:
-                    PowerUp.currentPowerUpTimer >= PowerUp.shieldTimer &&  this._player.resetPowerUp();
+                time >= PowerUp.prototype.shieldTimer &&  this._player.resetPowerUp();
                     break;
             }
 
@@ -215,6 +214,7 @@ class GameScene extends Scene
         if(this._player.getHealth < 0)
             this.NextScene();
     }
+    
 
     inputHandling(dt)
     {
@@ -262,26 +262,27 @@ class GameScene extends Scene
             this._player.getShape.setAngle(-this._player.getRotationSpeed);
             this._player.getShape.rotate();
         }
-    
-        if(this._pressedKeys[' '] && Math.round((performance.now() - this._player.getFireTimer) /1000) > this._player.getFireRate)
+
+        if(this._player.getFired() && (performance.now() - this._player.getFireTimer) /1000 >= this._player.getFireRate)
         {
             let tempBullet = new Bullet(new Vec2(this._player.getShape.getOrigin().x, this._player.getShape.getOrigin().y),new Vec2(30,30),
             this._player.getSpriteAngle * Math.PI/180,this._player.getMaxBulletSpeed);
             this._bullets.push(tempBullet);
-            this._player.setFireTimer(performance.now());
+            this._player.setFired(false);
         }
 
         if(this._pressedKeys['e']  && this._player.getCurrentPowerUp() != null)
         {
             this._player.setUsingPowerUp(true);
-            PowerUp.currentPowerUpTimer = performance.now();
+            PowerUp.prototype.currentPowerUpTimer = performance.now();
             
             switch(this._player.getCurrentPowerUp()) 
             {
                 case PowerUpType.HEALTH:
                     this._player.setPowerUpType(PowerUpType.HEALTH);
                     break;
-                case  PowerUpType.FIRE_RATE:   
+                case  PowerUpType.FIRE_RATE:
+                    this._player.setFireRate = 0.25;   
                     this._player.setPowerUpType(PowerUpType.FIRE_RATE);
                     break;
                 case  PowerUpType.SHIELD:
@@ -564,12 +565,9 @@ class GameScene extends Scene
             }
         }
         /* Player Bullet timer Collision */
-        for(let i =this._bullets.length -1 ; i >= 0; i--)
+        for(let i = this._bullets.length -1 ; i >= 0; i--)
         {
-            let time = performance.now();
-            time = time -this._bullets[i].getTTL();
-            time /= 1000;
-            time = Math.round(time);
+           let  time = Math.round((performance.now() -this._bullets[i].getTTL())/1000);
             if (time >= this._player.getTTL)
             {
                 this._animationManager.addAnimation(5,0.5,this._bullets[i].getRect.getOrigin(),BULLET_EXPLOSION_IMAGE,new Vec2(256,256));
@@ -582,11 +580,8 @@ class GameScene extends Scene
         {
             for(let b = this._bombers[i]._bullets.length -1; b >= 0; b--)
             {
-                let time = performance.now();
-                time = time -  this._bombers[i]._bullets[b].getTTL();
-                time /= 1000;
-                time = Math.round(time);
-        
+                let  time = Math.round((performance.now() - this._bombers[i]._bullets[b].getTTL())/1000);
+
                 if (time >= Bomber.ttl)
                 {
                     //implode bomb

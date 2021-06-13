@@ -24,7 +24,8 @@ class Player
         this._ttl = 3;
         this._maxbulletSpeed = 8;
         this._color = 'red'; 
-        this._fireRate = 0.1;
+        this._fired = false;
+        this._fireRate = 0.5;
         this._fireTimer = 0;
         this._mass = 1;
         this._powerUp = null;
@@ -186,6 +187,16 @@ class Player
     setFireTimer(val)
     {
         this._fireTimer = val;
+    }
+
+    getFired()
+    {
+        return this._fired;
+    }
+
+    setFired(val)
+    {
+        this._fired = val;
     }
 
     getSpeed()
