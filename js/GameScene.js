@@ -85,7 +85,7 @@ class GameScene extends Scene
             //create Power Ups
             for(let i = 0; i < this._waveManager.getPowerUpCount(); i++)
             {
-                let  temp = new PowerUp(new Vec2(Math.random() * WORLD_WIDTH, Math.random() * WORLD_HEIGHT), new Vec2(300,300),"fireRate",  Math.random() * 30);
+                let  temp = new PowerUp(new Vec2(Math.random() * WORLD_WIDTH, Math.random() * WORLD_HEIGHT), new Vec2(300,300),"shield",  Math.random() * 30);
                 this.powerUps.push(temp);
             }
 
@@ -173,7 +173,10 @@ class GameScene extends Scene
         {
             pu.update(dt);
         });
-    
+
+        this._player.getShield().getActive() &&  this._player.getShield().update(dt);
+           
+
         /* this._asteroids update */
         this._asteroids.forEach(ast =>
         {
@@ -197,7 +200,13 @@ class GameScene extends Scene
                     }  
                     break;
                 case  PowerUpType.SHIELD:
-                time >= PowerUp.prototype.shieldTimer &&  this._player.resetPowerUp();
+                    //if timer >= 10, take 16 health , reset timer, 
+                    //if health < = 0 de activate health
+                    if(time >= PowerUp.prototype.shieldTimer)
+                    {
+                        this._player.getShield().setActive(false);
+                        this._player.resetPowerUp();
+                    }  
                     break;
             }
 
@@ -287,6 +296,7 @@ class GameScene extends Scene
                     break;
                 case  PowerUpType.SHIELD:
                     this._player.setPowerUpType(PowerUpType.SHIELD);
+                    this._player.getShield().setActive(true);
                     break;
             }
             this._pressedKeys['e'] = false;
@@ -625,6 +635,9 @@ class GameScene extends Scene
         };
 
         this._player.draw(ctx,this._camera.getPos);
+
+        this._player.getShield().getActive() && this._player.getShield().draw(ctx,this._camera.getPos);
+
         /* Draw all minions*/
         this._minions.forEach(array => 
         {
@@ -661,38 +674,3 @@ class GameScene extends Scene
         this._scenes.shift();
     }
 }
-
-/*
-for(let i = 0; i < this._waveManager.getBlackHoleCount(); i++)
-{
-    let  temp = new BlackHole(new Vec2(Math.random() * WORLD_WIDTH - 643, Math.random() * WORLD_HEIGHT - 480), new Vec2(643,480));
-    this._blackHoles.push(temp);
-}
-// Createthis._asteroids 
-for(let i = 0; i < this._waveManager.getAsteroidCount(); i++)
-{
-    let  temp = new Asteroid(new Vec2(Math.random() * WORLD_WIDTH, Math.random() * WORLD_HEIGHT), new Vec2(98,99));
-    this._asteroids.push(temp);
-}
-// Createthis._minions
-for(let row = 0; row < this._waveManager.getFlockCount(); row++)
-{
-    let tempMinions = [];
-    let flockPoint = new Vec2(Math.random() * (WORLD_WIDTH - MINION_SPAWN_XOFFSET), Math.random() * (WORLD_HEIGHT - MINION_SPAWN_YOFFSET));
-    for(let col = 0; col < this._waveManager.getMininonCount(); col++)
-    {
-        let tempMinion = new EnemyMinion(new Vec2(flockPoint.x + 50 * col, flockPoint.y + 10 * col), new Vec2(90, 102) ,new Vec2(Math.random(1) + -1, Math.random(1) + -1));
-        tempMinions.push(tempMinion);
-    }
-    this._minions.push(tempMinions);
-    this._flockPoints.push(new Vec2(Math.random() * (WORLD_WIDTH - MINION_SPAWN_XOFFSET), Math.random() * (WORLD_HEIGHT - MINION_SPAWN_YOFFSET)));
-}
-// Create this._bombers
-for(let i = 0; i < this._waveManager.getBomberCount(); i++)
-{
-    let pos = new Vec2(Math.random() * WORLD_WIDTH, Math.random() * WORLD_HEIGHT);
-    let flockPoint = new Vec2(Math.random() * WORLD_WIDTH, Math.random() * WORLD_HEIGHT);
-    let tempBomber = new Bomber(pos, new Vec2(128,158), new Vec2(0,0),flockPoint);
-    this._bombers.push(tempBomber);
-}
-*/

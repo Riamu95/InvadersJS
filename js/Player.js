@@ -5,7 +5,7 @@ class Player
         this._shape = new Shape(pos,size,6);
         
         this._collisionRect = new Rect(new Vec2(this._shape._origin.x , this._shape._origin.y)
-        , new Vec2(this._shape._size.x * 3, this._shape._size.y * 4));
+        , new Vec2(this._shape._size.x * 4, this._shape._size.y * 4));
 
         this._health = 1;
 
@@ -32,6 +32,7 @@ class Player
         this._usingPowerUp = false;
         this._currentPowerUp = null;
         this._nextPowerUp = null;
+        this._shield = new Shield(this._shape.getOrigin(), new Vec2(93,94));
         this.createShape();
     }
 
@@ -187,6 +188,11 @@ class Player
     setFireTimer(val)
     {
         this._fireTimer = val;
+    }
+
+    getShield()
+    {
+        return this._shield;
     }
 
     getFired()
