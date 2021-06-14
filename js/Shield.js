@@ -9,6 +9,7 @@ const Shield = function(pos,size)
     this._fireTimer = 0;
     this._timer  = 0;
     this._targets = new Set();
+    this._ttl = 2;
 }
 
 
@@ -21,12 +22,11 @@ Shield.prototype.update = function(dt)
 
         if(this._timer > this._fireRate)
         {   
-            //this._bullets is empty error 
             let bullet = this._bullets.shift();
             bullet[0].getRect.setRect(this._rect.getOrigin());
+            bullet[0].setTTL = performance.now();
            this._activebullets.push(bullet);
            this._fireTimer = performance.now();
-           this._targets.delete(this._activebullets[this._activebullets.length -1][1]);
         }
     }
    
@@ -38,7 +38,6 @@ Shield.prototype.update = function(dt)
 
 Shield.prototype.addBullet = function(target)
 {
-    //every frame we're adding back a bullet
     if(!this._targets.has(target))
     {
         this._targets.add(target);
@@ -48,12 +47,30 @@ Shield.prototype.addBullet = function(target)
     }
 }
 
+Shield.prototype.getTTL = function()
+{
+    return this._ttl;
+}
+
 Shield.prototype.getActive = function()
 {
    return this._active;
 }
 
+Shield.prototype.getActiveBullets = function()
+{
+   return this._activebullets;
+}
 
+Shield.prototype.getBullets = function()
+{
+   return this._bullets;
+}
+
+Shield.prototype.getTargets = function()
+{
+   return this._targets;
+}
 
 Shield.prototype.setActive = function(val)
 {

@@ -322,7 +322,6 @@ class GameScene extends Scene
                     if(CollisionManager.SATCollision(this._minions[row][col].getRect.getPoints(),this._player.getCollisionRect.getPoints()))
                     {
                         this._player.getShield().addBullet(this._minions[row][col].getRect.getOrigin());
-                        console.log("colision");
                     }
                 }
             }
@@ -510,6 +509,7 @@ class GameScene extends Scene
 
     bulletCollisions()
     {
+        this.turretCollisions();
             /* Minion Player bullet collision */
         for( let row = 0; row < this._minions.length; row++)
         {
@@ -615,6 +615,44 @@ class GameScene extends Scene
                     //implode bomb
                     this._animationManager.addAnimation(5,0.5,this._bombers[i]._bullets[b].getRect.getOrigin(),EXPLOSION_IMAGE,new Vec2(256,256));
                     this._bombers[i]._bullets.splice(b,1);
+                }
+            }
+        }
+    }
+
+    turretCollisions()
+    {
+        let  turretBullets = this._player.getShield().getActiveBullets();
+        //turret bullets and minions
+        for( let i = turretBullets.length -1; i >= 0; i--)
+        {
+            let  time = Math.round((performance.now() - turretBullets[i][0].getTTL())/1000);
+
+            if (time >= this._player.getShield().getTTL())
+            {
+                this._animationManager.addAnimation(5,0.5,turretBullets[i][0].getRect.getOrigin(),EXPLOSION_IMAGE,new Vec2(256,256));
+                this._player.getShield().getTargets().delete(turretBullets[i][1]);      
+                turretBullets.splice(i,1);
+            }
+        }
+
+        for( let row = 0; row < this._minions.length; row++)
+        {
+            for( let col = this._minions[row].length -1; col >= 0; col--)
+            {  
+                for(let b = turretBullets.length -1 ; b >= 0; b--)
+                {
+                    if(CollisionManager.SATCollision(turretBullets[b][0].getRect.getPoints(),this._minions[row][col].getRect.getPoints()))
+                    {
+                        this._animationManager.addAnimation(5,0.5,this._minions[row][col].getRect.getOrigin(),EXPLOSION_IMAGE,new Vec2(256,256));
+                        this._minions[row].splice(col,1);
+                
+                        this._animationManager.addAnimation(5,0.5,turretBullets[b][0].getRect.getOrigin(),BULLET_EXPLOSION_IMAGE,new Vec2(256,256));
+                        turretBullets.splice(b,1);
+                        this.spawn();
+                        if (turretBullets.length > 0)
+                                break;
+                    }
                 }
             }
         }

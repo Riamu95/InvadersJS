@@ -56,7 +56,7 @@ class Bullet
     } 
     set setTTL(val)
     {
-        this._ttl += val;
+        this._ttl = val;
     }
 
     get getRect()
