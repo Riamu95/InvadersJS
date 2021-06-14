@@ -32,7 +32,7 @@ class Player
         this._usingPowerUp = false;
         this._currentPowerUp = null;
         this._nextPowerUp = null;
-        this._shield = new Shield(this._shape.getOrigin(), new Vec2(93,94));
+        this._autoTurret = new AutoTurret(this._shape.getOrigin(), new Vec2(93,94));
         this.createShape();
     }
 
@@ -190,9 +190,9 @@ class Player
         this._fireTimer = val;
     }
 
-    getShield()
+    getAutoTurret()
     {
-        return this._shield;
+        return this._autoTurret;
     }
 
     getFired()

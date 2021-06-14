@@ -2,7 +2,7 @@ const PowerUpType =
 {
     HEALTH : "health",
     FIRE_RATE : "fireRate",
-    SHIELD : "shield"
+    AUTOTURRET : "autoTurret"
 };
 
 const PowerUp = function(pos,size,type, spawnTimer)
@@ -17,12 +17,12 @@ const PowerUp = function(pos,size,type, spawnTimer)
 PowerUp.prototype.MaxPowerUpCount = 5;
 PowerUp.prototype.currentPowerUpTimer = 0;
 PowerUp.prototype.timeToLive = 5;
-PowerUp.prototype.shieldTimer = 20;
+PowerUp.prototype.AutoTurretTimer = 20;
 PowerUp.prototype.resetTime = 20;
 PowerUp.prototype.fireRateTimer = 10;
 PowerUp.prototype.health_image = document.getElementById('health');
 PowerUp.prototype.fire_rate = document.getElementById('fireRate');
-PowerUp.prototype.shield_image = document.getElementById('shield');
+PowerUp.prototype.autoTurret_image = document.getElementById('shield');
 
 PowerUp.prototype.activatePowerUp = function()
 { 
@@ -40,7 +40,7 @@ PowerUp.prototype.generateRandomType = function(val)
             type = "fireRate";
             break;
         case 2:
-            type = "shield";
+            type = "autoTurret";
             break;
     }
     return type;
@@ -107,8 +107,8 @@ PowerUp.prototype.draw = function(ctx,cameraPos)
         case  PowerUpType.FIRE_RATE:
             ctx.drawImage(this.fire_rate,0,0,this._rect.getSize().x,this._rect.getSize().y,-this._rect.getSize().x/2,-this._rect.getSize().y/2,this._rect.getSize().x,this._rect.getSize().y);
           break;
-        case  PowerUpType.SHIELD:
-            ctx.drawImage(this.shield_image,0,0,this._rect.getSize().x,this._rect.getSize().y,-this._rect.getSize().x/2,-this._rect.getSize().y/2,this._rect.getSize().x,this._rect.getSize().y);
+        case  PowerUpType.AUTOTURRET:
+            ctx.drawImage(this.autoTurret_image,0,0,this._rect.getSize().x,this._rect.getSize().y,-this._rect.getSize().x/2,-this._rect.getSize().y/2,this._rect.getSize().x,this._rect.getSize().y);
           break;
     }
 

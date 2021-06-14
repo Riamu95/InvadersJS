@@ -85,7 +85,7 @@ class GameScene extends Scene
             //create Power Ups
             for(let i = 0; i < this._waveManager.getPowerUpCount(); i++)
             {
-                let  temp = new PowerUp(new Vec2(Math.random() * WORLD_WIDTH, Math.random() * WORLD_HEIGHT), new Vec2(300,300),"shield",  Math.random() * 30);
+                let  temp = new PowerUp(new Vec2(Math.random() * WORLD_WIDTH, Math.random() * WORLD_HEIGHT), new Vec2(300,300),"autoTurret",  Math.random() * 30);
                 this.powerUps.push(temp);
             }
 
@@ -134,8 +134,6 @@ class GameScene extends Scene
         {
             bullet.move(dt);
         })
-
-        this._player.getShield().update(dt);
     
         //for every array, allocate seek point and move the flock
         for( let row = 0; row < this._minions.length; row++)
@@ -176,7 +174,7 @@ class GameScene extends Scene
             pu.update(dt);
         });
 
-        this._player.getShield().getActive() &&  this._player.getShield().update(dt);
+        this._player.getAutoTurret().getActive() &&  this._player.getAutoTurret().update(dt);
            
 
         /* this._asteroids update */
@@ -201,12 +199,12 @@ class GameScene extends Scene
                         this._player.resetPowerUp();
                     }  
                     break;
-                case  PowerUpType.SHIELD:
+                case  PowerUpType.AUTOTURRET:
                     //if timer >= 10, take 16 health , reset timer, 
                     //if health < = 0 de activate health
-                    if(time >= PowerUp.prototype.shieldTimer)
+                    if(time >= PowerUp.prototype.AutoTurretTimer)
                     {
-                        this._player.getShield().setActive(false);
+                        this._player.getAutoTurret().setActive(false);
                         this._player.resetPowerUp();
                     }  
                     break;
@@ -296,9 +294,9 @@ class GameScene extends Scene
                     this._player.setFireRate = 0.25;   
                     this._player.setPowerUpType(PowerUpType.FIRE_RATE);
                     break;
-                case  PowerUpType.SHIELD:
-                    this._player.setPowerUpType(PowerUpType.SHIELD);
-                    this._player.getShield().setActive(true);
+                case  PowerUpType.AUTOTURRET:
+                    this._player.setPowerUpType(PowerUpType.AUTOTURRET);
+                    this._player.getAutoTurret().setActive(true);
                     break;
             }
             this._pressedKeys['e'] = false;
@@ -313,18 +311,26 @@ class GameScene extends Scene
 
     objectCollisions()
     {
-        if(this._player.getShield().getActive())
+        if(this._player.getAutoTurret().getActive())
         {
             for (let row = 0; row < this._minions.length; row ++)
             {
                 for(let col = 0; col < this._minions[row].length; col ++)
                 {
-                    if(CollisionManager.SATCollision(this._minions[row][col].getRect.getPoints(),this._player.getCollisionRect.getPoints()))
+                    if(Vec2.distance(this._player.getAutoTurret().getRect().getOrigin(),this._minions[row][col].getRect.getOrigin()) < this._player.getAutoTurret().getActiveDistance())
                     {
-                        this._player.getShield().addBullet(this._minions[row][col].getRect.getOrigin());
+                        this._player.getAutoTurret().addBullet(this._minions[row][col].getRect.getOrigin());
                     }
                 }
             }
+
+                for(let i = this._bombers.length -1; i >= 0; i--)
+                {
+                    if(Vec2.distance(this._player.getAutoTurret().getRect().getOrigin(),this._bombers[i].getRect.getOrigin()) < this._player.getAutoTurret().getActiveDistance())
+                    {
+                        this._player.getAutoTurret().addBullet(this._bombers[i].getRect.getOrigin());
+                    }
+                }
         }
 
         // Player and power ups 
@@ -345,8 +351,8 @@ class GameScene extends Scene
                     case  PowerUpType.FIRE_RATE:   
                         this._player.getCurrentPowerUp() == null ? this._player.setCurrentPowerUp(PowerUpType.FIRE_RATE) : this._player.setNextPowerUp(PowerUpType.FIRE_RATE);
                       break;//timer based power up/ healthbased
-                    case  PowerUpType.SHIELD:
-                        this._player.getCurrentPowerUp() == null ? this._player.setCurrentPowerUp(PowerUpType.SHIELD) : this._player.setNextPowerUp(PowerUpType.SHIELD);
+                    case  PowerUpType.AUTOTURRET:
+                        this._player.getCurrentPowerUp() == null ? this._player.setCurrentPowerUp(PowerUpType.AUTOTURRET) : this._player.setNextPowerUp(PowerUpType.AUTOTURRET);
                       break;
                 }
 
@@ -366,8 +372,12 @@ class GameScene extends Scene
                 if(CollisionManager.SATCollision(this._minions[row][col]._rect.getPoints(), this._player._shape.getPoints()))
                 {
                     this._animationManager.addAnimation(5,0.5,this._minions[row][col].getRect.getOrigin(),EXPLOSION_IMAGE,new Vec2(256,256));
+                    if(this._player.getAutoTurret().getBullets().keys(this._minions[row][col].getRect.getOrigin()) != undefined)
+                    {
+                        this._player.getAutoTurret().getBullets().delete(this._minions[row][col].getRect.getOrigin());
+                    }
                     this._minions[row].splice(col,1);
-                    this._player.setHealth = 0.1;
+                    //this._player.setHealth = 0.1;
                     this.spawn();
                 }
             }
@@ -440,7 +450,7 @@ class GameScene extends Scene
                        this._asteroids[a].setHealth(-20);
                         //colliison this._animation/Particle affects.
 
-                        //checkif bomber or asteroid is still alive.
+                        //check if bomber or asteroid is still alive.
                         //&& shorT cirucits upon first falsey value , so if there's still health, object is not deleted.
                         //blow up this._animation?
                     this._bombers[b].getHealth <= 0 && this._bombers.splice(b,1);
@@ -509,6 +519,7 @@ class GameScene extends Scene
 
     bulletCollisions()
     {
+
         this.turretCollisions();
             /* Minion Player bullet collision */
         for( let row = 0; row < this._minions.length; row++)
@@ -622,16 +633,104 @@ class GameScene extends Scene
 
     turretCollisions()
     {
-        let  turretBullets = this._player.getShield().getActiveBullets();
+        if (this._player.getAutoTurret().getBullets().size == 0)
+        {
+            return;    
+        }
+        
+        let turretBullets = this._player.getAutoTurret().getBullets();
+        //turret bullets and minions
+        for( let [key,value] of turretBullets.entries())
+        {
+            let  time = Math.round((performance.now() - value[0].getTTL())/1000);
+
+            if (time >= this._player.getAutoTurret().getTTL())
+            {
+                this._animationManager.addAnimation(5,0.5,value[0].getRect.getOrigin(),EXPLOSION_IMAGE,new Vec2(256,256));    
+                turretBullets.delete(key);
+            }
+        }
+
+        for( let row = 0; row < this._minions.length; row++)
+        {
+            for( let col = this._minions[row].length -1; col >= 0; col--)
+            {  
+                for(let [target,bullet]  of turretBullets.entries())
+                {
+                    if(CollisionManager.SATCollision(bullet[0].getRect.getPoints(),this._minions[row][col].getRect.getPoints()))
+                    {
+                        this._animationManager.addAnimation(5,0.5,bullet[0].getRect.getOrigin(),BULLET_EXPLOSION_IMAGE,new Vec2(256,256));
+                        turretBullets.delete(target);
+                         //if there's still a bullet targetting the minion(inaccurate collision/ remove that bullet)
+                        if(turretBullets.keys(this._minions[row][col].getRect.getOrigin()) != undefined)
+                        {
+                            turretBullets.delete(this._minions[row][col].getRect.getOrigin());
+                        }
+
+                        this._animationManager.addAnimation(5,0.5,this._minions[row][col].getRect.getOrigin(),EXPLOSION_IMAGE,new Vec2(256,256));                 
+                        this._minions[row].splice(col,1);
+ 
+                        this.spawn();
+                        if (turretBullets.size > 0)
+                                break;
+                    }
+                }
+            }
+        }
+
+
+        for(let [target,bullet]  of turretBullets.entries())
+        {
+            for(let i = this._bombers.length -1; i >= 0; i--)
+            {
+                if(CollisionManager.SATCollision(bullet[0].getRect.getPoints(), this._bombers[i].getRect.getPoints()))
+                {
+
+                    this._animationManager.addAnimation(5,0.5,bullet[0].getRect.getOrigin(),BULLET_EXPLOSION_IMAGE,new Vec2(256,256));
+                    turretBullets.delete(target);  
+                    if(turretBullets.keys(this._bombers[i].getRect.getOrigin()) != undefined)
+                    {
+                        turretBullets.delete(this._bombers[i].getRect.getOrigin());
+                    }
+
+                    //decrease bomber health   
+                    this._bombers[i].setHealth = -10;
+                    if(this._bombers[i].getHealth <= 0)
+                    {
+                        this._animationManager.addAnimation(5,0.5,this._bombers[i].getRect.getOrigin(),EXPLOSION_IMAGE,new Vec2(256,256));
+                        this._bombers.splice(i,1);
+                    }
+                  
+                    this.spawn();
+
+                    if (turretBullets.size == 0)     
+                        break;
+                }
+            }
+        }
+
+        //turret asteroid collision
+    }
+
+
+    /*
+turretCollisions()
+    {
+        if (this._player.getAutoTurret().getBullets().length == 0)
+        {
+            return;    
+        }
+
+        let  turretBullets = this._player.getAutoTurret().getBullets();
         //turret bullets and minions
         for( let i = turretBullets.length -1; i >= 0; i--)
         {
             let  time = Math.round((performance.now() - turretBullets[i][0].getTTL())/1000);
 
-            if (time >= this._player.getShield().getTTL())
+            if (time >= this._player.getAutoTurret().getTTL())
             {
                 this._animationManager.addAnimation(5,0.5,turretBullets[i][0].getRect.getOrigin(),EXPLOSION_IMAGE,new Vec2(256,256));
-                this._player.getShield().getTargets().delete(turretBullets[i][1]);      
+                this._player.getAutoTurret().getTargets().delete(turretBullets[i][1]);      
                 turretBullets.splice(i,1);
             }
         }
@@ -648,6 +747,7 @@ class GameScene extends Scene
                         this._minions[row].splice(col,1);
                 
                         this._animationManager.addAnimation(5,0.5,turretBullets[b][0].getRect.getOrigin(),BULLET_EXPLOSION_IMAGE,new Vec2(256,256));
+                        this._player.getAutoTurret().getTargets().delete(turretBullets[b][1]);
                         turretBullets.splice(b,1);
                         this.spawn();
                         if (turretBullets.length > 0)
@@ -656,7 +756,31 @@ class GameScene extends Scene
                 }
             }
         }
+        
+        for(let b = turretBullets.length -1; b >= 0; b--)
+        {
+            for(let i = this._bombers.length -1; i >= 0; i--)
+            {
+                if(CollisionManager.SATCollision(turretBullets[b][0].getRect.getPoints(), this._bombers[i].getRect.getPoints()))
+                {
+                    //decrease bomber health   
+                    this._bombers[i].setHealth = -10;
+                    if(this._bombers[i].getHealth <= 0)
+                    {
+                        this._animationManager.addAnimation(5,0.5,this._bombers[i].getRect.getOrigin(),EXPLOSION_IMAGE,new Vec2(256,256));
+                        this._bombers.splice(i,1);
+                    }
+                    this._animationManager.addAnimation(5,0.5,turretBullets[b][0].getRect.getOrigin(),BULLET_EXPLOSION_IMAGE,new Vec2(256,256));
+                    this._player.getAutoTurret().getTargets().delete(turretBullets[b][1]);
+                    turretBullets.splice(b,1);  
+                    this.spawn();
+                    if (turretBullets.length == 0 || b >= turretBullets.length)     
+                        break;
+                }
+            }
+        }
     }
+    */
 
     draw(ctx)
     {
@@ -691,7 +815,7 @@ class GameScene extends Scene
 
         this._player.draw(ctx,this._camera.getPos);
 
-        this._player.getShield().getActive() && this._player.getShield().draw(ctx,this._camera.getPos);
+        this._player.getAutoTurret().getActive() && this._player.getAutoTurret().draw(ctx,this._camera.getPos);
 
         /* Draw all minions*/
         this._minions.forEach(array => 
