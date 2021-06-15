@@ -6,11 +6,14 @@ const Asteroid = function(pos, size)
     this._velocity = new Vec2(Math.random() * 1,(Math.random() * 1));
     this._maxSpeed = Math.random() * 2;
     this._health = 100;
+    this._rect.setAngle(0.2);
+    this._spriteAngle = 0;
 }
 
 Asteroid.prototype.update = function(dt)
 {
-    this._rect.addAngle(0.1);
+    this._spriteAngle >= 360 ? this._spriteAngle = 0 : this._spriteAngle += 0.2;
+    this._rect.rotate();
     this._velocity.setMagnitude = this._maxSpeed;
 
     //boundary wrapping
@@ -57,7 +60,7 @@ Asteroid.prototype.draw = function(ctx, cameraPos)
     ctx.save();
     ctx.beginPath();      
     ctx.translate(this._rect.getOrigin().x - cameraPos.x,this._rect.getOrigin().y - cameraPos.y);
-    ctx.rotate(Math.PI/180 * this._rect.getAngle());
+    ctx.rotate(Math.PI/180 * this._spriteAngle);
     ctx.drawImage(ASTEROID_IMAGE,0,0,this._rect.getSize().x,this._rect.getSize().y,-this._rect.getSize().x/2,-this._rect.getSize().y/2,this._rect.getSize().x,this._rect.getSize().y);
     ctx.closePath();
     ctx.restore();

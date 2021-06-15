@@ -2,7 +2,8 @@ const PowerUpType =
 {
     HEALTH : "health",
     FIRE_RATE : "fireRate",
-    AUTOTURRET : "autoTurret"
+    AUTOTURRET : "autoTurret",
+    SPEED : "speed"
 };
 
 const PowerUp = function(pos,size,type, spawnTimer)
@@ -20,14 +21,17 @@ PowerUp.prototype.timeToLive = 5;
 PowerUp.prototype.AutoTurretTimer = 20;
 PowerUp.prototype.resetTime = 20;
 PowerUp.prototype.fireRateTimer = 10;
+PowerUp.prototype.speedTimer = 10;
 PowerUp.prototype.health_image = document.getElementById('health');
 PowerUp.prototype.fire_rate = document.getElementById('fireRate');
 PowerUp.prototype.autoTurret_image = document.getElementById('shield');
+PowerUp.prototype.speed_image = document.getElementById('speed');
 
 PowerUp.prototype.activatePowerUp = function()
 { 
 
 }
+
 PowerUp.prototype.generateRandomType = function(val)
 {
     let type = "";
@@ -41,6 +45,9 @@ PowerUp.prototype.generateRandomType = function(val)
             break;
         case 2:
             type = "autoTurret";
+            break;
+        case 3:
+            type = "speed";
             break;
     }
     return type;
@@ -81,7 +88,7 @@ PowerUp.prototype.reset = function()
 {
     this._active = true;
     this._rect.pos = new Vec2(Math.random() * WORLD_WIDTH, Math.random() * WORLD_HEIGHT);
-    this._type = this.generateRandomType(Math.round(Math.random() * 2));
+    this._type = this.generateRandomType(Math.round(Math.random() * 3));
 }
 
 PowerUp.prototype.setInactiveTimer = function(val)
@@ -109,6 +116,9 @@ PowerUp.prototype.draw = function(ctx,cameraPos)
           break;
         case  PowerUpType.AUTOTURRET:
             ctx.drawImage(this.autoTurret_image,0,0,this._rect.getSize().x,this._rect.getSize().y,-this._rect.getSize().x/2,-this._rect.getSize().y/2,this._rect.getSize().x,this._rect.getSize().y);
+          break;
+        case  PowerUpType.SPEED:
+            ctx.drawImage(this.speed_image,0,0,this._rect.getSize().x,this._rect.getSize().y,-this._rect.getSize().x/2,-this._rect.getSize().y/2,this._rect.getSize().x,this._rect.getSize().y);
           break;
     }
 

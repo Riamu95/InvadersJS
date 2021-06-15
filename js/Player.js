@@ -110,8 +110,7 @@ class Player
 
         this._velocity.x =  this._acceleration.x * dt;
         this._velocity.y = this._acceleration.y * dt;
-        
-        //this._shape.addPos(this._velocity);
+
 
         this._shape.updatePoints(this._velocity);
         this._collisionRect.updatePoints(this._velocity);
@@ -254,7 +253,6 @@ class Player
         this.setUsingPowerUp(false);
         this.setCurrentPowerUp(null);
         this.setPowerUpType(null);
-        this.setUsingPowerUp(false);
     }
 
     getUsingPowerUp()
@@ -295,5 +293,10 @@ class Player
     get getMaxAcceleration()
     {
         return this._maxAcceleration;
+    }
+
+    setMaxAcceleration(val)
+    {
+         this._maxAcceleration = val;
     }
 }

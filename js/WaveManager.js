@@ -3,7 +3,7 @@ const WaveManager = function()
     this._npcList = new Map();
     this._spawnPoints = new Map();
         //minion,flock,bomber,asteroid,black hole, power up
-    this._npcList.set(1,[5,3,1,1,1,3]);
+    this._npcList.set(1,[5,3,1,5,1,3]);
     this._npcList.set(2,[5,3,1,5,0,3]);
     this._npcList.set(3,[5,5,2,5,2,3]);
     this._npcList.set(4,[5,5,5,5,2,5]);
