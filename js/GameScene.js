@@ -477,7 +477,7 @@ class GameScene extends Scene
         {
             if(CollisionManager.SATCollision(this._asteroids[a].getRect().getPoints(),this._player.getShape.getPoints()))
             {
-                this._asteroids[a].setHealth = -this._player.getCollisionDamage();
+                this._asteroids[a].setHealth(-this._player.getCollisionDamage());
                 this._player.setHealth = - Asteroid.collisionDamage;
 
                 if(this._player.getAutoTurret().getBullets().keys(this._asteroids[a].getRect().getOrigin()) != undefined)
@@ -507,7 +507,7 @@ class GameScene extends Scene
                 if(CollisionManager.SATCollision(this._asteroids[a].getRect().getPoints(),this._bombers[b].getRect.getPoints()))
                 {
                     //MTV 
-                    this._asteroids[a].setHealth = -Bomber.collisionDamage;
+                    this._asteroids[a].setHealth(-Bomber.collisionDamage);
                     this._player.setHealth = -Asteroid.collisionDamage;
 
                     if(this._bombers[b].checkHealth())
@@ -546,7 +546,8 @@ class GameScene extends Scene
                         {
                             this._animationManager.addAnimation(5,0.5,this._asteroids[a].getRect().getOrigin(),EXPLOSION_IMAGE,new Vec2(256,256));
                             this._asteroids.splice(a,1);
-                            a--;
+                            break loop1;
+                           
                         }
                         //same issue here when minions collide with last aasteroid, need to break
                        this.spawn();
@@ -652,7 +653,6 @@ class GameScene extends Scene
                 {
                     if(CollisionManager.SATCollision(playerBullets[b].getRect.getPoints(), this._asteroids[i].getRect().getPoints()))
                     {
-                        //decrease bomber health
                         this._asteroids[i].setHealth(-this._player.getWeapons()[w].getDamage());
                         if(this._asteroids[i].checkHealth())
                         {

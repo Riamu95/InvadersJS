@@ -80,9 +80,9 @@ Asteroid.prototype.getHealth = function()
     return this._health;
 }
 
-Asteroid.prototype.setHealth = function(val)
+Asteroid.prototype.setHealth = function (val)
 {
-    return this._health += val;
+     this._health += val;
 }
 
 Asteroid.prototype.checkHealth = function()
