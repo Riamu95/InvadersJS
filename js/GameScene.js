@@ -4,7 +4,6 @@ class GameScene extends Scene
     {
         super();
         this._scenes = scene;
-        this._bullets = [];
         this._enemies = [];
         this._minions = [];
         this._flockPoints = [];
@@ -12,6 +11,7 @@ class GameScene extends Scene
         this._asteroids = [];
         this._blackHoles = [];
         this._pressedKeys = new Set();
+        this._buttons = ['w','a','s','d','e','1','2','3'];
         this.powerUps = [];
         this._collisionManager = new CollisionManager();
         this._player = new Player(new Vec2(WORLD_WIDTH/2,WORLD_HEIGHT/2),new Vec2(127,130));
@@ -21,40 +21,22 @@ class GameScene extends Scene
         this._waveManager = new WaveManager();
     
         this.init();
-    
-    
     }
 
     init()
     {
         this.spawn();
-        /*Insertthis._minions into quad tree 
-        for(let row = 0; row <this._minions.length; row++ ) 
-        {
-            for(let col = 0; col <this._minions[row].length; col++)
-            {
-                qt.insert(this._minions[row][col].getRect);
-            }
-        }*/
-
+    
         document.addEventListener('keydown', (event) =>
         { 
-            if (event.key == 'w' || event.key == 'd' || event.key == 's' ||
-                event.key == 'a' ||  event.key == 'e')
-            {
+           if (this._buttons.includes(event.key))
                 this._pressedKeys[event.key] = true;
-            }
-        });
-
-        
+        });   
 
         document.addEventListener('keyup', (event) =>
         {
-            if (event.key == 'w' || event.key == 'd' || event.key == 's' ||
-            event.key == 'a' || event.key == 'e')
-            {
+            if(this._buttons.includes(event.key))
                 this._pressedKeys[event.key] = false;
-            }
         });
 
         document.addEventListener('click', () =>
@@ -91,7 +73,7 @@ class GameScene extends Scene
             //create Power Ups
             for(let i = 0; i < this._waveManager.getPowerUpCount(); i++)
             {
-                let  temp = new PowerUp(new Vec2(Math.random() * WORLD_WIDTH, Math.random() * WORLD_HEIGHT), new Vec2(300,300),"speed",  Math.random() * 30);
+                let  temp = new PowerUp(new Vec2(Math.random() * WORLD_WIDTH, Math.random() * WORLD_HEIGHT), new Vec2(300,300),"autoTurret",  Math.random() * 30);
                 this.powerUps.push(temp);
             }
 
@@ -135,10 +117,10 @@ class GameScene extends Scene
 
     update(dt)
     {
-        this._bullets.forEach(bullet =>
+        for( let i = 0; i < this._player.getWeapons().length; i++)
         {
-            bullet.move(dt);
-        })
+            this._player.getWeapons()[i].update(dt);
+        }  
     
         //for every array, allocate seek point and move the flock
         for( let row = 0; row < this._minions.length; row++)
@@ -222,7 +204,7 @@ class GameScene extends Scene
                     break;
                 case PowerUpType.SPEED:
                     if(time >= PowerUp.prototype.speedTimer)
-                    {   //set speed
+                    { 
                         this._player.setMaxAcceleration(0.5);
                         this._player.setSpeed(0.5);
                         this._player.resetPowerUp();
@@ -239,7 +221,7 @@ class GameScene extends Scene
 
         this.inputHandling(dt);
         this.collisions();
-
+        //dont check this here, check on every collision
         if(this._player.getHealth < 0)
             this.NextScene();
     }
@@ -292,11 +274,10 @@ class GameScene extends Scene
             this._player.getShape.rotate();
         }
 
-        if(this._player.getFired() && (performance.now() - this._player.getFireTimer) /1000 >= this._player.getFireRate)
+        if(this._player.getFired() && (performance.now() - this._player.getFireTimer) /1000 >= this._player.getFireRate && this._player.getCurrentWeapon().getAmmoCount() > 0)
         {
-            let tempBullet = new Bullet(new Vec2(this._player.getShape.getOrigin().x, this._player.getShape.getOrigin().y),new Vec2(30,30),
-            this._player.getSpriteAngle * Math.PI/180,this._player.getMaxBulletSpeed);
-            this._bullets.push(tempBullet);
+            
+            this._player.getCurrentWeapon().addBullet(this._player.getShape.getOrigin(),this._player.getCurrentWeapon().getBulletSize(),this._player.getSpriteAngle * Math.PI/180,this._player.getMaxBulletSpeed);
             this._player.setFired(false);
         }
 
@@ -324,6 +305,18 @@ class GameScene extends Scene
                     break;
             }
             this._pressedKeys['e'] = false;
+        }
+        if (this._pressedKeys['1'])
+        {
+            this._player.setCurrentWeapon(0);    
+        }
+        else if (this._pressedKeys['2'])
+        {
+            this._player.setCurrentWeapon(1); 
+        }
+        else if (this._pressedKeys['3'])
+        {
+            this._player.setCurrentWeapon(2); 
         }
     }
 
@@ -408,23 +401,33 @@ class GameScene extends Scene
             //quad tree detection
                 if(CollisionManager.SATCollision(this._minions[row][col]._rect.getPoints(), this._player._shape.getPoints()))
                 {
+                    this._player.setHealth = -EnemyMinion.collisionDamage;
+                    this._minions[row][col].setHealth = -this._player.getCollisionDamage();
+
                     this._animationManager.addAnimation(5,0.5,this._minions[row][col].getRect.getOrigin(),EXPLOSION_IMAGE,new Vec2(256,256));
                     if(this._player.getAutoTurret().getBullets().keys(this._minions[row][col].getRect.getOrigin()) != undefined)
                     {
                         this._player.getAutoTurret().getBullets().delete(this._minions[row][col].getRect.getOrigin());
                     }
-                    this._minions[row].splice(col,1);
-                    //this._player.setHealth = 0.1;
+
+                    this._minions[row][col].checkHealth() &&  this._minions[row].splice(col,1);
+                    this._player.checkHealth() && this.NextScene();
+        
                     this.spawn();
                 }
             }
         }
         /* Player Bomber */
-        for( let b = 0; b < this._bombers.length; b++)
+        for( let b = this._bombers.length -1; b >= 0; b--)
         {
             if(CollisionManager.SATCollision(this._bombers[b].getRect.getPoints(),this._player.getShape.getPoints()))
             {
-                this._player.setHealth = 0.25;
+                this._player.setHealth = -Bomber.collisionDamage;
+                this._bombers[b].setHealth = -this._player.getCollisionDamage();
+                
+                this._bombers[b].checkHealth() && this._bombers.splice(b,1);
+                this._player.checkHealth() &&  this.NextScene();
+                
                 this.spawn();
                 //impulse
                 //Reduce player and bomber health
@@ -445,12 +448,19 @@ class GameScene extends Scene
                 {
                     if(CollisionManager.SATCollision(this._bombers[b].getRect.getPoints(),this._minions[row][col].getRect.getPoints()))
                     {
+
+                        this._bombers[b].setHealth = -EnemyMinion.collisionDamage;
+                        this._minions[row][col].setHealth = -Bomber.collisionDamage;
+
+
                         this._animationManager.addAnimation(5,0.5,this._minions[row][col].getRect.getOrigin(),EXPLOSION_IMAGE,new Vec2(256,256));
-                        this._minions[row].splice(col,1);
 
-                        this._bombers[b].setHealth = -10;
-                        this._bombers[b].getHealth <= 0 && this._bombers.splice(b,1);
-
+                       
+                        this._bombers[b].checkHealth() && this._bombers.splice(b,1);
+                        if(this._minions[row][col].checkHealth())
+                        {
+                          this._minions[row].splice(col,1);
+                        }
                         this.spawn();
 
                         if(this._bombers.length <= 0)
@@ -467,39 +477,50 @@ class GameScene extends Scene
         {
             if(CollisionManager.SATCollision(this._asteroids[a].getRect().getPoints(),this._player.getShape.getPoints()))
             {
+                this._asteroids[a].setHealth = -this._player.getCollisionDamage();
+                this._player.setHealth = - Asteroid.collisionDamage;
+
                 if(this._player.getAutoTurret().getBullets().keys(this._asteroids[a].getRect().getOrigin()) != undefined)
                 {
                     this._player.getAutoTurret().getBullets().delete(this._asteroids[a].getRect().getOrigin());
                     //if bullet is active exploding animation??
                 }
-                this._animationManager.addAnimation(5,0.5,this._asteroids[a].getRect().getOrigin(),EXPLOSION_IMAGE,new Vec2(256,256));
-                this._asteroids.splice(a,1);
-                this._player.setHealth = 0.4;
+                if (this._asteroids[a].checkHealth())
+                {
+                    this._animationManager.addAnimation(5,0.5,this._asteroids[a].getRect().getOrigin(),EXPLOSION_IMAGE,new Vec2(256,256));
+                    this._asteroids.splice(a,1);
+                }
+
+                if(this._player.checkHealth())
+                {
+                   this.NextScene();
+                }
                 this.spawn();
-                //  startFrame,endFrame,transitionTime,pos,animate,image, width,height
             }
         }
 
         //Asteroids and this._bombers
-        /* for( let b = this._bombers.length -1; b >= 0; b--)
+         for( let b = this._bombers.length -1; b >= 0; b--)
         {
-                for( let a =this._asteroids.length - 1; a >= 0; a--)
+            for( let a = this._asteroids.length - 1; a >= 0; a--)
+            {
+                if(CollisionManager.SATCollision(this._asteroids[a].getRect().getPoints(),this._bombers[b].getRect.getPoints()))
                 {
-                    if(CollisionManager.SATCollision(asteroids[a].getRect().getPoints(),this._bombers[b].getRect.getPoints()))
-                    {
-                        //MTV 
-                        this._bombers[b].setHealth = -20;
-                       this._asteroids[a].setHealth(-20);
-                        //colliison this._animation/Particle affects.
+                    //MTV 
+                    this._asteroids[a].setHealth = -Bomber.collisionDamage;
+                    this._player.setHealth = -Asteroid.collisionDamage;
 
-                        //check if bomber or asteroid is still alive.
-                        //&& shorT cirucits upon first falsey value , so if there's still health, object is not deleted.
-                        //blow up this._animation?
-                    this._bombers[b].getHealth <= 0 && this._bombers.splice(b,1);
-                   this._asteroids[a].getHealth() <= 0 && this._bombers.splice(a,1);
-                    }
+                    if(this._bombers[b].checkHealth())
+                    {
+                        this._bombers.splice(b,1);
+                    } 
+                    if(this._asteroids[a].checkHealth())
+                    {
+                        this._asteroids.splice(a,1);
+                    } 
                 }
-        }*/
+            }
+        }
 
         //Asteroids andthis._minions
         loop1:
@@ -513,16 +534,25 @@ class GameScene extends Scene
                 {
                     if(CollisionManager.SATCollision(this._asteroids[a].getRect().getPoints(),this._minions[row][col].getRect.getPoints()))
                     {
-                        this._animationManager.addAnimation(5,0.5,this._minions[row][col].getRect.getOrigin(),EXPLOSION_IMAGE,new Vec2(256,256));
-                        this._minions[row].splice(col,1);
+                        this._asteroids[a].setHealth(-EnemyMinion.collisionDamage);
+                        this._minions[row][col].setHealth = -Asteroid.collisionDamage;
 
-                       this._asteroids[a].setHealth(-10);
-                       this._asteroids[a].getHealth() <= 0 && this._asteroids.splice(a,1);
-                        //same issue here when inions collide with last aasteroid, need to break
+                        if(this._minions[row][col].checkHealth())
+                        {
+                            this._animationManager.addAnimation(5,0.5,this._minions[row][col].getRect.getOrigin(),EXPLOSION_IMAGE,new Vec2(256,256));
+                            this._minions[row].splice(col,1);
+                        }
+                        if(this._asteroids[a].checkHealth())
+                        {
+                            this._animationManager.addAnimation(5,0.5,this._asteroids[a].getRect().getOrigin(),EXPLOSION_IMAGE,new Vec2(256,256));
+                            this._asteroids.splice(a,1);
+                            a--;
+                        }
+                        //same issue here when minions collide with last aasteroid, need to break
                        this.spawn();
+
                        if(this._asteroids.length <= 0)
                             break loop1;
-                        //asteroid blow up this._animation
                     }
                 }
             }
@@ -563,68 +593,88 @@ class GameScene extends Scene
     {
 
         this.turretCollisions();
-            /* Minion Player bullet collision */
-        for( let row = 0; row < this._minions.length; row++)
+       // let playerBullets = this._player.getCurrentWeapon().getBullets();
+        //for all the players weapons // check bullets against game objects
+        for(let w = 0; w < this._player.getWeapons().length; w++)
         {
-            for( let col = this._minions[row].length -1; col >= 0; col--)
-            {  
-                for(let b = this._bullets.length -1 ; b >= 0; b--)
-                {
-                    if(CollisionManager.SATCollision(this._bullets[b].getRect.getPoints(),this._minions[row][col].getRect.getPoints()))
+            let playerBullets = this._player.getWeapons()[w].getBullets();
+             /* Minion Player bullet collision */
+            for( let row = 0; row < this._minions.length; row++)
+            {
+                for( let col = this._minions[row].length -1; col >= 0; col--)
+                {  
+                    for(let b = playerBullets.length -1 ; b >= 0; b--)
                     {
-                        this._animationManager.addAnimation(5,0.5,this._minions[row][col].getRect.getOrigin(),EXPLOSION_IMAGE,new Vec2(256,256));
-                        this._minions[row].splice(col,1);
-                
-                        this._animationManager.addAnimation(5,0.5,this._bullets[b].getRect.getOrigin(),BULLET_EXPLOSION_IMAGE,new Vec2(256,256));
-                        this._bullets.splice(b,1);
+                        if(CollisionManager.SATCollision(playerBullets[b].getRect.getPoints(),this._minions[row][col].getRect.getPoints()))
+                        {
+                            this._minions[row][col].setHealth = -this._player.getWeapons()[w].getDamage();
+                            if(this._minions[row][col].checkHealth())
+                            {
+                                this._animationManager.addAnimation(5,0.5,this._minions[row][col].getRect.getOrigin(),EXPLOSION_IMAGE,new Vec2(256,256));
+                                this._minions[row].splice(col,1);
+                            }
+                    
+                            this._animationManager.addAnimation(5,0.5,playerBullets[b].getRect.getOrigin(),BULLET_EXPLOSION_IMAGE,new Vec2(256,256));
+                            playerBullets.splice(b,1);
+                            this.spawn();
+                            if (playerBullets.length > 0)
+                                    break;
+                        }
+                    }
+                }
+            }
+            /*collision between Playerthis._bullets and bomber. */
+            for(let b = playerBullets.length -1; b >= 0; b--)
+            {
+                for(let i = this._bombers.length -1; i >= 0; i--)
+                {
+                    if(CollisionManager.SATCollision(playerBullets[b].getRect.getPoints(), this._bombers[i].getRect.getPoints()))
+                    {
+                        //decrease bomber health   
+                        this._bombers[i].setHealth = -this._player.getWeapons()[w].getDamage();
+                        if(this._bombers[i].checkHealth())
+                        {
+                            this._animationManager.addAnimation(5,0.5,this._bombers[i].getRect.getOrigin(),EXPLOSION_IMAGE,new Vec2(256,256));
+                            this._bombers.splice(i,1);
+                        }
+                        this._animationManager.addAnimation(5,0.5,playerBullets[b].getRect.getOrigin(),BULLET_EXPLOSION_IMAGE,new Vec2(256,256));
+                        playerBullets.splice(b,1);  
                         this.spawn();
-                        if (this._bullets.length > 0)
-                                break;
+                        if (playerBullets.length == 0 || b >= playerBullets.length)     
+                            break;
                     }
                 }
             }
-        }
-        /*collision between Playerthis._bullets and bomber. */
-        for(let b = this._bullets.length -1; b >= 0; b--)
-        {
-            for(let i = this._bombers.length -1; i >= 0; i--)
+            /*collision between Playerthis._bullets and Asteroid. */
+            for(let b = playerBullets.length -1; b >= 0; b--)
             {
-                if(CollisionManager.SATCollision(this._bullets[b].getRect.getPoints(), this._bombers[i].getRect.getPoints()))
+                for(let i = this._asteroids.length -1; i >= 0; i--)
                 {
-                    //decrease bomber health   
-                    this._bombers[i].setHealth = -10;
-                    if(this._bombers[i].getHealth <= 0)
+                    if(CollisionManager.SATCollision(playerBullets[b].getRect.getPoints(), this._asteroids[i].getRect().getPoints()))
                     {
-                        this._animationManager.addAnimation(5,0.5,this._bombers[i].getRect.getOrigin(),EXPLOSION_IMAGE,new Vec2(256,256));
-                        this._bombers.splice(i,1);
+                        //decrease bomber health
+                        this._asteroids[i].setHealth(-this._player.getWeapons()[w].getDamage());
+                        if(this._asteroids[i].checkHealth())
+                        {
+                            this._animationManager.addAnimation(5,0.5,this._asteroids[i].getRect().getOrigin(),EXPLOSION_IMAGE,new Vec2(256,256));
+                            this._asteroids.splice(i,1);
+                        }
+                        this._animationManager.addAnimation(5,0.5,playerBullets[b].getRect.getOrigin(),BULLET_EXPLOSION_IMAGE,new Vec2(256,256));
+                        playerBullets.splice(b,1);
+                        this.spawn();
+                        if (playerBullets.length == 0 || b >= playerBullets.length)     
+                                break;   
                     }
-                    this._animationManager.addAnimation(5,0.5,this._bullets[b].getRect.getOrigin(),BULLET_EXPLOSION_IMAGE,new Vec2(256,256));
-                    this._bullets.splice(b,1);  
-                    this.spawn();
-                    if (this._bullets.length == 0 || b >= this._bullets.length)     
-                        break;
                 }
             }
-        }
-        /*collision between Playerthis._bullets and Asteroid. */
-        for(let b = this._bullets.length -1; b >= 0; b--)
-        {
-            for(let i = this._asteroids.length -1; i >= 0; i--)
+            /* Player Bullet timer Collision */
+            for(let i = playerBullets.length -1 ; i >= 0; i--)
             {
-                if(CollisionManager.SATCollision(this._bullets[b].getRect.getPoints(), this._asteroids[i].getRect().getPoints()))
+                let  time = Math.round((performance.now() - playerBullets[i].getTimer())/1000);
+                if (time >= this._player.getWeapons()[w].getTTL())
                 {
-                    //decrease bomber health
-                    this._asteroids[i].setHealth(-35);
-                    if(this._asteroids[i].getHealth() <= 0)
-                    {
-                        this._animationManager.addAnimation(5,0.5,this._asteroids[i].getRect().getOrigin(),EXPLOSION_IMAGE,new Vec2(256,256));
-                        this._asteroids.splice(i,1);
-                    }
-                    this._animationManager.addAnimation(5,0.5,this._bullets[b].getRect.getOrigin(),BULLET_EXPLOSION_IMAGE,new Vec2(256,256));
-                    this._bullets.splice(b,1);
-                    this.spawn();
-                    if (this._bullets.length == 0 || b >=this._bullets.length)     
-                            break;   
+                    this._animationManager.addAnimation(5,0.5,playerBullets[i].getRect.getOrigin(),BULLET_EXPLOSION_IMAGE,new Vec2(256,256));
+                    playerBullets.splice(i,1);
                 }
             }
         }
@@ -637,7 +687,13 @@ class GameScene extends Scene
                 {
                     this._animationManager.addAnimation(5,0.5,this._bombers[i]._bullets[b].getRect.getOrigin(),EXPLOSION_IMAGE,new Vec2(256,256));
                     this._bombers[i]._bullets.splice(b,1);
-                    this._player.setHealth = 0.5;
+                    
+                    this._player.setHealth = -Bomber.bulletDamage;
+                    if(this._player.checkHealth())
+                    {
+                        this.NextScene();
+                    }
+        
                     //implode bomb
                     //delete bomb
 
@@ -645,24 +701,13 @@ class GameScene extends Scene
                 }
             }
         }
-        /* Player Bullet timer Collision */
-        for(let i = this._bullets.length -1 ; i >= 0; i--)
-        {
-           let  time = Math.round((performance.now() -this._bullets[i].getTTL())/1000);
-            if (time >= this._player.getTTL)
-            {
-                this._animationManager.addAnimation(5,0.5,this._bullets[i].getRect.getOrigin(),BULLET_EXPLOSION_IMAGE,new Vec2(256,256));
-                this._bullets.splice(i,1);
-            }
-        }
 
-        /*  For all this._bombersthis._bullets check bullet ttl */
+        //  For all this._bombersthis._bullets check bullet ttl
         for(let i = 0; i < this._bombers.length; i++)
         {
             for(let b = this._bombers[i]._bullets.length -1; b >= 0; b--)
             {
-                let  time = Math.round((performance.now() - this._bombers[i]._bullets[b].getTTL())/1000);
-
+                let  time = Math.round( ( performance.now() - this._bombers[i]._bullets[b].getTimer())/1000);
                 if (time >= Bomber.ttl)
                 {
                     //implode bomb
@@ -684,7 +729,7 @@ class GameScene extends Scene
         //turret bullets and minions
         for( let [key,value] of turretBullets.entries())
         {
-            let  time = Math.round((performance.now() - value[0].getTTL())/1000);
+            let  time = Math.round((performance.now() - value[0].getTimer())/1000);
 
             if (time >= this._player.getAutoTurret().getTTL())
             {
@@ -701,6 +746,7 @@ class GameScene extends Scene
                 {
                     if(CollisionManager.SATCollision(bullet[0].getRect.getPoints(),this._minions[row][col].getRect.getPoints()))
                     {
+                        this._minions[row][col].setHealth = -this._player.getAutoTurret().getBulletDamage();
                         this._animationManager.addAnimation(5,0.5,bullet[0].getRect.getOrigin(),BULLET_EXPLOSION_IMAGE,new Vec2(256,256));
                         turretBullets.delete(target);
                          //if there's still a bullet targetting the minion(inaccurate collision/ remove that bullet)
@@ -708,9 +754,11 @@ class GameScene extends Scene
                         {
                             turretBullets.delete(this._minions[row][col].getRect.getOrigin());
                         }
-
-                        this._animationManager.addAnimation(5,0.5,this._minions[row][col].getRect.getOrigin(),EXPLOSION_IMAGE,new Vec2(256,256));                 
-                        this._minions[row].splice(col,1);
+                        if(this._minions[row][col].checkHealth())
+                        {
+                            this._animationManager.addAnimation(5,0.5,this._minions[row][col].getRect.getOrigin(),EXPLOSION_IMAGE,new Vec2(256,256));                 
+                            this._minions[row].splice(col,1);
+                        }
  
                         this.spawn();
                         if (turretBullets.size > 0)
@@ -727,7 +775,7 @@ class GameScene extends Scene
             {
                 if(CollisionManager.SATCollision(bullet[0].getRect.getPoints(), this._bombers[i].getRect.getPoints()))
                 {
-
+                    this._bombers[i].setHealth = -this._player.getAutoTurret().getBulletDamage();
                     this._animationManager.addAnimation(5,0.5,bullet[0].getRect.getOrigin(),BULLET_EXPLOSION_IMAGE,new Vec2(256,256));
                     turretBullets.delete(target);  
                     if(turretBullets.keys(this._bombers[i].getRect.getOrigin()) != undefined)
@@ -735,9 +783,7 @@ class GameScene extends Scene
                         turretBullets.delete(this._bombers[i].getRect.getOrigin());
                     }
 
-                    //decrease bomber health   
-                    this._bombers[i].setHealth = -10;
-                    if(this._bombers[i].getHealth <= 0)
+                    if(this._bombers[i].checkHealth())
                     {
                         this._animationManager.addAnimation(5,0.5,this._bombers[i].getRect.getOrigin(),EXPLOSION_IMAGE,new Vec2(256,256));
                         this._bombers.splice(i,1);
@@ -757,15 +803,14 @@ class GameScene extends Scene
             {
                 if(CollisionManager.SATCollision(bullet[0].getRect.getPoints(), this._asteroids[i].getRect().getPoints()))
                 {
+                    this._asteroids[i].setHealth(-this._player.getAutoTurret().getBulletDamage());
                     this._animationManager.addAnimation(5,0.5,bullet[0].getRect.getOrigin(),BULLET_EXPLOSION_IMAGE,new Vec2(256,256));
                     turretBullets.delete(target);  
                     if(turretBullets.keys(this._asteroids[i].getRect().getOrigin()) != undefined)
                     {
                         turretBullets.delete(this._asteroids[i].getRect().getOrigin());
                     }
-                    //decrease asteroid health   
-                    this._asteroids[i].setHealth(-50);
-                    if(this._asteroids[i].getHealth() <= 0)
+                    if(this._asteroids[i].checkHealth())
                     {
                         this._animationManager.addAnimation(5,0.5,this._asteroids[i].getRect().getOrigin(),EXPLOSION_IMAGE,new Vec2(256,256));
                         this._asteroids.splice(i,1);
@@ -796,11 +841,12 @@ class GameScene extends Scene
         {
             ast.draw(ctx,this._camera.getPos)
         });
-        /* Draw Player Bullets */
-        this._bullets.forEach(bullet =>
+        /* Draw Player Bullets */   
+        for(let i = 0; i < this._player.getWeapons().length; i++)
         {
-            bullet.draw(ctx,this._camera.getPos,PLAYER_BULLET_IMAGE);
-        }); 
+            this._player.getWeapons()[i].draw(ctx,this._camera.getPos);
+        }  
+    
         /* Draw bombers and bomber Bullets*/
         for(let i =0; i < this._bombers.length; i ++)
         {
@@ -837,7 +883,7 @@ class GameScene extends Scene
             //ctx.drawImage(healthBar,0,0,HEALTHBAR_SIZE.x,HEALTHBAR_SIZE.y,(camera.getPos.x + (camera.getSize.x * 0.81)) - camera.getPos.x,(camera.getSize.y +  (camera.getSize.x / 30)) - camera.getPos.y,HEALTHBAR_SIZE.x,HEALTHBAR_SIZE.y);
             //heartValue
             //render width based off health
-            ctx.drawImage(healthValue,0,0,HEALTHVALUE_SIZE.x,HEALTHVALUE_SIZE.y,(this._camera.getPos.x + (this._camera.getSize.x * 0.81)) - this._camera.getPos.x,(this._camera.getPos.y +  (this._camera.getSize.x / 30.1)) - this._camera.getPos.y,HEALTHVALUE_SIZE.x * this._player.getHealth,HEALTHVALUE_SIZE.y);
+            ctx.drawImage(healthValue,0,0,HEALTHVALUE_SIZE.x,HEALTHVALUE_SIZE.y,(this._camera.getPos.x + (this._camera.getSize.x * 0.81)) - this._camera.getPos.x,(this._camera.getPos.y +  (this._camera.getSize.x / 30.1)) - this._camera.getPos.y,HEALTHVALUE_SIZE.x * (this._player.getHealth/100),HEALTHVALUE_SIZE.y);
         }
         ctx.fillStyle = 'blue';
         ctx.fillText(`fps : ${this._waveManager.getWave()}`, (this._camera.getPos.x + 100) - this._camera.getPos.x,(this._camera.getPos.y + 50) - this._camera.getPos.y);  

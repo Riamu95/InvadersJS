@@ -6,7 +6,7 @@ class Bullet
         this._rect.setAngle(_angle);
         this._color = 'Red';
         this._velocity = new Vec2(0,0);
-        this._ttl = performance.now();
+        this._timer = performance.now();
         this._maxSpeed = maxSpeed;
         this._steering = new Vec2(0,0);
     }
@@ -50,13 +50,13 @@ class Bullet
     {
         return this._velocity;
     }
-    getTTL()
+    getTimer()
     {
-        return this._ttl;
+        return this._timer;
     } 
-    set setTTL(val)
+    set setTimer(val)
     {
-        this._ttl = val;
+        this._timer = val;
     }
 
     get getRect()

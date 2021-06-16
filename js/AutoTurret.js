@@ -9,6 +9,7 @@ const AutoTurret = function(pos,size)
     this._timer  = 0;
     this._ttl = 2;
     this._activeDistance = 500;
+    this._bulletdamage = 10;
 }
 
 
@@ -26,7 +27,7 @@ AutoTurret.prototype.update = function(dt)
                 {
                     value[1] = true;
                     value[0].getRect.setRect(this._rect.getOrigin());
-                    value[0].setTTL = performance.now();
+                    value[0].setTimer = performance.now();
                     this._fireTimer = performance.now();
                     break;
                 }
@@ -85,6 +86,10 @@ AutoTurret.prototype.setActive = function(val)
     this._active = val;
 }
 
+AutoTurret.prototype.getBulletDamage = function()
+{
+   return this._bulletdamage;
+}
 AutoTurret.prototype.clear = function()
 {
     if (this._bullets.size  == 0)

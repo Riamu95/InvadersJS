@@ -10,6 +10,8 @@ const Asteroid = function(pos, size)
     this._spriteAngle = 0;
 }
 
+Asteroid.prototype.collisionDamage = 30;
+
 Asteroid.prototype.update = function(dt)
 {
     this._spriteAngle >= 360 ? this._spriteAngle = 0 : this._spriteAngle += 0.2;
@@ -81,4 +83,9 @@ Asteroid.prototype.getHealth = function()
 Asteroid.prototype.setHealth = function(val)
 {
     return this._health += val;
+}
+
+Asteroid.prototype.checkHealth = function()
+{
+    return this._health < 1;
 }

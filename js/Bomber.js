@@ -14,7 +14,7 @@ class Bomber extends Enemy
         this._seek = new Vec2(0,0);
         this._health = 100;
     }
-
+    static collisionDamage = 40;
    
     move (dt,playerPos) 
     {
@@ -109,24 +109,11 @@ class Bomber extends Enemy
     }
 
     static ttl = 5;
-
-    get getTTL()
-    {
-        return this._ttl;
-    }
+    static bulletDamage = 30;
 
     get getMaxBulletSpeed()
     {
         return this._maxBulletSpeed;
     }
 
-    get getHealth()
-    {
-        return this._health;
-    }
-
-    set setHealth(val)
-    {
-        this._health += val;
-    }
 }

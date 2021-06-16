@@ -23,8 +23,9 @@ class EnemyMinion extends Enemy {
         this._seperation = new Vec2(0,0);
         this._seek = new Vec2(0,0);
         this._color = 'blue';
+        this._health = 10;
     }
-
+    static collisionDamage = 10;
 
     static generateFlockPoint(minions, playerPos , flockPoint, dt)
     {    

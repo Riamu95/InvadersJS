@@ -8,6 +8,8 @@ class Enemy
         this._acceleration = new Vec2(0,0);
         this._attack = false;
         this._attackDistance = 500;
+        this._health = null;
+        this._collisionDamage = null;
     }
 
     move (dt,playerPos,playerSize) 
@@ -25,5 +27,20 @@ class Enemy
     get getRect()
     {
         return this._rect;
+    }
+
+    get getHealth()
+    {
+        return this._health;
+    }
+
+    set setHealth(val)
+    {
+        this._health += val;
+    }
+
+    checkHealth()
+    {
+        return this._health < 1;
     }
 }

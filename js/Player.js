@@ -7,7 +7,7 @@ class Player
         this._collisionRect = new Rect(new Vec2(this._shape._origin.x , this._shape._origin.y)
         , new Vec2(this._shape._size.x * 4, this._shape._size.y * 4));
 
-        this._health = 1;
+        this._health = 100;
 
         
         this._velocity = new Vec2(0,0);
@@ -34,6 +34,16 @@ class Player
         this._nextPowerUp = null;
         this._autoTurret = new AutoTurret(this._shape.getOrigin(), new Vec2(93,94));
         this.createShape();
+
+        this._weapons = [];
+        this._currentWeapon = null;
+                                    //size,ammoCount,ttl,damage
+        this._weapons.push(new Pistol(new Vec2(30,30),1000,5,10));
+        this._weapons.push(new Shotgun(new Vec2(30,30),12,3,15));
+        this._weapons.push(new Mine(new Vec2(105,105),5,20,100));
+
+        this._currentWeapon = this._weapons[0];
+        this._collisionDamage = 10;
     }
 
 
@@ -141,7 +151,7 @@ class Player
   
     set setHealth(value)
     {
-        this._health -= value;
+        this._health += value;
     }
 
     set setSpriteAngle(val)
@@ -233,6 +243,7 @@ class Player
     {
         return this._powerUp;
     }
+
     setPowerUpType(val)
     {
         return this._powerUp = val;
@@ -298,5 +309,26 @@ class Player
     setMaxAcceleration(val)
     {
          this._maxAcceleration = val;
+    }
+
+    getCurrentWeapon()
+    {
+        return this._currentWeapon;
+    }
+    setCurrentWeapon(val)
+    {
+        this._currentWeapon = this._weapons[val];
+    }
+    getWeapons()
+    {
+        return this._weapons;
+    }
+    checkHealth()
+    {
+        return this._health < 1;
+    }
+    getCollisionDamage()
+    {
+        return this._collisionDamage;
     }
 }
