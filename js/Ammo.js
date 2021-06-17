@@ -59,10 +59,15 @@ Ammo.prototype.reset = function()
     this._rect.setRect(new Vec2(Math.random()* WORLD_WIDTH, Math.random() * WORLD_HEIGHT));
 }
 
+Ammo.prototype.setTimer = function(val)
+{
+    this._timer = val;
+}
+
 Ammo.prototype.initAmmo = function(ammunition)
 {
-    let mineAmmo = new Ammo(new Vec2(Math.random() * WORLD_WIDTH, Math.random() * WORLD_HEIGHT), new Vec2(42,40),AmmoType.MINE);
-    let shotgunAmmo = new Ammo(new Vec2(Math.random() * WORLD_WIDTH, Math.random() * WORLD_HEIGHT), new Vec2(42,40),AmmoType.SHOTGUN);
+    let mineAmmo = new Ammo(new Vec2(Math.random() * WORLD_WIDTH, Math.random() * WORLD_HEIGHT), new Vec2(138,153),AmmoType.MINE);
+    let shotgunAmmo = new Ammo(new Vec2(Math.random() * WORLD_WIDTH, Math.random() * WORLD_HEIGHT), new Vec2(156,152),AmmoType.SHOTGUN);
     ammunition.push(mineAmmo);
     ammunition.push(shotgunAmmo);
 }

@@ -409,14 +409,14 @@ class GameScene extends Scene
 
             if(CollisionManager.SATCollision(this.ammunition[i].getRect().getPoints(), this._player._shape.getPoints()))
             {
-                console.log( this._player.getCurrentWeapon().getAmmoCount());
+               
                 if (this.ammunition[i].getType() == AmmoType.MINE)
                     this._player.getWeapons()[2].addAmmo(this.ammunition[i].getAmmount());
                 else if (this.ammunition[i].getType() == AmmoType.SHOTGUN)
                     this._player.getWeapons()[1].addAmmo(this.ammunition[i].getAmmount());
                
-                console.log(this._player.getCurrentWeapon().getAmmoCount());
                 this.ammunition[i].setActive(false);
+                this.ammunition[i].setTimer(performance.now());
             }
         }
 
@@ -627,6 +627,9 @@ class GameScene extends Scene
         for(let w = 0; w < this._player.getWeapons().length; w++)
         {
             let playerBullets = this._player.getWeapons()[w].getBullets();
+            let noOfFrames = w == 2 ? 9 : 5;
+            let bulletAnimation =  w == 2 ? MINE_EXPLOSION_IMAGE : BULLET_EXPLOSION_IMAGE;
+            let animationSize = w == 2 ? new Vec2(210,210) : new Vec2(256,256);
              /* Minion Player bullet collision */
             for( let row = 0; row < this._minions.length; row++)
             {
@@ -636,14 +639,15 @@ class GameScene extends Scene
                     {
                         if(CollisionManager.SATCollision(playerBullets[b].getRect.getPoints(),this._minions[row][col].getRect.getPoints()))
                         {
+                            
                             this._minions[row][col].setHealth = -this._player.getWeapons()[w].getDamage();
                             if(this._minions[row][col].checkHealth())
                             {
                                 this._animationManager.addAnimation(5,0.5,this._minions[row][col].getRect.getOrigin(),EXPLOSION_IMAGE,new Vec2(256,256));
                                 this._minions[row].splice(col,1);
                             }
-                    
-                            this._animationManager.addAnimation(5,0.5,playerBullets[b].getRect.getOrigin(),BULLET_EXPLOSION_IMAGE,new Vec2(256,256));
+                            //frames, transitiontime,pos,image,size,currentFrame,timer
+                            this._animationManager.addAnimation(noOfFrames,0.5,playerBullets[b].getRect.getOrigin(),bulletAnimation,animationSize);
                             playerBullets.splice(b,1);
                             this.spawn();
                             if (playerBullets.length > 0)
@@ -666,7 +670,7 @@ class GameScene extends Scene
                             this._animationManager.addAnimation(5,0.5,this._bombers[i].getRect.getOrigin(),EXPLOSION_IMAGE,new Vec2(256,256));
                             this._bombers.splice(i,1);
                         }
-                        this._animationManager.addAnimation(5,0.5,playerBullets[b].getRect.getOrigin(),BULLET_EXPLOSION_IMAGE,new Vec2(256,256));
+                        this._animationManager.addAnimation(noOfFrames,0.5,playerBullets[b].getRect.getOrigin(),bulletAnimation,animationSize);
                         playerBullets.splice(b,1);  
                         this.spawn();
                         if (playerBullets.length == 0 || b >= playerBullets.length)     
@@ -687,7 +691,7 @@ class GameScene extends Scene
                             this._animationManager.addAnimation(5,0.5,this._asteroids[i].getRect().getOrigin(),EXPLOSION_IMAGE,new Vec2(256,256));
                             this._asteroids.splice(i,1);
                         }
-                        this._animationManager.addAnimation(5,0.5,playerBullets[b].getRect.getOrigin(),BULLET_EXPLOSION_IMAGE,new Vec2(256,256));
+                        this._animationManager.addAnimation(noOfFrames,0.5,playerBullets[b].getRect.getOrigin(),bulletAnimation,animationSize);
                         playerBullets.splice(b,1);
                         this.spawn();
                         if (playerBullets.length == 0 || b >= playerBullets.length)     
@@ -701,7 +705,7 @@ class GameScene extends Scene
                 let  time = Math.round((performance.now() - playerBullets[i].getTimer())/1000);
                 if (time >= this._player.getWeapons()[w].getTTL())
                 {
-                    this._animationManager.addAnimation(5,0.5,playerBullets[i].getRect.getOrigin(),BULLET_EXPLOSION_IMAGE,new Vec2(256,256));
+                    this._animationManager.addAnimation(noOfFrames,0.5,playerBullets[i].getRect.getOrigin(),bulletAnimation,animationSize);
                     playerBullets.splice(i,1);
                 }
             }
@@ -909,18 +913,9 @@ class GameScene extends Scene
                 a.draw(ctx,this._camera.getPos)
         });
 
-        //Scale health bar 
-        if(this._player.getHealth > 0)
-        {
-            ctx.drawImage(heart,0,0,HEART_SIZE.x,HEART_SIZE.y,(this._camera.getPos.x + (this._camera.getSize.x * 0.75)) - this._camera.getPos.x,(this._camera.getPos.y +  (this._camera.getSize.x / 30)) - this._camera.getPos.y,HEART_SIZE.x,HEART_SIZE.y);
-            //heartBar
-            //ctx.drawImage(healthBar,0,0,HEALTHBAR_SIZE.x,HEALTHBAR_SIZE.y,(camera.getPos.x + (camera.getSize.x * 0.81)) - camera.getPos.x,(camera.getSize.y +  (camera.getSize.x / 30)) - camera.getPos.y,HEALTHBAR_SIZE.x,HEALTHBAR_SIZE.y);
-            //heartValue
-            //render width based off health
-            ctx.drawImage(healthValue,0,0,HEALTHVALUE_SIZE.x,HEALTHVALUE_SIZE.y,(this._camera.getPos.x + (this._camera.getSize.x * 0.81)) - this._camera.getPos.x,(this._camera.getPos.y +  (this._camera.getSize.x / 30.1)) - this._camera.getPos.y,HEALTHVALUE_SIZE.x * (this._player.getHealth/100),HEALTHVALUE_SIZE.y);
-        }
-        ctx.fillStyle = 'blue';
-        ctx.fillText(`fps : ${this._waveManager.getWave()}`, (this._camera.getPos.x + 100) - this._camera.getPos.x,(this._camera.getPos.y + 50) - this._camera.getPos.y);  
+       
+       // ctx.fillStyle = 'blue';
+       // ctx.fillText(`fps : ${this._waveManager.getWave()}`, (this._camera.getPos.x + 100) - this._camera.getPos.x,(this._camera.getPos.y + 50) - this._camera.getPos.y);  
         this._animationManager.draw(ctx,this._camera.getPos);    
     }
 

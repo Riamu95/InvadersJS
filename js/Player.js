@@ -40,7 +40,7 @@ class Player
                                     //size,ammoCount,ttl,damage
         this._weapons.push(new Pistol(new Vec2(30,30),1000,5,10));
         this._weapons.push(new Shotgun(new Vec2(30,30),12,3,15));
-        this._weapons.push(new Mine(new Vec2(105,105),5,20,100));
+        this._weapons.push(new Mine(new Vec2(70,68),5,20,100));
 
         this._currentWeapon = this._weapons[0];
         this._collisionDamage = 10;

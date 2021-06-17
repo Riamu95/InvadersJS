@@ -11,6 +11,8 @@ AnimationManager.prototype.getInstance = function()
 AnimationManager.prototype.addAnimation = function(...animationProperties)
 {
     //is it better to pass some of these properties in rather than store them?
+
+    //frames, transitiontime,pos,image,size,currentFrame,timer
     let animateObj = {
 
         noOfFrames : animationProperties[0],

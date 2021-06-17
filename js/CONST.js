@@ -13,6 +13,7 @@ const ASTEROID_IMAGE = document.getElementById('asteroid');
 const BOMBER_BULLET_IMAGE = document.getElementById('bomberBullet');
 const PLAYER_BULLET_IMAGE = document.getElementById('playerBullet');
 const EXPLOSION_IMAGE = document.getElementById('explosion');
+const MINE_EXPLOSION_IMAGE = document.getElementById('mineExplosion');
 
 const BULLET_EXPLOSION_IMAGE = document.getElementById('bulletExplosion');
 
