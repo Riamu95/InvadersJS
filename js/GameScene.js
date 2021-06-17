@@ -448,25 +448,25 @@ class GameScene extends Scene
                 {
                     if(CollisionManager.SATCollision(this._bombers[b].getRect.getPoints(),this._minions[row][col].getRect.getPoints()))
                     {
-
                         this._bombers[b].setHealth = -EnemyMinion.collisionDamage;
                         this._minions[row][col].setHealth = -Bomber.collisionDamage;
-
-
-                        this._animationManager.addAnimation(5,0.5,this._minions[row][col].getRect.getOrigin(),EXPLOSION_IMAGE,new Vec2(256,256));
-
-                       
-                        this._bombers[b].checkHealth() && this._bombers.splice(b,1);
+                        
                         if(this._minions[row][col].checkHealth())
                         {
-                          this._minions[row].splice(col,1);
+                            this._animationManager.addAnimation(5,0.5,this._minions[row][col].getRect.getOrigin(),EXPLOSION_IMAGE,new Vec2(256,256));
+                            this._minions[row].splice(col,1);
+                            this.spawn();
                         }
-                        this.spawn();
-
+                        if(this._bombers[b].checkHealth())
+                        {
+                            this._animationManager.addAnimation(5,0.5,this._bombers[b].getRect.getOrigin(),EXPLOSION_IMAGE,new Vec2(256,256));
+                            this._bombers.splice(b,1);
+                            this.spawn();
+                            break loop1;
+                        }
+                        
                         if(this._bombers.length <= 0)
                             break loop1;
-                        //break out  here 
-                        //play explostion this._animation
                     }
                 }
             }
@@ -507,12 +507,13 @@ class GameScene extends Scene
                 if(CollisionManager.SATCollision(this._asteroids[a].getRect().getPoints(),this._bombers[b].getRect.getPoints()))
                 {
                     //MTV 
-                    this._asteroids[a].setHealth(-Bomber.prototype.collisionDamage);
-                    this._player.setHealth = -Asteroid.prototype.collisionDamage;
+                    this._asteroids[a].setHealth(-Bomber.collisionDamage);
+                    this._bombers[b].setHealth = -Asteroid.prototype.collisionDamage;
 
                     if(this._bombers[b].checkHealth())
                     {
                         this._bombers.splice(b,1);
+                        break;
                     } 
                     if(this._asteroids[a].checkHealth())
                     {
@@ -534,7 +535,7 @@ class GameScene extends Scene
                 {
                     if(CollisionManager.SATCollision(this._asteroids[a].getRect().getPoints(),this._minions[row][col].getRect.getPoints()))
                     {
-                        this._asteroids[a].setHealth(-EnemyMinion.prototype.collisionDamage);
+                        this._asteroids[a].setHealth(-EnemyMinion.collisionDamage);
                         this._minions[row][col].setHealth = -Asteroid.prototype.collisionDamage;
 
                         if(this._minions[row][col].checkHealth())
