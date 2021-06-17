@@ -20,7 +20,17 @@ class GameScene extends Scene
         //let qt = new QuadTree(new Vec2(0,0),new Vec2(WORLD_WIDTH,WORLD_HEIGHT), 5);
         this._animationManager = new AnimationManager();
         this._waveManager = new WaveManager();
-        
+        this._guiComponents = [];
+
+        this._guiComponents.push(new GuiComponent("healthGUI",new Vec2(164,105),new Vec2(328,105),true));
+        this._guiComponents.push(new GuiComponent("healthValueGUI",new Vec2(this._guiComponents[0].getPos().x + 43,this._guiComponents[0].getPos().y),new Vec2(222,59),true));
+        this._guiComponents.push(new GuiComponent("nullPowerUpGui",new Vec2(this._camera.getSize.x/1.09,this._camera.getSize.y/1.25),new Vec2(253,138),true));
+        this._guiComponents.push(new GuiComponent("healthSymbolGui",new Vec2(WORLD_WIDTH * 2,WORLD_HEIGHT * 2),new Vec2(110,110),false));
+        this._guiComponents.push(new GuiComponent("fireRateGui",new Vec2(WORLD_WIDTH * 2,WORLD_HEIGHT * 2),new Vec2(110,110),false));
+        this._guiComponents.push(new GuiComponent("speedGui",new Vec2(WORLD_WIDTH * 2,WORLD_HEIGHT * 2),new Vec2(110,110),false));
+        this._guiComponents.push(new GuiComponent("turretGui",new Vec2(WORLD_WIDTH * 2,WORLD_HEIGHT * 2),new Vec2(110,110),false));
+        this._guiComponents.push(new GuiComponent("ammoGui",new Vec2(this._camera.getSize.x/9.5,this._camera.getSize.y/1.25),new Vec2(378,128),true));
+
         this.init();
     }
 
@@ -299,18 +309,23 @@ class GameScene extends Scene
             {
                 case PowerUpType.HEALTH:
                     this._player.setPowerUpType(PowerUpType.HEALTH);
+                    this._guiComponents[3].setActive(false);  
                     break;
                 case  PowerUpType.FIRE_RATE:
-                    this._player.setFireRate = 0.25;   
+                    this._player.setFireRate = 0.25;
+                   
                     this._player.setPowerUpType(PowerUpType.FIRE_RATE);
+                    this._guiComponents[4].setActive(false);
                     break;
                 case  PowerUpType.AUTOTURRET:
                     this._player.setPowerUpType(PowerUpType.AUTOTURRET);
+                    this._guiComponents[6].setActive(false);
                     this._player.getAutoTurret().setActive(true);
                     break;
                 case  PowerUpType.SPEED:
                     this._player.setMaxAcceleration(1);
                     this._player.setPowerUpType(PowerUpType.SPEED);
+                    this._guiComponents[5].setActive(false);
                     break;
             }
             this._pressedKeys['e'] = false;
@@ -379,19 +394,61 @@ class GameScene extends Scene
 
             if(CollisionManager.SATCollision(this.powerUps[i].getRect().getPoints(), this._player._shape.getPoints()))
             {
+                let powerupGuiLeft = new Vec2(this._camera.getSize.x/1.13,this._camera.getSize.y/1.255);
+                let powerupGuiRight = new Vec2(this._camera.getSize.x/1.05,this._camera.getSize.y/1.255);
                 switch(this.powerUps[i].getType()) 
                 {
                     case PowerUpType.HEALTH:
-                        this._player.getCurrentPowerUp() == null ? this._player.setCurrentPowerUp(PowerUpType.HEALTH) : this._player.setNextPowerUp(PowerUpType.HEALTH);
+                        if (this._player.getCurrentPowerUp() == null ) {
+                            this._player.setCurrentPowerUp(PowerUpType.HEALTH);
+                            this._guiComponents[3].setActive(true);
+                            this._guiComponents[3].setPos(powerupGuiLeft);
+                        }
+                        else
+                        {
+                            this._player.setNextPowerUp(PowerUpType.HEALTH);
+                            this._guiComponents[3].setActive(true);
+                            this._guiComponents[3].setPos(powerupGuiRight);
+                        }
                       break;//timer based power up
                     case  PowerUpType.FIRE_RATE:   
-                        this._player.getCurrentPowerUp() == null ? this._player.setCurrentPowerUp(PowerUpType.FIRE_RATE) : this._player.setNextPowerUp(PowerUpType.FIRE_RATE);
+                    if (this._player.getCurrentPowerUp() == null ) {
+                        this._player.setCurrentPowerUp(PowerUpType.FIRE_RATE);
+                        this._guiComponents[4].setActive(true);
+                        this._guiComponents[4].setPos(powerupGuiLeft);
+                    }
+                    else
+                    {
+                        this._player.setNextPowerUp(PowerUpType.FIRE_RATE);
+                        this._guiComponents[4].setActive(true);
+                        this._guiComponents[4].setPos(powerupGuiRight);
+                    }
                       break;//timer based power up/ healthbased
                     case  PowerUpType.AUTOTURRET:
-                        this._player.getCurrentPowerUp() == null ? this._player.setCurrentPowerUp(PowerUpType.AUTOTURRET) : this._player.setNextPowerUp(PowerUpType.AUTOTURRET);
+                        if (this._player.getCurrentPowerUp() == null ) {
+                            this._player.setCurrentPowerUp(PowerUpType.AUTOTURRET);
+                            this._guiComponents[6].setActive(true);
+                            this._guiComponents[6].setPos(powerupGuiLeft);
+                        }
+                        else
+                        {
+                            this._player.setNextPowerUp(PowerUpType.AUTOTURRET);
+                            this._guiComponents[6].setActive(true);
+                            this._guiComponents[6].setPos(powerupGuiRight);
+                        }
                       break;
                     case  PowerUpType.SPEED:
-                        this._player.getCurrentPowerUp() == null ? this._player.setCurrentPowerUp(PowerUpType.SPEED) : this._player.setNextPowerUp(PowerUpType.SPEED);
+                        if (this._player.getCurrentPowerUp() == null ) {
+                            this._player.setCurrentPowerUp(PowerUpType.SPEED);
+                            this._guiComponents[5].setActive(true);
+                            this._guiComponents[5].setPos(powerupGuiLeft);
+                        }
+                        else
+                        {
+                            this._player.setNextPowerUp(PowerUpType.SPEED);
+                            this._guiComponents[5].setActive(true);
+                            this._guiComponents[5].setPos(powerupGuiRight);
+                        }
                       break;
                 }
 
@@ -429,6 +486,7 @@ class GameScene extends Scene
                 if(CollisionManager.SATCollision(this._minions[row][col]._rect.getPoints(), this._player._shape.getPoints()))
                 {
                     this._player.setHealth = -EnemyMinion.collisionDamage;
+                   // this._guiComponents[1].setSize(new Vec2(this._player.getHealth,this._guiComponents[1].getSize().y))
                     this._minions[row][col].setHealth = -this._player.getCollisionDamage();
 
                     this._animationManager.addAnimation(5,0.5,this._minions[row][col].getRect.getOrigin(),EXPLOSION_IMAGE,new Vec2(256,256));
@@ -911,6 +969,12 @@ class GameScene extends Scene
         {
             if(a.getActive())
                 a.draw(ctx,this._camera.getPos)
+        });
+
+        this._guiComponents.forEach(guiComp =>
+        {
+            if(guiComp.getActive())
+                guiComp.draw(ctx,this._camera.getPos);
         });
 
        
