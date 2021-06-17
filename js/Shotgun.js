@@ -2,7 +2,7 @@ const Shotgun = function(size,ammoCount,ttl,damage)
 {
     Weapon.call(this,size,ammoCount,ttl,damage);
     this._image = document.getElementById("shotgunBullet");
-
+    this._maxAmmo = 15;
 }
 
 Shotgun.prototype = Object.create(Weapon.prototype);

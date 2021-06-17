@@ -13,13 +13,14 @@ class GameScene extends Scene
         this._pressedKeys = new Set();
         this._buttons = ['w','a','s','d','e','1','2','3'];
         this.powerUps = [];
+        this.ammunition = [];
         this._collisionManager = new CollisionManager();
         this._player = new Player(new Vec2(WORLD_WIDTH/2,WORLD_HEIGHT/2),new Vec2(127,130));
         this._camera = new Camera(this._player.getShape.getOrigin().x - CANVAS_WIDTH/2,this._player.getShape.getOrigin().y - CANVAS_HEIGHT/2,CANVAS_WIDTH,CANVAS_HEIGHT);
         //let qt = new QuadTree(new Vec2(0,0),new Vec2(WORLD_WIDTH,WORLD_HEIGHT), 5);
         this._animationManager = new AnimationManager();
         this._waveManager = new WaveManager();
-    
+        
         this.init();
     }
 
@@ -73,45 +74,48 @@ class GameScene extends Scene
             //create Power Ups
             for(let i = 0; i < this._waveManager.getPowerUpCount(); i++)
             {
-                let  temp = new PowerUp(new Vec2(Math.random() * WORLD_WIDTH, Math.random() * WORLD_HEIGHT), new Vec2(300,300),"autoTurret",  Math.random() * 30);
+                let  temp = new PowerUp(new Vec2(Math.random() * WORLD_WIDTH, Math.random() * WORLD_HEIGHT), new Vec2(300,300),PowerUp.prototype.generateRandomType(Math.round(Math.random()* 2)),  Math.random() * 30);
                 this.powerUps.push(temp);
             }
 
-              /* Create Black Holes*/
-              for(let i = 0; i < this._waveManager.getBlackHoleCount(); i++)
-              {
-                  let pos = this._waveManager.getSpawnPoint(Math.trunc(Math.random() * SPAWN_POINTS));
-                  let  temp = new BlackHole(new Vec2(pos.x, pos.y), new Vec2(643,480));
-                  this._blackHoles.push(temp);
-              }
-              /* Createthis._asteroids */
-              for(let i = 0; i < this._waveManager.getAsteroidCount(); i++)
-              {
-                  let pos = this._waveManager.getSpawnPoint(Math.trunc(Math.random() * SPAWN_POINTS));
-                  let  temp = new Asteroid(new Vec2(pos.x, pos.y), new Vec2(99,99));
-                  this._asteroids.push(temp);
-              }
-              /* Createthis._minions*/
-              for(let row = 0; row < this._waveManager.getFlockCount(); row++)
-              {
-                  let pos = this._waveManager.getSpawnPoint(Math.trunc(Math.random() * SPAWN_POINTS));
-                  let tempMinions = [];
-                  for(let col = 0; col < this._waveManager.getMininonCount(); col++)
-                  {
-                      let tempMinion = new EnemyMinion(new Vec2(pos.x + (col * 20), pos.y + (row * 20)), new Vec2(90, 102) ,new Vec2(Math.random(1) + -1, Math.random(1) + -1));
-                      tempMinions.push(tempMinion);
-                  }
-                  this._minions.push(tempMinions);
-                  this._flockPoints.push(new Vec2(Math.random() * (WORLD_WIDTH - MINION_SPAWN_XOFFSET), Math.random() * (WORLD_HEIGHT - MINION_SPAWN_YOFFSET)));
-              }
-              /* Create this._bombers*/
-              for(let i = 0; i < this._waveManager.getBomberCount(); i++)
-              {
-                  let pos = this._waveManager.getSpawnPoint(Math.trunc(Math.random() * SPAWN_POINTS));
-                  let flockPoint = new Vec2(Math.random() * WORLD_WIDTH, Math.random() * WORLD_HEIGHT);
-                  let tempBomber = new Bomber(new Vec2(pos.x,pos.y), new Vec2(128,158), new Vec2(0,0),flockPoint);
-                  this._bombers.push(tempBomber);
-              }
+            Ammo.prototype.initAmmo(this.ammunition);
+        
+
+            /* Create Black Holes*/
+            for(let i = 0; i < this._waveManager.getBlackHoleCount(); i++)
+            {
+                let pos = this._waveManager.getSpawnPoint(Math.trunc(Math.random() * SPAWN_POINTS));
+                let  temp = new BlackHole(new Vec2(pos.x, pos.y), new Vec2(643,480));
+                this._blackHoles.push(temp);
+            }
+            /* Createthis._asteroids */
+            for(let i = 0; i < this._waveManager.getAsteroidCount(); i++)
+            {
+                let pos = this._waveManager.getSpawnPoint(Math.trunc(Math.random() * SPAWN_POINTS));
+                let  temp = new Asteroid(new Vec2(pos.x, pos.y), new Vec2(99,99));
+                this._asteroids.push(temp);
+            }
+            /* Createthis._minions*/
+            for(let row = 0; row < this._waveManager.getFlockCount(); row++)
+            {
+                let pos = this._waveManager.getSpawnPoint(Math.trunc(Math.random() * SPAWN_POINTS));
+                let tempMinions = [];
+                for(let col = 0; col < this._waveManager.getMininonCount(); col++)
+                {
+                    let tempMinion = new EnemyMinion(new Vec2(pos.x + (col * 20), pos.y + (row * 20)), new Vec2(90, 102) ,new Vec2(Math.random(1) + -1, Math.random(1) + -1));
+                    tempMinions.push(tempMinion);
+                }
+                this._minions.push(tempMinions);
+                this._flockPoints.push(new Vec2(Math.random() * (WORLD_WIDTH - MINION_SPAWN_XOFFSET), Math.random() * (WORLD_HEIGHT - MINION_SPAWN_YOFFSET)));
+            }
+            /* Create this._bombers*/
+            for(let i = 0; i < this._waveManager.getBomberCount(); i++)
+            {
+                let pos = this._waveManager.getSpawnPoint(Math.trunc(Math.random() * SPAWN_POINTS));
+                let flockPoint = new Vec2(Math.random() * WORLD_WIDTH, Math.random() * WORLD_HEIGHT);
+                let tempBomber = new Bomber(new Vec2(pos.x,pos.y), new Vec2(128,158), new Vec2(0,0),flockPoint);
+                this._bombers.push(tempBomber);
+            }
               
     }
 
@@ -159,6 +163,11 @@ class GameScene extends Scene
         this.powerUps.forEach( pu =>
         {
             pu.update();
+        });
+
+        this.ammunition.forEach( a =>
+        {
+            a.update(this._waveManager.getAmmoIntervalTimer());
         });
 
         this._player.getAutoTurret().getActive() &&  this._player.getAutoTurret().update(dt);
@@ -390,6 +399,24 @@ class GameScene extends Scene
                 this.powerUps[i].setInactiveTimer(performance.now());
                 //Make power up not active, once power up depleted remove power up
                 //destroy power up + animation
+            }
+        }
+
+        for( let i = 0; i < this.ammunition.length; i++)
+        {
+            if(!this.ammunition[i].getActive())
+                continue;
+
+            if(CollisionManager.SATCollision(this.ammunition[i].getRect().getPoints(), this._player._shape.getPoints()))
+            {
+                console.log( this._player.getCurrentWeapon().getAmmoCount());
+                if (this.ammunition[i].getType() == AmmoType.MINE)
+                    this._player.getWeapons()[2].addAmmo(this.ammunition[i].getAmmount());
+                else if (this.ammunition[i].getType() == AmmoType.SHOTGUN)
+                    this._player.getWeapons()[1].addAmmo(this.ammunition[i].getAmmount());
+               
+                console.log(this._player.getCurrentWeapon().getAmmoCount());
+                this.ammunition[i].setActive(false);
             }
         }
 
@@ -874,6 +901,12 @@ class GameScene extends Scene
         this.powerUps.forEach( pu =>
         {
             pu.draw(ctx,this._camera.getPos)
+        });
+
+        this.ammunition.forEach( a =>
+        {
+            if(a.getActive())
+                a.draw(ctx,this._camera.getPos)
         });
 
         //Scale health bar 

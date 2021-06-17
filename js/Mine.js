@@ -2,6 +2,7 @@ const Mine = function(size,ammoCount,ttl,damage)
 {
     Weapon.call(this,size,ammoCount,ttl,damage);
     this._image = document.getElementById("mineBullet");
+    this._maxAmmo = 5;
 }
 
 Mine.prototype = Object.create(Weapon.prototype);

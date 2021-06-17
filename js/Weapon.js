@@ -6,6 +6,7 @@ const Weapon = function(size,ammoCount,ttl,damage)
     this._ttl = ttl;
     this._damage = damage;
     this._bulletSize = new Vec2(size.x,size.y);
+    this._maxAmmo = null;
 }
 
 Weapon.prototype.addBullet = function(pos,size,angle)
@@ -27,6 +28,11 @@ Weapon.prototype.draw = function(ctx, cameraPos)
     });
 }
 
+Weapon.prototype.getMaxAmmo = function()
+{
+    return this._maxAmmo;
+}
+
 Weapon.prototype.getAmmoCount = function()
 {
     return this._ammoCount;
@@ -44,7 +50,12 @@ Weapon.prototype.getImage = function()
 
 Weapon.prototype.addAmmo = function(val)
 {
-    return this._ammoCount += val;
+    let i = 0;
+    while(this._ammoCount < this._maxAmmo && i < val)
+    {
+        this._ammoCount += 1;
+        i++;
+    }
 }
 Weapon.prototype.getTTL = function()
 {
