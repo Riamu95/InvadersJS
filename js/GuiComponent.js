@@ -2,20 +2,31 @@ const GuiComponent = function(_image,pos,size,_active,...listeners)
 {
     this._image = document.getElementById(_image);
     this._listeners = listeners;
+    
     this._active = _active;
     this._pos = pos;
     this._size = size;
-
+  
     for(let i = 0; i < this._listeners.length; i++)
     {
-        if (this._listeners[i] == "click")
-            this._image.addEventListener(this._listeners[i],this.click);
-        else if(this._listeners[i] == "hover")
-            this._image.addEventListener(this._listeners[i],this.hover);
-        else if(this._listeners[i] == "mouseEnter")
-            this._image.addEventListener(this._listeners[i],this.mouseEnter);
-        else if(this._listeners[i] == "mouseLeave")
-            this._image.addEventListener(this._listeners[i],this.mousmousLeave);
+        let type = Object.keys(this._listeners[i]);
+        let value = Object.values(this._listeners[i]);
+
+        if(type == "mouseenter" && value[0] == null)
+        {
+            value[0] = this.mouseEnter;
+        }
+        else if(type == "mouseleave" && value[0] == null)
+        {
+            value[0] = this.mouseLeave;
+        }
+
+        if (type == "click")
+            this._image.addEventListener(type,value[0]);
+        else if(type == "mouseenter")
+            this._image.addEventListener(type,value[0]);
+        else if(type == "mouseleave")
+            this._image.addEventListener(type,value[0]);
     }
 }
 
@@ -31,24 +42,48 @@ GuiComponent.prototype.update = function()
 
 GuiComponent.prototype.click = function()
 {
-
+   
 }
 
-GuiComponent.prototype.hover = function()
+GuiComponent.prototype.mouseHover = function()
 {
 
 }
-GuiComponent.prototype.mouseEnter = function()
+GuiComponent.prototype.mouseEnter = function(e)
 {
-
+    if(e.target.src == 'file:///C:/Users/Predator/Desktop/InvadersJs/Assets/buttons/play.png')
+    {
+        e.target.src = 'file:///C:/Users/Predator/Desktop/InvadersJs/Assets/buttons/playClicked.png';
+    } 
+    else if(e.target.src == 'file:///C:/Users/Predator/Desktop/InvadersJs/Assets/buttons/unquit.png')
+    {
+        e.target.src = 'file:///C:/Users/Predator/Desktop/InvadersJs/Assets/buttons/quitClicked.png';
+    } 
+    else if(e.target.src == 'file:///C:/Users/Predator/Desktop/InvadersJs/Assets/buttons/playAgain.png')
+    {
+        e.target.src = 'file:///C:/Users/Predator/Desktop/InvadersJs/Assets/buttons/playAgainClicked.png';
+    } 
+   
 }
 
-GuiComponent.prototype.mouseLeave = function()
+GuiComponent.prototype.mouseLeave = function(e)
 {
 
+    if (e.target.src == 'file:///C:/Users/Predator/Desktop/InvadersJs/Assets/buttons/playClicked.png')
+    {
+        e.target.src = 'file:///C:/Users/Predator/Desktop/InvadersJs/Assets/buttons/play.png';
+    }
+    else if (e.target.src == 'file:///C:/Users/Predator/Desktop/InvadersJs/Assets/buttons/quitClicked.png')
+    {
+        e.target.src = 'file:///C:/Users/Predator/Desktop/InvadersJs/Assets/buttons/unquit.png';
+    } 
+    else if (e.target.src == 'file:///C:/Users/Predator/Desktop/InvadersJs/Assets/buttons/playAgainClicked.png')
+    {
+        e.target.src = 'file:///C:/Users/Predator/Desktop/InvadersJs/Assets/buttons/playAgain.png';
+    }
 }
 
-GuiComponent.prototype.draw = function(ctx,cameraPos)
+GuiComponent.prototype.draw = function(ctx,cameraPos = new Vec2(0,0))
 {
     ctx.save();
     ctx.beginPath();      
@@ -62,23 +97,36 @@ GuiComponent.prototype.removeListeners = function()
 {
     for(let i =0; i < this._listeners.length; i++)
     {
-        if (this._listeners[i] == "click")
-            this._image.removeListeners(this._listeners[i],this.click);
-        else if(this._listeners[i] == "hover")
-            this._image.removeListeners(this._listeners[i],this.hover);
-        else if(this._listeners[i] == "mouseEnter")
-            this._image.removeListeners(this._listeners[i],this.mouseEnter);
-        else if(this._listeners[i] == "mouseLeave")
-            this._image.removeListeners(this._listeners[i],this.mouseLeave);
+        let type = Object.keys(this._listeners[i]);
+        let value = Object.values(this._listeners[i]);
+
+        if(type == "mouseenter" && value[0] == null)
+        {
+            value[0] = this.mouseEnter;
+        }
+        else if(type == "mouseleave" && value[0] == null)
+        {
+            value[0] = this.mouseLeave;
+        }
+
+        if (type == "click")
+            this._image.removeEventListener(type,value[0]);
+        else if(type == "mouseenter")
+            this._image.removeEventListener(type,value[0]);
+        else if(type == "mouseleave")
+            this._image.removeEventListener(type,value[0]);
     }
 }
-
 
 GuiComponent.prototype.getActive = function()
 {
     return this._active;
 }
 
+GuiComponent.prototype.getImage = function()
+{
+    return this._image;
+}
 
 GuiComponent.prototype.getPos = function()
 {
@@ -89,10 +137,12 @@ GuiComponent.prototype.setPos = function(val)
 {
     this._pos = val;
 }
+
 GuiComponent.prototype.getSize = function()
 {
     return this._size;
 }
+
 GuiComponent.prototype.setSize = function(val)
 {
     this._size = val;
