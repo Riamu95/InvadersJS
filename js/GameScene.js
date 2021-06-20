@@ -39,7 +39,9 @@ class GameScene extends Scene
         this._guiComponents.set("turretGui",[new GuiComponent("turretGui",new Vec2(WORLD_WIDTH * 2, WORLD_HEIGHT * 2),new Vec2(110,110),false),
                                              new GuiComponent("turretGui",new Vec2(WORLD_WIDTH * 2, WORLD_HEIGHT * 2),new Vec2(110,110),false)]);
         
-        this._guiComponents.set("ammoGui",[new GuiComponent("ammoGui",new Vec2(this._camera.getSize.x/9.5,this._camera.getSize.y/1.25),new Vec2(378,128),true)]);
+        this._guiComponents.set("ammoGui",[new GuiComponent("leftAmmoGui",new Vec2(this._camera.getSize.x/9.5,this._camera.getSize.y/1.25),new Vec2(378,128),true),
+                                new GuiComponent("middleAmmoGui",new Vec2(this._camera.getSize.x/9.5,this._camera.getSize.y/1.25),new Vec2(378,128),false),
+                                new GuiComponent("rightAmmoGui",new Vec2(this._camera.getSize.x/9.5,this._camera.getSize.y/1.25),new Vec2(378,128),false)]);
     
         this.init();
     }
@@ -47,7 +49,9 @@ class GameScene extends Scene
     init() 
     {
         this.spawn();
-    
+        ctx.font = '24px serif';
+        ctx.fillStyle = 'blue';
+
         document.addEventListener('keydown', (event) =>
         { 
            if (this._buttons.includes(event.key))
@@ -135,8 +139,7 @@ class GameScene extends Scene
                 let flockPoint = new Vec2(Math.random() * WORLD_WIDTH, Math.random() * WORLD_HEIGHT);
                 let tempBomber = new Bomber(new Vec2(pos.x,pos.y), new Vec2(128,158), new Vec2(0,0),flockPoint);
                 this._bombers.push(tempBomber);
-            }
-              
+            }        
     }
 
     update(dt)
@@ -212,6 +215,7 @@ class GameScene extends Scene
                         PowerUp.prototype.healthIncreaseAmount = 10;
 
                    index = this._guiComponents.get("healthSymbolGui")[0].getActive() == true ? index = 0 : index = 1;
+
                    this._player.setHealth =  PowerUp.prototype.healthIncreaseAmount;
                    this._guiComponents.get("healthValueGUI")[0].getRenderSize().x += (this._guiComponents.get("healthValueGUI")[0].getRenderSize().x/100) *  PowerUp.prototype.healthIncreaseAmount;
                    this._player.resetPowerUp();
@@ -281,10 +285,7 @@ class GameScene extends Scene
         }
 
         this.inputHandling(dt);
-        this.collisions();
-        //dont check this here, check on every collision
-        if(this._player.getHealth < 0)
-            this.NextScene();
+        this.collisions();    
     }
     
 
@@ -369,15 +370,24 @@ class GameScene extends Scene
         }
         if (this._pressedKeys['1'])
         {
-            this._player.setCurrentWeapon(0);    
+            this._player.setCurrentWeapon(0);
+            this._guiComponents.get("ammoGui")[0].setActive(true);
+            this._guiComponents.get("ammoGui")[1].setActive(false);
+            this._guiComponents.get("ammoGui")[2].setActive(false);
         }
         else if (this._pressedKeys['2'])
         {
             this._player.setCurrentWeapon(1); 
+            this._guiComponents.get("ammoGui")[1].setActive(true);
+            this._guiComponents.get("ammoGui")[0].setActive(false);
+            this._guiComponents.get("ammoGui")[2].setActive(false);
         }
         else if (this._pressedKeys['3'])
         {
-            this._player.setCurrentWeapon(2); 
+            this._player.setCurrentWeapon(2);
+            this._guiComponents.get("ammoGui")[2].setActive(true);
+            this._guiComponents.get("ammoGui")[0].setActive(false);
+            this._guiComponents.get("ammoGui")[1].setActive(false);
         }
     }
 
@@ -437,15 +447,15 @@ class GameScene extends Scene
                     
                     if(powerUpIcon[0].getActive() && powerUpIcon[1].getActive())
                     {
-                        powerUpIcon[1].setActive(false)
+                        powerUpIcon[1].setActive(false);
                     }
                     else if (powerUpIcon[0].getActive() && !powerUpIcon[1].getActive())
                     {
-                        powerUpIcon[0].setActive(false)
+                        powerUpIcon[0].setActive(false);
                     } 
                     else if (!powerUpIcon[0].getActive() && powerUpIcon[1].getActive())
                     {
-                        powerUpIcon[1].setActive(false)
+                        powerUpIcon[1].setActive(false);
                     } 
                     this._playerPowerUps.pop();
                 }
@@ -1058,13 +1068,12 @@ class GameScene extends Scene
         }
     
        // ctx.fillText(`fps : ${this._waveManager.getWave()}`, (this._camera.getPos.x + 100) - this._camera.getPos.x,(this._camera.getPos.y + 50) - this._camera.getPos.y);  
-         ctx.font = '24px serif';
-        ctx.fillStyle = 'blue';
-        ctx.fillText('INF',((this._camera.getPos.x + this._camera.getSize.x/32) - this._camera.getPos.x),((this._camera.getPos.y + this._camera.getSize.y/1.183) - this._camera.getPos.y));
-        ctx.fillText(this._player.getWeapons()[1].getAmmoCount(),((this._camera.getPos.x + this._camera.getSize.x/10) - this._camera.getPos.x),((this._camera.getPos.y + this._camera.getSize.y/1.183) - this._camera.getPos.y));
-        ctx.fillText(this._player.getWeapons()[2].getAmmoCount(),((this._camera.getPos.x + this._camera.getSize.x/5.9) - this._camera.getPos.x),((this._camera.getPos.y + this._camera.getSize.y/1.183) - this._camera.getPos.y));
 
-       this._animationManager.draw(ctx,this._camera.getPos);    
+       this._animationManager.draw(ctx,this._camera.getPos);
+       
+       ctx.fillText('INF',((this._camera.getPos.x + this._camera.getSize.x/32) - this._camera.getPos.x),((this._camera.getPos.y + this._camera.getSize.y/1.183) - this._camera.getPos.y));
+       ctx.fillText(this._player.getWeapons()[1].getAmmoCount(),((this._camera.getPos.x + this._camera.getSize.x/10) - this._camera.getPos.x),((this._camera.getPos.y + this._camera.getSize.y/1.183) - this._camera.getPos.y));
+       ctx.fillText(this._player.getWeapons()[2].getAmmoCount(),((this._camera.getPos.x + this._camera.getSize.x/5.9) - this._camera.getPos.x),((this._camera.getPos.y + this._camera.getSize.y/1.183) - this._camera.getPos.y));
     }
 
     NextScene()
