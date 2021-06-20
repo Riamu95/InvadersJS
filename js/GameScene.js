@@ -22,33 +22,13 @@ class GameScene extends Scene
         this._waveManager = new WaveManager();
         this._guiComponents = new Map();
         this._playerPowerUps = [];
-
-        this._guiComponents.set("healthGUI",[new GuiComponent("healthGUI",new Vec2(164,105),new Vec2(328,105),true)]);
-        this._guiComponents.set("healthValueGUI",[new GuiComponent("healthValueGUI",new Vec2(this._guiComponents.get("healthGUI")[0].getPos().x + 43,this._guiComponents.get("healthGUI")[0].getPos().y),new Vec2(222,59),true)]);
-        this._guiComponents.set("nullPowerUpGui",[new GuiComponent("nullPowerUpGui",new Vec2(this._camera.getSize.x/1.09,this._camera.getSize.y/1.25),new Vec2(253,138),true)]);
-       
-        this._guiComponents.set("healthSymbolGui",[new GuiComponent("healthSymbolGui",new Vec2(WORLD_WIDTH * 2,WORLD_HEIGHT * 2),new Vec2(110,110),false),
-                                                    new GuiComponent("healthSymbolGui",new Vec2(WORLD_WIDTH * 2,WORLD_HEIGHT * 2),new Vec2(110,110),false)]);
-        
-        this._guiComponents.set("fireRateGui",[new GuiComponent("fireRateGui",new Vec2(WORLD_WIDTH * 2, WORLD_HEIGHT * 2),new Vec2(110,110),false),
-                                                new GuiComponent("fireRateGui",new Vec2(WORLD_WIDTH * 2, WORLD_HEIGHT * 2),new Vec2(110,110),false)]);
-        
-        this._guiComponents.set("speedGui",[new GuiComponent("speedGui",new Vec2(WORLD_WIDTH * 2, WORLD_HEIGHT * 2),new Vec2(110,110),false),
-                                            new GuiComponent("speedGui",new Vec2(WORLD_WIDTH * 2, WORLD_HEIGHT * 2),new Vec2(110,110),false)]);
-        
-        this._guiComponents.set("turretGui",[new GuiComponent("turretGui",new Vec2(WORLD_WIDTH * 2, WORLD_HEIGHT * 2),new Vec2(110,110),false),
-                                             new GuiComponent("turretGui",new Vec2(WORLD_WIDTH * 2, WORLD_HEIGHT * 2),new Vec2(110,110),false)]);
-        
-        this._guiComponents.set("ammoGui",[new GuiComponent("leftAmmoGui",new Vec2(this._camera.getSize.x/9.5,this._camera.getSize.y/1.25),new Vec2(378,128),true),
-                                new GuiComponent("middleAmmoGui",new Vec2(this._camera.getSize.x/9.5,this._camera.getSize.y/1.25),new Vec2(378,128),false),
-                                new GuiComponent("rightAmmoGui",new Vec2(this._camera.getSize.x/9.5,this._camera.getSize.y/1.25),new Vec2(378,128),false)]);
-    
         this.init();
     }
 
     init() 
     {
         this.spawn();
+        this.loadGui();
         ctx.font = '24px serif';
         ctx.fillStyle = 'blue';
 
@@ -74,6 +54,35 @@ class GameScene extends Scene
         });
     }
 
+    loadGui()
+    {
+        this._guiComponents.set("healthGUI",[new GuiComponent("healthGUI",new Vec2(164,105),new Vec2(328,105),true)]);
+        
+        this._guiComponents.set("healthValueGUI",[new GuiComponent("healthValueGUI",new Vec2(this._guiComponents.get("healthGUI")[0].getPos().x + 43,this._guiComponents.get("healthGUI")[0].getPos().y),new Vec2(222,59),true)]);
+        
+        this._guiComponents.set("PowerUpGui",[new GuiComponent("PowerUpGui",new Vec2(this._camera.getSize.x/1.09,this._camera.getSize.y/1.25),new Vec2(253,138),true)]);
+
+        this._guiComponents.set("activePowerUpGui",[new GuiComponent("activePowerUpGui",new Vec2(this._camera.getSize.x/1.085,this._camera.getSize.y/1.235),new Vec2(253,138),false)]);
+       
+        this._guiComponents.set("healthSymbolGui",[new GuiComponent("healthSymbolGui",new Vec2(WORLD_WIDTH * 2,WORLD_HEIGHT * 2),new Vec2(110,110),false),
+                                                    new GuiComponent("healthSymbolGui",new Vec2(WORLD_WIDTH * 2,WORLD_HEIGHT * 2),new Vec2(110,110),false)]);
+        
+        this._guiComponents.set("fireRateGui",[new GuiComponent("fireRateGui",new Vec2(WORLD_WIDTH * 2, WORLD_HEIGHT * 2),new Vec2(110,110),false),
+                                                new GuiComponent("fireRateGui",new Vec2(WORLD_WIDTH * 2, WORLD_HEIGHT * 2),new Vec2(110,110),false)]);
+        
+        this._guiComponents.set("speedGui",[new GuiComponent("speedGui",new Vec2(WORLD_WIDTH * 2, WORLD_HEIGHT * 2),new Vec2(110,110),false),
+                                            new GuiComponent("speedGui",new Vec2(WORLD_WIDTH * 2, WORLD_HEIGHT * 2),new Vec2(110,110),false)]);
+        
+        this._guiComponents.set("turretGui",[new GuiComponent("turretGui",new Vec2(WORLD_WIDTH * 2, WORLD_HEIGHT * 2),new Vec2(110,110),false),
+                                             new GuiComponent("turretGui",new Vec2(WORLD_WIDTH * 2, WORLD_HEIGHT * 2),new Vec2(110,110),false)]);
+        
+        this._guiComponents.set("nullPowerUpGui",[new GuiComponent("nullPowerUpGui",new Vec2(this._camera.getSize.x/1.035,this._camera.getSize.y/1.215),new Vec2(378,128),true),
+                                             new GuiComponent("nullPowerUpGui",new Vec2(this._camera.getSize.x/0.975,this._camera.getSize.y/1.215),new Vec2(378,128),true)]);
+        
+        this._guiComponents.set("ammoGui",[new GuiComponent("leftAmmoGui",new Vec2(this._camera.getSize.x/9.5,this._camera.getSize.y/1.25),new Vec2(378,128),true),
+                                new GuiComponent("middleAmmoGui",new Vec2(this._camera.getSize.x/9.5,this._camera.getSize.y/1.25),new Vec2(378,128),false),
+                                new GuiComponent("rightAmmoGui",new Vec2(this._camera.getSize.x/9.5,this._camera.getSize.y/1.25),new Vec2(378,128),false)]);
+    }
     spawn()
     {
             for(let row = 0; row < this._minions.length; row++)
@@ -97,8 +106,8 @@ class GameScene extends Scene
             
             //create Power Ups
             for(let i = 0; i < this._waveManager.getPowerUpCount(); i++)
-            {//PowerUp.prototype.generateRandomType(Math.round(Math.random()* 2))
-                let  temp = new PowerUp(new Vec2(Math.random() * WORLD_WIDTH, Math.random() * WORLD_HEIGHT), new Vec2(300,300),"health",  Math.random() * 30);
+            {
+                let  temp = new PowerUp(new Vec2(Math.random() * WORLD_WIDTH, Math.random() * WORLD_HEIGHT), new Vec2(300,300),PowerUp.prototype.generateRandomType(Math.round(Math.random()* 2)),  Math.random() * 30);
                 this.powerUps.push(temp);
             }
 
@@ -265,7 +274,7 @@ class GameScene extends Scene
             {
                 this._player.setCurrentPowerUp(this._player.getNextPowerUp());
                 this._player.setNextPowerUp(null);
-
+                this._guiComponents.get("activePowerUpGui")[0].setActive(false);
                 for( let [key,value] of this._guiComponents.entries())
                 {
                     if(key == "healthSymbolGui" || key =="fireRateGui" || key == "speedGui" || key == "turretGui")
@@ -276,13 +285,18 @@ class GameScene extends Scene
                             {
                                 v.setPos(new Vec2(this._camera.getSize.x/1.13,this._camera.getSize.y/1.255));
                                 this._playerPowerUps.shift();
-                                console.log(this._playerPowerUps);
+                                this._guiComponents.get("nullPowerUpGui")[1].setActive(true);
                             }
                         }
                     }
                 }
             }
-        }
+                else if (this._player.getCurrentPowerUp() == null && this._player.getNextPowerUp() == null)
+                {
+                    this._guiComponents.get("nullPowerUpGui")[0].setActive(true);
+                    this._guiComponents.get("activePowerUpGui")[0].setActive(false);
+                }
+            }
 
         this.inputHandling(dt);
         this.collisions();    
@@ -347,7 +361,7 @@ class GameScene extends Scene
         {
             this._player.setUsingPowerUp(true);
             PowerUp.prototype.currentPowerUpTimer = performance.now();
-            
+            this._guiComponents.get("activePowerUpGui")[0].setActive(true);
             switch(this._player.getCurrentPowerUp()) 
             {
                 case PowerUpType.HEALTH:
@@ -457,6 +471,7 @@ class GameScene extends Scene
                     {
                         powerUpIcon[1].setActive(false);
                     } 
+                   
                     this._playerPowerUps.pop();
                 }
 
@@ -534,6 +549,15 @@ class GameScene extends Scene
                             
                         }
                       break;
+                }
+
+                if(this._playerPowerUps.length == 1)
+                {
+                    this._guiComponents.get("nullPowerUpGui")[0].setActive(false);
+                }
+                else if(this._playerPowerUps.length == 2)
+                {
+                    this._guiComponents.get("nullPowerUpGui")[1].setActive(false);
                 }
 
                 this.powerUps[i].setActive(false);
