@@ -93,8 +93,8 @@ class GameScene extends Scene
             
             //create Power Ups
             for(let i = 0; i < this._waveManager.getPowerUpCount(); i++)
-            {
-                let  temp = new PowerUp(new Vec2(Math.random() * WORLD_WIDTH, Math.random() * WORLD_HEIGHT), new Vec2(300,300),PowerUp.prototype.generateRandomType(Math.round(Math.random()* 2)),  Math.random() * 30);
+            {//PowerUp.prototype.generateRandomType(Math.round(Math.random()* 2))
+                let  temp = new PowerUp(new Vec2(Math.random() * WORLD_WIDTH, Math.random() * WORLD_HEIGHT), new Vec2(300,300),"health",  Math.random() * 30);
                 this.powerUps.push(temp);
             }
 
@@ -207,7 +207,8 @@ class GameScene extends Scene
             {
                 case PowerUpType.HEALTH:
                    index = this._guiComponents.get("healthSymbolGui")[0].getActive() == true ? index = 0 : index = 1;
-                   this._player.setHealth = -0.1;
+                   this._player.setHealth = 10;
+                   this._guiComponents.get("healthValueGUI")[0].getRenderSize().x += (this._guiComponents.get("healthValueGUI")[0].getRenderSize().x/100) * 10;
                    this._player.resetPowerUp();
                    this._guiComponents.get("healthSymbolGui")[index].setActive(false);  
                     break;
@@ -554,7 +555,8 @@ class GameScene extends Scene
                 if(CollisionManager.SATCollision(this._minions[row][col]._rect.getPoints(), this._player._shape.getPoints()))
                 {
                     this._player.setHealth = -EnemyMinion.collisionDamage;
-                   // this._guiComponents.get(1].setSize(new Vec2(this._player.getHealth,this._guiComponents.get(1].getSize().y))
+                    this._guiComponents.get("healthValueGUI")[0].getRenderSize().x -= (this._guiComponents.get("healthValueGUI")[0].getSize().x/100) * EnemyMinion.collisionDamage;
+        
                     this._minions[row][col].setHealth = -this._player.getCollisionDamage();
 
                     this._animationManager.addAnimation(5,0.5,this._minions[row][col].getRect.getOrigin(),EXPLOSION_IMAGE,new Vec2(256,256));
@@ -575,6 +577,7 @@ class GameScene extends Scene
         {
             if(CollisionManager.SATCollision(this._bombers[b].getRect.getPoints(),this._player.getShape.getPoints()))
             {
+                this._guiComponents.get("healthValueGUI")[0].getRenderSize().x -= (this._guiComponents.get("healthValueGUI")[0].getSize().x/100) * Bomber.collisionDamage;
                 this._player.setHealth = -Bomber.collisionDamage;
                 this._bombers[b].setHealth = -this._player.getCollisionDamage();
                 
@@ -630,6 +633,7 @@ class GameScene extends Scene
         {
             if(CollisionManager.SATCollision(this._asteroids[a].getRect().getPoints(),this._player.getShape.getPoints()))
             {
+                this._guiComponents.get("healthValueGUI")[0].getRenderSize().x -= (this._guiComponents.get("healthValueGUI")[0].getSize().x/100) * Asteroid.prototype.collisionDamage;
                 this._asteroids[a].setHealth(-this._player.getCollisionDamage());
                 this._player.setHealth = -Asteroid.prototype.collisionDamage;
 
@@ -843,6 +847,7 @@ class GameScene extends Scene
             {
                 if(CollisionManager.SATCollision(this._bombers[i]._bullets[b].getRect.getPoints(),this._player.getShape.getPoints()))
                 {
+                    this._guiComponents.get("healthValueGUI")[0].getRenderSize().x -= (this._guiComponents.get("healthValueGUI")[0].getSize().x/100) * Bomber.bulletDamage;
                     this._animationManager.addAnimation(5,0.5,this._bombers[i]._bullets[b].getRect.getOrigin(),EXPLOSION_IMAGE,new Vec2(256,256));
                     this._bombers[i]._bullets.splice(b,1);
                     
@@ -989,7 +994,6 @@ class GameScene extends Scene
         this._camera.draw(ctx);
         //qt.draw(ctx,camera.getPos);
         /* Draw Black Holes */
-        
         this._blackHoles.forEach( bh =>
         {
             bh.draw(ctx,this._camera.getPos)
@@ -1041,14 +1045,12 @@ class GameScene extends Scene
         
         for (let value of this._guiComponents.values())
         {
-            value.forEach(val => 
+            value.forEach(val=> 
             {
                 if(val.getActive())
                     val.draw(ctx, this._camera.getPos);
             });
         }
-
-      
        // ctx.fillStyle = 'blue';
        // ctx.fillText(`fps : ${this._waveManager.getWave()}`, (this._camera.getPos.x + 100) - this._camera.getPos.x,(this._camera.getPos.y + 50) - this._camera.getPos.y);  
         this._animationManager.draw(ctx,this._camera.getPos);    

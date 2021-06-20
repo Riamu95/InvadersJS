@@ -4,9 +4,10 @@ const GuiComponent = function(_image,pos,size,_active,...listeners)
     this._listeners = listeners;
     
     this._active = _active;
-    this._pos = pos;
-    this._size = size;
-  
+    this._pos = new Vec2(pos.x,pos.y);
+    this._size = new Vec2(size.x,size.y);
+    this._renderSize = new Vec2(size.x,size.y);
+
     for(let i = 0; i < this._listeners.length; i++)
     {
         let type = Object.keys(this._listeners[i]);
@@ -35,20 +36,7 @@ GuiComponent.prototype.setActive = function(val)
     this._active = val;
 }
 
-GuiComponent.prototype.update = function()
-{
 
-}
-
-GuiComponent.prototype.click = function()
-{
-   
-}
-
-GuiComponent.prototype.mouseHover = function()
-{
-
-}
 GuiComponent.prototype.mouseEnter = function(e)
 {
     if(e.target.src == 'file:///C:/Users/Predator/Desktop/InvadersJs/Assets/buttons/play.png')
@@ -88,7 +76,7 @@ GuiComponent.prototype.draw = function(ctx,cameraPos = new Vec2(0,0))
     ctx.save();
     ctx.beginPath();      
     ctx.translate((cameraPos.x + this._pos.x) - cameraPos.x,(cameraPos.y + this._pos.y) - cameraPos.y);
-    ctx.drawImage(this._image,0,0,this._size.x,this._size.y,-this._size.x/2,-this._size.y/2,this._size.x,this._size.y);
+    ctx.drawImage(this._image,0,0,this._size.x,this._size.y,-this._size.x/2,-this._size.y/2,this._renderSize.x,this._renderSize.y);
     ctx.closePath();
     ctx.restore();
 }
@@ -143,7 +131,18 @@ GuiComponent.prototype.getSize = function()
     return this._size;
 }
 
+GuiComponent.prototype.getRenderSize = function()
+{
+    return this._renderSize;
+}
+
 GuiComponent.prototype.setSize = function(val)
 {
     this._size = val;
+}
+
+GuiComponent.prototype.setRenderSize = function(val)
+{
+    this._renderSize.x -= val.x;
+    this._renderSize.y -= val.y;
 }
