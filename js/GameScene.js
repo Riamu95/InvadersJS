@@ -40,11 +40,11 @@ class GameScene extends Scene
                                              new GuiComponent("turretGui",new Vec2(WORLD_WIDTH * 2, WORLD_HEIGHT * 2),new Vec2(110,110),false)]);
         
         this._guiComponents.set("ammoGui",[new GuiComponent("ammoGui",new Vec2(this._camera.getSize.x/9.5,this._camera.getSize.y/1.25),new Vec2(378,128),true)]);
-
+    
         this.init();
     }
 
-    init()
+    init() 
     {
         this.spawn();
     
@@ -206,9 +206,14 @@ class GameScene extends Scene
             switch(this._player.getPowerUpType()) 
             {
                 case PowerUpType.HEALTH:
+                    if(this._player.getHealth + PowerUp.prototype.healthIncreaseValue > 100)
+                        PowerUp.prototype.healthIncreaseAmount = PowerUp.prototype.healthIncreaseValue - ((this._player.getHealth + PowerUp.prototype.healthIncreaseValue) - 100);
+                    else
+                        PowerUp.prototype.healthIncreaseAmount = 10;
+
                    index = this._guiComponents.get("healthSymbolGui")[0].getActive() == true ? index = 0 : index = 1;
-                   this._player.setHealth = 10;
-                   this._guiComponents.get("healthValueGUI")[0].getRenderSize().x += (this._guiComponents.get("healthValueGUI")[0].getRenderSize().x/100) * 10;
+                   this._player.setHealth =  PowerUp.prototype.healthIncreaseAmount;
+                   this._guiComponents.get("healthValueGUI")[0].getRenderSize().x += (this._guiComponents.get("healthValueGUI")[0].getRenderSize().x/100) *  PowerUp.prototype.healthIncreaseAmount;
                    this._player.resetPowerUp();
                    this._guiComponents.get("healthSymbolGui")[index].setActive(false);  
                     break;
@@ -1051,9 +1056,15 @@ class GameScene extends Scene
                     val.draw(ctx, this._camera.getPos);
             });
         }
-       // ctx.fillStyle = 'blue';
+    
        // ctx.fillText(`fps : ${this._waveManager.getWave()}`, (this._camera.getPos.x + 100) - this._camera.getPos.x,(this._camera.getPos.y + 50) - this._camera.getPos.y);  
-        this._animationManager.draw(ctx,this._camera.getPos);    
+         ctx.font = '24px serif';
+        ctx.fillStyle = 'blue';
+        ctx.fillText('INF',((this._camera.getPos.x + this._camera.getSize.x/32) - this._camera.getPos.x),((this._camera.getPos.y + this._camera.getSize.y/1.183) - this._camera.getPos.y));
+        ctx.fillText(this._player.getWeapons()[1].getAmmoCount(),((this._camera.getPos.x + this._camera.getSize.x/10) - this._camera.getPos.x),((this._camera.getPos.y + this._camera.getSize.y/1.183) - this._camera.getPos.y));
+        ctx.fillText(this._player.getWeapons()[2].getAmmoCount(),((this._camera.getPos.x + this._camera.getSize.x/5.9) - this._camera.getPos.x),((this._camera.getPos.y + this._camera.getSize.y/1.183) - this._camera.getPos.y));
+
+       this._animationManager.draw(ctx,this._camera.getPos);    
     }
 
     NextScene()
