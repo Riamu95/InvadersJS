@@ -20,7 +20,7 @@ class GameScene extends Scene
         //let qt = new QuadTree(new Vec2(0,0),new Vec2(WORLD_WIDTH,WORLD_HEIGHT), 5);
         this._animationManager = new AnimationManager();
         this._waveManager = new WaveManager();
-        this._guiComponents = new Map();
+        this.gui = new Map();
         this._playerPowerUps = [];
         this.init();
     }
@@ -56,30 +56,30 @@ class GameScene extends Scene
 
     loadGui()
     {
-        this._guiComponents.set("healthGUI",[new GuiComponent("healthGUI",new Vec2(164,105),new Vec2(328,105),true)]);
+        this.gui.set("health",[new GuiComponent("healthGUI",new Vec2(164,105),new Vec2(328,105),true)]);
         
-        this._guiComponents.set("healthValueGUI",[new GuiComponent("healthValueGUI",new Vec2(this._guiComponents.get("healthGUI")[0].getPos().x + 43,this._guiComponents.get("healthGUI")[0].getPos().y),new Vec2(222,59),true)]);
+        this.gui.set("healthValue",[new GuiComponent("healthValueGUI",new Vec2(this.gui.get("health")[0].getPos().x + 43,this.gui.get("health")[0].getPos().y),new Vec2(222,59),true)]);
         
-        this._guiComponents.set("PowerUpGui",[new GuiComponent("PowerUpGui",new Vec2(this._camera.getSize.x/1.09,this._camera.getSize.y/1.25),new Vec2(253,138),true)]);
+        this.gui.set("PowerUp",[new GuiComponent("PowerUpGui",new Vec2(this._camera.getSize.x/1.09,this._camera.getSize.y/1.25),new Vec2(253,138),true)]);
 
-        this._guiComponents.set("activePowerUpGui",[new GuiComponent("activePowerUpGui",new Vec2(this._camera.getSize.x/1.085,this._camera.getSize.y/1.235),new Vec2(253,138),false)]);
+        this.gui.set("activePowerUp",[new GuiComponent("activePowerUpGui",new Vec2(this._camera.getSize.x/1.085,this._camera.getSize.y/1.235),new Vec2(253,138),false)]);
        
-        this._guiComponents.set("healthSymbolGui",[new GuiComponent("healthSymbolGui",new Vec2(WORLD_WIDTH * 2,WORLD_HEIGHT * 2),new Vec2(110,110),false),
+        this.gui.set("healthSymbol",[new GuiComponent("healthSymbolGui",new Vec2(WORLD_WIDTH * 2,WORLD_HEIGHT * 2),new Vec2(110,110),false),
                                                     new GuiComponent("healthSymbolGui",new Vec2(WORLD_WIDTH * 2,WORLD_HEIGHT * 2),new Vec2(110,110),false)]);
         
-        this._guiComponents.set("fireRateGui",[new GuiComponent("fireRateGui",new Vec2(WORLD_WIDTH * 2, WORLD_HEIGHT * 2),new Vec2(110,110),false),
+        this.gui.set("fireRate",[new GuiComponent("fireRateGui",new Vec2(WORLD_WIDTH * 2, WORLD_HEIGHT * 2),new Vec2(110,110),false),
                                                 new GuiComponent("fireRateGui",new Vec2(WORLD_WIDTH * 2, WORLD_HEIGHT * 2),new Vec2(110,110),false)]);
         
-        this._guiComponents.set("speedGui",[new GuiComponent("speedGui",new Vec2(WORLD_WIDTH * 2, WORLD_HEIGHT * 2),new Vec2(110,110),false),
+        this.gui.set("speed",[new GuiComponent("speedGui",new Vec2(WORLD_WIDTH * 2, WORLD_HEIGHT * 2),new Vec2(110,110),false),
                                             new GuiComponent("speedGui",new Vec2(WORLD_WIDTH * 2, WORLD_HEIGHT * 2),new Vec2(110,110),false)]);
         
-        this._guiComponents.set("turretGui",[new GuiComponent("turretGui",new Vec2(WORLD_WIDTH * 2, WORLD_HEIGHT * 2),new Vec2(110,110),false),
+        this.gui.set("turret",[new GuiComponent("turretGui",new Vec2(WORLD_WIDTH * 2, WORLD_HEIGHT * 2),new Vec2(110,110),false),
                                              new GuiComponent("turretGui",new Vec2(WORLD_WIDTH * 2, WORLD_HEIGHT * 2),new Vec2(110,110),false)]);
         
-        this._guiComponents.set("nullPowerUpGui",[new GuiComponent("nullPowerUpGui",new Vec2(this._camera.getSize.x/1.035,this._camera.getSize.y/1.215),new Vec2(378,128),true),
+        this.gui.set("nullPowerUp",[new GuiComponent("nullPowerUpGui",new Vec2(this._camera.getSize.x/1.035,this._camera.getSize.y/1.215),new Vec2(378,128),true),
                                              new GuiComponent("nullPowerUpGui",new Vec2(this._camera.getSize.x/0.975,this._camera.getSize.y/1.215),new Vec2(378,128),true)]);
         
-        this._guiComponents.set("ammoGui",[new GuiComponent("leftAmmoGui",new Vec2(this._camera.getSize.x/9.5,this._camera.getSize.y/1.25),new Vec2(378,128),true),
+        this.gui.set("ammo",[new GuiComponent("leftAmmoGui",new Vec2(this._camera.getSize.x/9.5,this._camera.getSize.y/1.25),new Vec2(378,128),true),
                                 new GuiComponent("middleAmmoGui",new Vec2(this._camera.getSize.x/9.5,this._camera.getSize.y/1.25),new Vec2(378,128),false),
                                 new GuiComponent("rightAmmoGui",new Vec2(this._camera.getSize.x/9.5,this._camera.getSize.y/1.25),new Vec2(378,128),false)]);
     }
@@ -223,30 +223,30 @@ class GameScene extends Scene
                     else
                         PowerUp.prototype.healthIncreaseAmount = 10;
 
-                   index = this._guiComponents.get("healthSymbolGui")[0].getActive() == true ? index = 0 : index = 1;
+                   index = this.gui.get("healthSymbol")[0].getActive() == true ? index = 0 : index = 1;
 
                    this._player.setHealth =  PowerUp.prototype.healthIncreaseAmount;
-                   this._guiComponents.get("healthValueGUI")[0].getRenderSize().x += (this._guiComponents.get("healthValueGUI")[0].getRenderSize().x/100) *  PowerUp.prototype.healthIncreaseAmount;
+                   this.gui.get("healthValue")[0].getRenderSize().x += (this.gui.get("healthValue")[0].getRenderSize().x/100) *  PowerUp.prototype.healthIncreaseAmount;
                    this._player.resetPowerUp();
-                   this._guiComponents.get("healthSymbolGui")[index].setActive(false);  
+                   this.gui.get("healthSymbol")[index].setActive(false);  
                     break;
                 case  PowerUpType.FIRE_RATE: 
-                index = this._guiComponents.get("fireRateGui")[0].getActive() == true ? index = 0 : index = 1;
+                index = this.gui.get("fireRate")[0].getActive() == true ? index = 0 : index = 1;
                     if (time >= PowerUp.prototype.fireRateTimer)
                     {
                         this._player.setFireRate = 0.5;
                         this._player.resetPowerUp();
-                        this._guiComponents.get("fireRateGui")[index].setActive(false);
+                        this.gui.get("fireRate")[index].setActive(false);
                     }  
                     break;
                 case  PowerUpType.AUTOTURRET:
-                    index = this._guiComponents.get("turretGui")[0].getActive() == true ? index = 0 : index = 1;
+                    index = this.gui.get("turret")[0].getActive() == true ? index = 0 : index = 1;
                     if(time >= PowerUp.prototype.AutoTurretTimer)
                     {
                         
                         this._player.getAutoTurret().setActive(false);
                         this._player.resetPowerUp();
-                        this._guiComponents.get("turretGui")[index].setActive(false);
+                        this.gui.get("turret")[index].setActive(false);
                         //explosion animation for all remaining bullets
                         for(let value of this._player.getAutoTurret().getBullets().values())
                         {
@@ -259,13 +259,13 @@ class GameScene extends Scene
                     }  
                     break;
                 case PowerUpType.SPEED:
-                    index = this._guiComponents.get("speedGui")[0].getActive() == true ? index = 0 : index = 1;
+                    index = this.gui.get("speed")[0].getActive() == true ? index = 0 : index = 1;
                     if(time >= PowerUp.prototype.speedTimer)
                     { 
                         this._player.setMaxAcceleration(0.5);
                         this._player.setSpeed(0.5);
                         this._player.resetPowerUp();
-                        this._guiComponents.get("speedGui")[index].setActive(false);
+                        this.gui.get("speed")[index].setActive(false);
                     }
                     break;
             }
@@ -274,29 +274,29 @@ class GameScene extends Scene
             {
                 this._player.setCurrentPowerUp(this._player.getNextPowerUp());
                 this._player.setNextPowerUp(null);
-                this._guiComponents.get("activePowerUpGui")[0].setActive(false);
-                for( let [key,value] of this._guiComponents.entries())
+                this.gui.get("activePowerUp")[0].setActive(false);
+                for( let [powerUpGuiType,powerUpGuiSymbol] of this.gui.entries())
                 {
-                    if(key == "healthSymbolGui" || key =="fireRateGui" || key == "speedGui" || key == "turretGui")
+                    if(powerUpGuiType == "healthSymbol" || powerUpGuiType =="fireRate" || powerUpGuiType == "speed" || powerUpGuiType == "turret")
                     {
-                        for( let v of value)
+                        for( let powerUpSymbol of powerUpGuiSymbol)
                         {
-                            if(v.getActive())
+                            if(powerUpSymbol.getActive())
                             {
-                                v.setPos(new Vec2(this._camera.getSize.x/1.13,this._camera.getSize.y/1.255));
+                                powerUpSymbol.setPos(new Vec2(this._camera.getSize.x/1.13,this._camera.getSize.y/1.255));
                                 this._playerPowerUps.shift();
-                                this._guiComponents.get("nullPowerUpGui")[1].setActive(true);
+                                this.gui.get("nullPowerUp")[1].setActive(true);
                             }
                         }
                     }
                 }
             }
-                else if (this._player.getCurrentPowerUp() == null && this._player.getNextPowerUp() == null)
-                {
-                    this._guiComponents.get("nullPowerUpGui")[0].setActive(true);
-                    this._guiComponents.get("activePowerUpGui")[0].setActive(false);
-                }
+            else if (this._player.getCurrentPowerUp() == null && this._player.getNextPowerUp() == null)
+            {
+                this.gui.get("nullPowerUp")[0].setActive(true);
+                this.gui.get("activePowerUp")[0].setActive(false);
             }
+        }
 
         this.inputHandling(dt);
         this.collisions();    
@@ -361,7 +361,7 @@ class GameScene extends Scene
         {
             this._player.setUsingPowerUp(true);
             PowerUp.prototype.currentPowerUpTimer = performance.now();
-            this._guiComponents.get("activePowerUpGui")[0].setActive(true);
+            this.gui.get("activePowerUp")[0].setActive(true);
             switch(this._player.getCurrentPowerUp()) 
             {
                 case PowerUpType.HEALTH:
@@ -385,23 +385,23 @@ class GameScene extends Scene
         if (this._pressedKeys['1'])
         {
             this._player.setCurrentWeapon(0);
-            this._guiComponents.get("ammoGui")[0].setActive(true);
-            this._guiComponents.get("ammoGui")[1].setActive(false);
-            this._guiComponents.get("ammoGui")[2].setActive(false);
+            this.gui.get("ammo")[0].setActive(true);
+            this.gui.get("ammo")[1].setActive(false);
+            this.gui.get("ammo")[2].setActive(false);
         }
         else if (this._pressedKeys['2'])
         {
             this._player.setCurrentWeapon(1); 
-            this._guiComponents.get("ammoGui")[1].setActive(true);
-            this._guiComponents.get("ammoGui")[0].setActive(false);
-            this._guiComponents.get("ammoGui")[2].setActive(false);
+            this.gui.get("ammo")[1].setActive(true);
+            this.gui.get("ammo")[0].setActive(false);
+            this.gui.get("ammo")[2].setActive(false);
         }
         else if (this._pressedKeys['3'])
         {
             this._player.setCurrentWeapon(2);
-            this._guiComponents.get("ammoGui")[2].setActive(true);
-            this._guiComponents.get("ammoGui")[0].setActive(false);
-            this._guiComponents.get("ammoGui")[1].setActive(false);
+            this.gui.get("ammo")[2].setActive(true);
+            this.gui.get("ammo")[0].setActive(false);
+            this.gui.get("ammo")[1].setActive(false);
         }
     }
 
@@ -455,97 +455,101 @@ class GameScene extends Scene
 
             if(CollisionManager.SATCollision(this.powerUps[i].getRect().getPoints(), this._player._shape.getPoints()))
             {
+                //If player collides with a power up when we already have 2 power ups
                 if(this._playerPowerUps.length == 2)
                 {
-                    let powerUpIcon = this._guiComponents.get(this._playerPowerUps[1]);
-                    
+                    //get the 2nd power up 
+                    let powerUpIcon = this.gui.get(this._playerPowerUps[1]);
+                    //if the both  power ups is active set the second one to false/ because we always set the first one to current!
                     if(powerUpIcon[0].getActive() && powerUpIcon[1].getActive())
                     {
                         powerUpIcon[1].setActive(false);
-                    }
+                    } //if the first of two power ups is active set the first one to false
                     else if (powerUpIcon[0].getActive() && !powerUpIcon[1].getActive())
                     {
                         powerUpIcon[0].setActive(false);
-                    } 
+                    } //if the second of two power ups is active set the second one to false
                     else if (!powerUpIcon[0].getActive() && powerUpIcon[1].getActive())
                     {
                         powerUpIcon[1].setActive(false);
                     } 
-                   
+                    //remove next power up
                     this._playerPowerUps.pop();
                 }
-
+                //left and right power up gui positions
                 let powerupGuiLeft = new Vec2(this._camera.getSize.x/1.13,this._camera.getSize.y/1.255);
                 let powerupGuiRight = new Vec2(this._camera.getSize.x/1.05,this._camera.getSize.y/1.255);
                 let index = 0;
+
                 switch(this.powerUps[i].getType()) 
                 {
                     case PowerUpType.HEALTH:
-                        this._guiComponents.get("healthSymbolGui")[0].getActive() == false ? index = 0 : index = 1;
+                        //get current active healthSymbol ( there's 2)
+                        this.gui.get("healthSymbol")[0].getActive() == false ? index = 0 : index = 1;
                         if (this._player.getCurrentPowerUp() == null )
-                        {
+                        {   //set current power up, set healthguipoweup to active and set it to the left powrupgui slot
                             this._player.setCurrentPowerUp(PowerUpType.HEALTH);
-                            this._guiComponents.get("healthSymbolGui")[index].setActive(true);
-                            this._guiComponents.get("healthSymbolGui")[index].setPos(powerupGuiLeft);
-                            this._playerPowerUps[0] = "healthSymbolGui";
+                            this.gui.get("healthSymbol")[index].setActive(true);
+                            this.gui.get("healthSymbol")[index].setPos(powerupGuiLeft);
+                            this._playerPowerUps[0] = "healthSymbol";
                         }
                         else
-                        {
+                        {   //set current power up, set healthguipoweup to active and set it to the right powrupgui slot
                             this._player.setNextPowerUp(PowerUpType.HEALTH);
-                            this._guiComponents.get("healthSymbolGui")[index].setActive(true);
-                            this._guiComponents.get("healthSymbolGui")[index].setPos(powerupGuiRight);
-                            this._playerPowerUps[1] = "healthSymbolGui";
+                            this.gui.get("healthSymbol")[index].setActive(true);
+                            this.gui.get("healthSymbol")[index].setPos(powerupGuiRight);
+                            this._playerPowerUps[1] = "healthSymbol";
                         }
                       break;//timer based power up
                     case  PowerUpType.FIRE_RATE:
-                    this._guiComponents.get("fireRateGui")[0].getActive() == false ? index = 0 : index = 1;
+                    this.gui.get("fireRate")[0].getActive() == false ? index = 0 : index = 1;
                     if (this._player.getCurrentPowerUp() == null )
                     {
                         this._player.setCurrentPowerUp(PowerUpType.FIRE_RATE);
-                        this._guiComponents.get("fireRateGui")[index].setActive(true);
-                        this._guiComponents.get("fireRateGui")[index].setPos(powerupGuiLeft);
-                        this._playerPowerUps[0] = "fireRateGui";
+                        this.gui.get("fireRate")[index].setActive(true);
+                        this.gui.get("fireRate")[index].setPos(powerupGuiLeft);
+                        this._playerPowerUps[0] = "fireRate";
                     }
                     else
                     {
                         this._player.setNextPowerUp(PowerUpType.FIRE_RATE);
-                        this._guiComponents.get("fireRateGui")[index].setActive(true);
-                        this._guiComponents.get("fireRateGui")[index].setPos(powerupGuiRight);
-                        this._playerPowerUps[1] = "fireRateGui";
+                        this.gui.get("fireRate")[index].setActive(true);
+                        this.gui.get("fireRate")[index].setPos(powerupGuiRight);
+                        this._playerPowerUps[1] = "fireRate";
                     }
                       break;//timer based power up/ healthbased
                     case  PowerUpType.AUTOTURRET:
-                        this._guiComponents.get("turretGui")[0].getActive() == false ? index = 0 : index = 1;
+                        this.gui.get("turret")[0].getActive() == false ? index = 0 : index = 1;
                         if (this._player.getCurrentPowerUp() == null )
                         {
                             this._player.setCurrentPowerUp(PowerUpType.AUTOTURRET);
-                            this._guiComponents.get("turretGui")[index].setActive(true);
-                            this._guiComponents.get("turretGui")[index].setPos(powerupGuiLeft);
-                            this._playerPowerUps[0] = "turretGui";
+                            this.gui.get("turret")[index].setActive(true);
+                            this.gui.get("turret")[index].setPos(powerupGuiLeft);
+                            this._playerPowerUps[0] = "turret";
                         }
                         else
                         {
                             this._player.setNextPowerUp(PowerUpType.AUTOTURRET);
-                            this._guiComponents.get("turretGui")[index].setActive(true);
-                            this._guiComponents.get("turretGui")[index].setPos(powerupGuiRight);
-                            this._playerPowerUps[1] = "turretGui";
+                            this.gui.get("turret")[index].setActive(true);
+                            this.gui.get("turret")[index].setPos(powerupGuiRight);
+                            this._playerPowerUps[1] = "turret";
                         }
                       break;
                     case  PowerUpType.SPEED:
-                        this._guiComponents.get("speedGui")[0].getActive() == false ? index = 0 : index = 1;
+                        this.gui.get("speed")[0].getActive() == false ? index = 0 : index = 1;
                         if (this._player.getCurrentPowerUp() == null )
                         {
                             this._player.setCurrentPowerUp(PowerUpType.SPEED);
-                            this._guiComponents.get("speedGui")[index].setActive(true);
-                            this._guiComponents.get("speedGui")[index].setPos(powerupGuiLeft);
-                            this._playerPowerUps[0] = "speedGui";
+                            this.gui.get("speed")[index].setActive(true);
+                            this.gui.get("speed")[index].setPos(powerupGuiLeft);
+                            this._playerPowerUps[0] = "speed";
                         }
                         else
                         {
                             this._player.setNextPowerUp(PowerUpType.SPEED);
-                            this._guiComponents.get("speedGui")[index].setActive(true);
-                            this._guiComponents.get("speedGui")[index].setPos(powerupGuiRight);
-                            this._playerPowerUps[1] = "speedGui";
+                            this.gui.get("speed")[index].setActive(true);
+                            this.gui.get("speed")[index].setPos(powerupGuiRight);
+                            this._playerPowerUps[1] = "speed";
                             
                         }
                       break;
@@ -553,11 +557,11 @@ class GameScene extends Scene
 
                 if(this._playerPowerUps.length == 1)
                 {
-                    this._guiComponents.get("nullPowerUpGui")[0].setActive(false);
+                    this.gui.get("nullPowerUp")[0].setActive(false);
                 }
                 else if(this._playerPowerUps.length == 2)
                 {
-                    this._guiComponents.get("nullPowerUpGui")[1].setActive(false);
+                    this.gui.get("nullPowerUp")[1].setActive(false);
                 }
 
                 this.powerUps[i].setActive(false);
@@ -594,7 +598,7 @@ class GameScene extends Scene
                 if(CollisionManager.SATCollision(this._minions[row][col]._rect.getPoints(), this._player._shape.getPoints()))
                 {
                     this._player.setHealth = -EnemyMinion.collisionDamage;
-                    this._guiComponents.get("healthValueGUI")[0].getRenderSize().x -= (this._guiComponents.get("healthValueGUI")[0].getSize().x/100) * EnemyMinion.collisionDamage;
+                    this.gui.get("healthValue")[0].getRenderSize().x -= (this.gui.get("healthValue")[0].getSize().x/100) * EnemyMinion.collisionDamage;
         
                     this._minions[row][col].setHealth = -this._player.getCollisionDamage();
 
@@ -616,7 +620,7 @@ class GameScene extends Scene
         {
             if(CollisionManager.SATCollision(this._bombers[b].getRect.getPoints(),this._player.getShape.getPoints()))
             {
-                this._guiComponents.get("healthValueGUI")[0].getRenderSize().x -= (this._guiComponents.get("healthValueGUI")[0].getSize().x/100) * Bomber.collisionDamage;
+                this.gui.get("healthValue")[0].getRenderSize().x -= (this.gui.get("healthValue")[0].getSize().x/100) * Bomber.collisionDamage;
                 this._player.setHealth = -Bomber.collisionDamage;
                 this._bombers[b].setHealth = -this._player.getCollisionDamage();
                 
@@ -672,7 +676,7 @@ class GameScene extends Scene
         {
             if(CollisionManager.SATCollision(this._asteroids[a].getRect().getPoints(),this._player.getShape.getPoints()))
             {
-                this._guiComponents.get("healthValueGUI")[0].getRenderSize().x -= (this._guiComponents.get("healthValueGUI")[0].getSize().x/100) * Asteroid.prototype.collisionDamage;
+                this.gui.get("healthValue")[0].getRenderSize().x -= (this.gui.get("healthValue")[0].getSize().x/100) * Asteroid.prototype.collisionDamage;
                 this._asteroids[a].setHealth(-this._player.getCollisionDamage());
                 this._player.setHealth = -Asteroid.prototype.collisionDamage;
 
@@ -886,7 +890,7 @@ class GameScene extends Scene
             {
                 if(CollisionManager.SATCollision(this._bombers[i]._bullets[b].getRect.getPoints(),this._player.getShape.getPoints()))
                 {
-                    this._guiComponents.get("healthValueGUI")[0].getRenderSize().x -= (this._guiComponents.get("healthValueGUI")[0].getSize().x/100) * Bomber.bulletDamage;
+                    this.gui.get("healthValue")[0].getRenderSize().x -= (this.gui.get("healthValue")[0].getSize().x/100) * Bomber.bulletDamage;
                     this._animationManager.addAnimation(5,0.5,this._bombers[i]._bullets[b].getRect.getOrigin(),EXPLOSION_IMAGE,new Vec2(256,256));
                     this._bombers[i]._bullets.splice(b,1);
                     
@@ -1082,7 +1086,7 @@ class GameScene extends Scene
                 a.draw(ctx,this._camera.getPos)
         });
         
-        for (let value of this._guiComponents.values())
+        for (let value of this.gui.values())
         {
             value.forEach(val=> 
             {
