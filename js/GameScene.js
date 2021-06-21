@@ -21,6 +21,7 @@ class GameScene extends Scene
         this._animationManager = new AnimationManager();
         this._waveManager = new WaveManager();
         this.gui = new Map();
+        this.map = new MapGui("map",new Vec2(CANVAS_WIDTH/1.1,CANVAS_HEIGHT/6),new Vec2(266,262),true,{"mouseenter": null},{"mouseleave": null});
         this._playerPowerUps = [];
         this.init();
     }
@@ -83,6 +84,7 @@ class GameScene extends Scene
                                 new GuiComponent("middleAmmoGui",new Vec2(this._camera.getSize.x/9.5,this._camera.getSize.y/1.25),new Vec2(378,128),false),
                                 new GuiComponent("rightAmmoGui",new Vec2(this._camera.getSize.x/9.5,this._camera.getSize.y/1.25),new Vec2(378,128),false)]);
     }
+
     spawn()
     {
             for(let row = 0; row < this._minions.length; row++)
@@ -1094,6 +1096,8 @@ class GameScene extends Scene
                     val.draw(ctx, this._camera.getPos);
             });
         }
+
+        this.map.draw(ctx,this._camera.getPos,this._player.getSpriteAngle);
     
        // ctx.fillText(`fps : ${this._waveManager.getWave()}`, (this._camera.getPos.x + 100) - this._camera.getPos.x,(this._camera.getPos.y + 50) - this._camera.getPos.y);  
 
