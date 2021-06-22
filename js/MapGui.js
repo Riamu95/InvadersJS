@@ -23,13 +23,6 @@ class MapGui extends GuiComponent
         ctx.beginPath();      
         ctx.translate((cameraPos.x + this._pos.x) - cameraPos.x,(cameraPos.y + this._pos.y) - cameraPos.y);
         ctx.drawImage(this._image,0,0,this._size.x,this._size.y,-this._size.x/2,-this._size.y/2,this._renderSize.x,this._renderSize.y);
-        ctx.closePath();
-        ctx.restore();
-
-
-        ctx.save();
-        ctx.beginPath();
-        ctx.translate((cameraPos.x + this._pos.x) - cameraPos.x,(cameraPos.y + this._pos.y) - cameraPos.y);
         ctx.rotate(rotate * (Math.PI/180));
         ctx.drawImage(this._player,0,0,this._playerSize.x,this._playerSize.y,-this._playerSize.x/2,-this._playerSize.y/2,this._playerSize.x,this._playerSize.y);
         ctx.closePath();
@@ -45,7 +38,7 @@ class MapGui extends GuiComponent
             ctx.fill();
             ctx.closePath();
         });
-
+        
         ctx.fillStyle  = "blue";
         this._npcPos[1].forEach(minionArray => 
         {
@@ -58,6 +51,7 @@ class MapGui extends GuiComponent
                 ctx.closePath();
             });
         });
+        
         ctx.fillStyle  = "yellow";
         this._npcPos[2].forEach(asteroid =>
         {
@@ -67,6 +61,7 @@ class MapGui extends GuiComponent
             ctx.fill();
             ctx.closePath();
         });
+
         ctx.fillStyle  = "black";
         this._npcPos[3].forEach(bh =>
         {
@@ -78,9 +73,6 @@ class MapGui extends GuiComponent
         });
         ctx.restore();
     }
-
-
-
 
     calculateNPCRadarPos(enemyPos, playerPos)
     {
