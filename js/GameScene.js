@@ -23,6 +23,8 @@ class GameScene extends Scene
         this.map = new MapGui("map",new Vec2(CANVAS_WIDTH/1.1,CANVAS_HEIGHT/6),new Vec2(266,266),true,{"mouseenter": null},{"mouseleave": null});
         this.map.addNPCPos(this._bombers);
         this.map.addNPCPos(this._minions);
+        this.map.addNPCPos(this._asteroids);
+        this.map.addNPCPos(this._blackHoles);
         this._playerPowerUps = [];
         this.init();
     }
@@ -120,8 +122,7 @@ class GameScene extends Scene
             /* Create Black Holes*/
             for(let i = 0; i < this._waveManager.getBlackHoleCount(); i++)
             {
-                let pos = this._waveManager.getSpawnPoint(Math.trunc(Math.random() * SPAWN_POINTS));
-                let  temp = new BlackHole(new Vec2(pos.x, pos.y), new Vec2(643,480));
+                let  temp = new BlackHole(new Vec2(Math.random() * WORLD_WIDTH - 643,Math.random() * WORLD_HEIGHT - 480), new Vec2(643,480));
                 this._blackHoles.push(temp);
             }
             /* Createthis._asteroids */
