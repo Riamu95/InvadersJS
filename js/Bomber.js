@@ -115,5 +115,4 @@ class Bomber extends Enemy
     {
         return this._maxBulletSpeed;
     }
-
 }

@@ -4,7 +4,6 @@ class GameScene extends Scene
     {
         super();
         this._scenes = scene;
-        this._enemies = [];
         this._minions = [];
         this._flockPoints = [];
         this._bombers = [];
@@ -21,7 +20,9 @@ class GameScene extends Scene
         this._animationManager = new AnimationManager();
         this._waveManager = new WaveManager();
         this.gui = new Map();
-        this.map = new MapGui("map",new Vec2(CANVAS_WIDTH/1.1,CANVAS_HEIGHT/6),new Vec2(266,262),true,{"mouseenter": null},{"mouseleave": null});
+        this.map = new MapGui("map",new Vec2(CANVAS_WIDTH/1.1,CANVAS_HEIGHT/6),new Vec2(266,266),true,{"mouseenter": null},{"mouseleave": null});
+        this.map.addNPCPos(this._bombers);
+        this.map.addNPCPos(this._minions);
         this._playerPowerUps = [];
         this.init();
     }
@@ -314,7 +315,7 @@ class GameScene extends Scene
                 this._player.addSpeed(this._player.getAccelerationRate);
             } 
             this._player.move(dt); 
-            this._camera.update( this._player.getShape.getOrigin()); 
+            this._camera.update( this._player.getShape.getOrigin());
         }
         else if(this._pressedKeys['s'])
         {
@@ -1097,7 +1098,7 @@ class GameScene extends Scene
             });
         }
 
-        this.map.draw(ctx,this._camera.getPos,this._player.getSpriteAngle);
+        this.map.draw(ctx,this._camera.getPos,this._player.getSpriteAngle,this._player.getShape.getOrigin());
     
        // ctx.fillText(`fps : ${this._waveManager.getWave()}`, (this._camera.getPos.x + 100) - this._camera.getPos.x,(this._camera.getPos.y + 50) - this._camera.getPos.y);  
 

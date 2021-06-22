@@ -4,10 +4,18 @@ class MapGui extends GuiComponent
     {
         super(_image,pos,size,_active,...listeners);
         this._player = document.getElementById("playerMap");
-        this._playerSize = new Vec2(23,18);        
+        this._playerSize = new Vec2(23,18); 
+        this._npcPos = [];
+        this._radius = 120;
+        this._scalar = 25;    
     }
 
-     draw(ctx,cameraPos = new Vec2(0,0), rotate)
+    addNPCPos(val)
+    {
+        this._npcPos.push(val);
+    }
+
+     draw(ctx,cameraPos = new Vec2(0,0), rotate,playerPos)
     {
         ctx.save();
         ctx.beginPath();      
@@ -23,6 +31,23 @@ class MapGui extends GuiComponent
         ctx.rotate(rotate * (Math.PI/180));
         ctx.drawImage(this._player,0,0,this._playerSize.x,this._playerSize.y,-this._playerSize.x/2,-this._playerSize.y/2,this._playerSize.x,this._playerSize.y);
         ctx.closePath();
+        ctx.restore();
+
+        ctx.save();
+        ctx.fillStyle  = "red";
+        this._npcPos[0].forEach(bomber =>
+        {
+            ctx.beginPath();
+            //if(Vec2.distance(bomber.getRect.getOrigin(), playerPos) > 500 ? scalar = 10 : scalar =  
+            let vecDirection = new Vec2(bomber.getRect.getOrigin().x - playerPos.x, bomber.getRect.getOrigin().y - playerPos.y);
+            vecDirection = Vec2.normalise(vecDirection);
+            vecDirection.setMagnitude = this._radius;// Vec2.distance(bomber.getRect.getOrigin(), playerPos);///this._scalar;
+            vecDirection.x += this._pos.x;
+            vecDirection.y += this._pos.y;
+            ctx.arc((cameraPos.x + vecDirection.x) - cameraPos.x, (cameraPos.y + vecDirection.y) - cameraPos.y, 5, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.closePath();
+        });
         ctx.restore();
     }
 }
