@@ -7,6 +7,7 @@ class MapGui extends GuiComponent
         this._playerSize = new Vec2(23,18); 
         this._npcPos = [];
         this._radius = 120;
+        this._radarRange = 1500;
         this._scalar = 25;    
     }
 
@@ -38,12 +39,16 @@ class MapGui extends GuiComponent
         this._npcPos[0].forEach(bomber =>
         {
             ctx.beginPath();
-            //if(Vec2.distance(bomber.getRect.getOrigin(), playerPos) > 500 ? scalar = 10 : scalar =  
+
+            Vec2.distance(bomber.getRect.getOrigin(), playerPos) > this._radarRange ? this._scalar = this._radius 
+                                                                        : this._scalar = Vec2.distance(bomber.getRect.getOrigin(), playerPos)/12.5;
+                                                                        
             let vecDirection = new Vec2(bomber.getRect.getOrigin().x - playerPos.x, bomber.getRect.getOrigin().y - playerPos.y);
             vecDirection = Vec2.normalise(vecDirection);
-            vecDirection.setMagnitude = this._radius;// Vec2.distance(bomber.getRect.getOrigin(), playerPos);///this._scalar;
+            vecDirection.setMagnitude =  this._scalar;
             vecDirection.x += this._pos.x;
             vecDirection.y += this._pos.y;
+            
             ctx.arc((cameraPos.x + vecDirection.x) - cameraPos.x, (cameraPos.y + vecDirection.y) - cameraPos.y, 5, 0, 2 * Math.PI);
             ctx.fill();
             ctx.closePath();
