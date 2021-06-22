@@ -20,7 +20,7 @@ class GameScene extends Scene
         this._animationManager = new AnimationManager();
         this._waveManager = new WaveManager();
         this.gui = new Map();
-        this.map = new MapGui("map",new Vec2(CANVAS_WIDTH/1.1,CANVAS_HEIGHT/6),new Vec2(266,266),true,{"mouseenter": null},{"mouseleave": null});
+        this.map = new MapGui("map",new Vec2(CANVAS_WIDTH/1.1,CANVAS_HEIGHT/6),new Vec2(1596,266),true,{"mouseenter": null},{"mouseleave": null});
         this.map.addNPCPos(this._bombers);
         this.map.addNPCPos(this._minions);
         this.map.addNPCPos(this._asteroids);
@@ -301,6 +301,8 @@ class GameScene extends Scene
                 this.gui.get("activePowerUp")[0].setActive(false);
             }
         }
+
+        this.map.update(this._animationManager,this._camera.getPos);
 
         this.inputHandling(dt);
         this.collisions();    
@@ -1098,12 +1100,11 @@ class GameScene extends Scene
                     val.draw(ctx, this._camera.getPos);
             });
         }
+        
+        this.map.drawMap(ctx,this._camera.getPos);
+        this._animationManager.draw(ctx,this._camera.getPos);
+        this.map.drawObjects(ctx,this._camera.getPos,this._player.getSpriteAngle,this._player.getShape.getOrigin());
 
-        this.map.draw(ctx,this._camera.getPos,this._player.getSpriteAngle,this._player.getShape.getOrigin());
-    
-       // ctx.fillText(`fps : ${this._waveManager.getWave()}`, (this._camera.getPos.x + 100) - this._camera.getPos.x,(this._camera.getPos.y + 50) - this._camera.getPos.y);  
-
-       this._animationManager.draw(ctx,this._camera.getPos);
        
        ctx.fillText('INF',((this._camera.getPos.x + this._camera.getSize.x/32) - this._camera.getPos.x),((this._camera.getPos.y + this._camera.getSize.y/1.183) - this._camera.getPos.y));
        ctx.fillText(this._player.getWeapons()[1].getAmmoCount(),((this._camera.getPos.x + this._camera.getSize.x/10) - this._camera.getPos.x),((this._camera.getPos.y + this._camera.getSize.y/1.183) - this._camera.getPos.y));
