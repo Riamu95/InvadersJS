@@ -1,8 +1,8 @@
 class MapGui extends GuiComponent
 {
-    constructor(_image,pos,size,_active,...listeners)
+    constructor(_image,pos,size,_activateAnimation,...listeners)
     {
-        super(_image,pos,size,_active,...listeners);
+        super(_image,pos,size,_activateAnimation,...listeners);
         this._player = document.getElementById("playerMap");
         this._playerSize = new Vec2(23,18); 
         this._npcPos = [];
@@ -10,12 +10,18 @@ class MapGui extends GuiComponent
         this._radarRange = 3000;
         this._scalar = 120;
         this._enemyRadarPos = new Vec2(0,0);
-        this._active = true;
-        this._reload = 3;
-        this._scan = 3;
-        this._reloadTimer = 0;
-        this._scanTimer = performance.now();
         this._renderSize = new Vec2(266,266);
+       
+        this._radarReloadTime = 3;
+        this._radarReloadClock = performance.now();
+
+        this._radarAnimationTime = 3;
+        this._radarAnimationClock = performance.now();
+        this._activateAnimation = false;
+        
+        this._renderClock = performance.now();
+        this._render = false;
+        this._renderTime = 0.2;
     }
 
     addNPCPos(val)
@@ -28,20 +34,30 @@ class MapGui extends GuiComponent
         this._pos.x = cameraPos.x + CANVAS_WIDTH/1.1;
         this._pos.y = cameraPos.y + CANVAS_HEIGHT/6;
 
-        if(!this._active && ((performance.now() - this._scanTimer)/1000) >= this._scan)
+        //if radar timer has passed add radar animation
+        if(!this._activateAnimation && ((performance.now() - this._radarReloadClock)/1000) >= this._radarReloadTime)
         {
-            this._active = true;
-            this._reloadTimer = performance.now();
-        }
-        if(this._active && ((performance.now() - this._reloadTimer)/1000) >= this._reload)
-        {
-            this._active = false;
-            this._scanTimer = performance.now();
+            this._activateAnimation = true;
+            this._radarAnimationClock = performance.now();
             animationManager.addAnimation(6,0.5,this._pos,this._image,this._renderSize);
+        }//if radar animation activates, wait radar animation time duration
+        if(this._activateAnimation && ((performance.now() - this._radarAnimationClock)/1000) >= this._radarAnimationTime)
+        {
+            this._activateAnimation = false;
+            //render objects on radar
+            this._render = true;
+            this._renderClock = performance.now();
+            this._radarReloadClock = performance.now();
         }
+        //redner objects for given time
+        if(this._render && (performance.now() - this._renderClock)/1000 > this._renderTime)
+        {
+            this._render = false;
+        }
+
     }
 
-     drawMap(ctx,cameraPos = new Vec2(0,0))
+    drawMap(ctx,cameraPos = new Vec2(0,0))
     {
         ctx.save();
         ctx.beginPath();      
@@ -61,7 +77,7 @@ class MapGui extends GuiComponent
         ctx.closePath();
         ctx.restore();
 
-        if(this._active)
+        if(this._render)
         {
             ctx.save();
             ctx.fillStyle  = "red";
