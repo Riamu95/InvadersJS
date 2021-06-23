@@ -6,7 +6,7 @@ class Camera
         this._size= new Vec2(width,height);
         this._worldSize = new Vec2(WORLD_WIDTH,WORLD_HEIGHT);
     }
-
+    static background = document.getElementById('background');
     update(playerPos)
      {
         //dont use global variables here!!
@@ -33,7 +33,7 @@ class Camera
 
     draw(ctx)
     {
-        ctx.drawImage(background,this._pos.x,this._pos.y,this._size.x,this._size.y,0,0,this._size.x,this._size.y);
+        ctx.drawImage(Camera.background,this._pos.x,this._pos.y,this._size.x,this._size.y,0,0,this._size.x,this._size.y);
     }
 
     get getPos()

@@ -3,7 +3,7 @@ class EnemyMinion extends Enemy {
     constructor (pos,size,vel)
     {
         super(pos,size,vel);
-      
+        
         this._alignmentDistance = 50;
         this._cohesionDistance = 450;
         this._seperationDistance = 90;
@@ -26,6 +26,7 @@ class EnemyMinion extends Enemy {
         this._health = 10;
     }
     static collisionDamage = 10;
+    static enemyMinionImage = document.getElementById("enemyMinion");
 
     static generateFlockPoint(minions, playerPos , flockPoint, dt)
     {    
@@ -191,12 +192,14 @@ class EnemyMinion extends Enemy {
         return steering;
     }
 
+   
+    
     draw(ctx,cameraPos)
     {
         ctx.save();
         ctx.beginPath();
         ctx.translate(this._rect.getOrigin().x - cameraPos.x,this._rect.getOrigin().y - cameraPos.y);
-        ctx.drawImage(enemyMinionImage,0,0,this._rect.getSize().x,this._rect.getSize().y,-this._rect.getSize().x/2,-this._rect.getSize().y/2,this._rect.getSize().x,this._rect.getSize().y);
+        ctx.drawImage(EnemyMinion.enemyMinionImage,0,0,this._rect.getSize().x,this._rect.getSize().y,-this._rect.getSize().x/2,-this._rect.getSize().y/2,this._rect.getSize().x,this._rect.getSize().y);
         ctx.closePath();
         ctx.restore();
         this._rect.draw(ctx,cameraPos, this._color);

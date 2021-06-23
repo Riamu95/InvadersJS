@@ -1,6 +1,14 @@
 const AnimationManager = function()
 {
     this._animations = [];
+    AnimationManager.prototype.BOMBER_RADAR_PING = document.getElementById('bomberRadarPing');
+    AnimationManager.prototype.MINION_RADAR_PING = document.getElementById('minionRadarPing');
+    AnimationManager.prototype.ASTEROID_RADAR_PING = document.getElementById('asteroidRadarPing');
+    AnimationManager.prototype.BH_RADAR_PING = document.getElementById('bhRadarPing');
+    AnimationManager.prototype.BULLET_EXPLOSION_IMAGE = document.getElementById('bulletExplosion');
+    AnimationManager.prototype.MINE_EXPLOSION_IMAGE = document.getElementById('mineExplosion');
+    AnimationManager.prototype.EXPLOSION_IMAGE = document.getElementById('explosion');
+    AnimationManager.prototype.MAP_IMAGE = document.getElementById('map');
     
 }
 AnimationManager.prototype.getInstance = function()
@@ -11,6 +19,8 @@ AnimationManager.prototype.getInstance = function()
 AnimationManager.prototype.addAnimation = function(...animationProperties)
 {
     //frames, transitiontime,pos,image,size,currentFrame,timer
+    let img = null;
+    animationProperties[3] = this.setImage(img,animationProperties[3]);
     let animateObj = {
 
         noOfFrames : animationProperties[0],
@@ -22,6 +32,39 @@ AnimationManager.prototype.addAnimation = function(...animationProperties)
         timer : performance.now()
     }
     this._animations.push(animateObj);
+}
+AnimationManager.prototype.setImage = function(img,animation)
+{
+    
+    switch(animation)
+    {
+        case "BOMBER":
+            img = AnimationManager.prototype.BOMBER_RADAR_PING;
+            break;
+        case "MINION":
+            img = AnimationManager.prototype.MINION_RADAR_PING;
+            break;
+        case "ASTEROID":
+            img = AnimationManager.prototype.ASTEROID_RADAR_PING;
+            break;
+        case "BH":
+            img = AnimationManager.prototype.BH_RADAR_PING;
+            break;
+        case "MINE":
+            img = AnimationManager.prototype.MINE_EXPLOSION_IMAGE;
+            break;
+        case "EXPLOSION":
+            img = AnimationManager.prototype.EXPLOSION_IMAGE;
+            break;
+        case "BULLET":
+            img = AnimationManager.prototype.BULLET_EXPLOSION_IMAGE;
+            break;
+        case "MAP":
+            img =  AnimationManager.prototype.MAP_IMAGE;
+            break;       
+    }
+
+    return img;
 }
 
 
@@ -36,7 +79,6 @@ AnimationManager.prototype.draw = function(ctx,cameraPos)
         {
             this._animations[i].currentFrame += 1;
             this._animations[i].timer = performance.now();
-            console.log("passed");
         }
         
         ctx.drawImage(this._animations[i].imagesrc, this._animations[i].currentFrame * this._animations[i].size.x,0,this._animations[i].size.x,this._animations[i].size.y,

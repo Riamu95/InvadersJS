@@ -26,8 +26,11 @@ class GameScene extends Scene
         this.map.addNPCPos(this._asteroids);
         this.map.addNPCPos(this._blackHoles);
         this._playerPowerUps = [];
+
+        this._spawnPoints = 37;
         this.init();
     }
+     
 
     init() 
     {
@@ -128,14 +131,14 @@ class GameScene extends Scene
             /* Createthis._asteroids */
             for(let i = 0; i < this._waveManager.getAsteroidCount(); i++)
             {
-                let pos = this._waveManager.getSpawnPoint(Math.trunc(Math.random() * SPAWN_POINTS));
+                let pos = this._waveManager.getSpawnPoint(Math.trunc(Math.random() * this._spawnPoints));
                 let  temp = new Asteroid(new Vec2(pos.x, pos.y), new Vec2(99,99));
                 this._asteroids.push(temp);
             }
             /* Createthis._minions*/
             for(let row = 0; row < this._waveManager.getFlockCount(); row++)
             {
-                let pos = this._waveManager.getSpawnPoint(Math.trunc(Math.random() * SPAWN_POINTS));
+                let pos = this._waveManager.getSpawnPoint(Math.trunc(Math.random() * this._spawnPoints));
                 let tempMinions = [];
                 for(let col = 0; col < this._waveManager.getMininonCount(); col++)
                 {
@@ -148,7 +151,7 @@ class GameScene extends Scene
             /* Create this._bombers*/
             for(let i = 0; i < this._waveManager.getBomberCount(); i++)
             {
-                let pos = this._waveManager.getSpawnPoint(Math.trunc(Math.random() * SPAWN_POINTS));
+                let pos = this._waveManager.getSpawnPoint(Math.trunc(Math.random() * this._spawnPoints));
                 let flockPoint = new Vec2(Math.random() * WORLD_WIDTH, Math.random() * WORLD_HEIGHT);
                 let tempBomber = new Bomber(new Vec2(pos.x,pos.y), new Vec2(128,158), new Vec2(0,0),flockPoint);
                 this._bombers.push(tempBomber);
@@ -256,7 +259,7 @@ class GameScene extends Scene
                         {
                             if (value[1] == true)
                             {
-                                this._animationManager.addAnimation(5,0.02,value[0].getRect.getOrigin(),BULLET_EXPLOSION_IMAGE,new Vec2(256,256));    
+                                this._animationManager.addAnimation(5,0.02,value[0].getRect.getOrigin(),"BULLET",new Vec2(256,256));    
                             }
                         }
                         this._player.getAutoTurret().clear();
@@ -608,7 +611,7 @@ class GameScene extends Scene
         
                     this._minions[row][col].setHealth = -this._player.getCollisionDamage();
 
-                    this._animationManager.addAnimation(5,0.02,this._minions[row][col].getRect.getOrigin(),EXPLOSION_IMAGE,new Vec2(256,256));
+                    this._animationManager.addAnimation(5,0.02,this._minions[row][col].getRect.getOrigin(),"EXPLOSION",new Vec2(256,256));
                     if(this._player.getAutoTurret().getBullets().keys(this._minions[row][col].getRect.getOrigin()) != undefined)
                     {
                         this._player.getAutoTurret().getBullets().delete(this._minions[row][col].getRect.getOrigin());
@@ -658,13 +661,13 @@ class GameScene extends Scene
                         
                         if(this._minions[row][col].checkHealth())
                         {
-                            this._animationManager.addAnimation(5,0.02,this._minions[row][col].getRect.getOrigin(),EXPLOSION_IMAGE,new Vec2(256,256));
+                            this._animationManager.addAnimation(5,0.02,this._minions[row][col].getRect.getOrigin(),"EXPLOSION",new Vec2(256,256));
                             this._minions[row].splice(col,1);
                             this.spawn();
                         }
                         if(this._bombers[b].checkHealth())
                         {
-                            this._animationManager.addAnimation(5,0.02,this._bombers[b].getRect.getOrigin(),EXPLOSION_IMAGE,new Vec2(256,256));
+                            this._animationManager.addAnimation(5,0.02,this._bombers[b].getRect.getOrigin(),"EXPLOSION",new Vec2(256,256));
                             this._bombers.splice(b,1);
                             this.spawn();
                             break loop1;
@@ -693,7 +696,7 @@ class GameScene extends Scene
                 }
                 if (this._asteroids[a].checkHealth())
                 {
-                    this._animationManager.addAnimation(5,0.02,this._asteroids[a].getRect().getOrigin(),EXPLOSION_IMAGE,new Vec2(256,256));
+                    this._animationManager.addAnimation(5,0.02,this._asteroids[a].getRect().getOrigin(),"EXPLOSION",new Vec2(256,256));
                     this._asteroids.splice(a,1);
                 }
 
@@ -746,12 +749,12 @@ class GameScene extends Scene
 
                         if(this._minions[row][col].checkHealth())
                         {
-                            this._animationManager.addAnimation(5,0.02,this._minions[row][col].getRect.getOrigin(),EXPLOSION_IMAGE,new Vec2(256,256));
+                            this._animationManager.addAnimation(5,0.02,this._minions[row][col].getRect.getOrigin(),"EXPLOSION",new Vec2(256,256));
                             this._minions[row].splice(col,1);
                         }
                         if(this._asteroids[a].checkHealth())
                         {
-                            this._animationManager.addAnimation(5,0.02,this._asteroids[a].getRect().getOrigin(),EXPLOSION_IMAGE,new Vec2(256,256));
+                            this._animationManager.addAnimation(5,0.02,this._asteroids[a].getRect().getOrigin(),"EXPLOSION",new Vec2(256,256));
                             this._asteroids.splice(a,1);
                             break loop1;
                            
@@ -773,8 +776,8 @@ class GameScene extends Scene
             {
                 if (CollisionManager.SATCollision(this._asteroids[a].getRect().getPoints(),this._asteroids[b].getRect().getPoints()))
                 {
-                    this._animationManager.addAnimation(5,0.02,this._asteroids[a].getRect().getOrigin(),EXPLOSION_IMAGE,new Vec2(256,256));
-                    this._animationManager.addAnimation(5,0.02,this._asteroids[b].getRect().getOrigin(),EXPLOSION_IMAGE,new Vec2(256,256));
+                    this._animationManager.addAnimation(5,0.02,this._asteroids[a].getRect().getOrigin(),"EXPLOSION",new Vec2(256,256));
+                    this._animationManager.addAnimation(5,0.02,this._asteroids[b].getRect().getOrigin(),"EXPLOSION",new Vec2(256,256));
                     this._asteroids.splice(b,1);
                     this._asteroids.splice(a,1);
                     this.spawn();
@@ -807,7 +810,7 @@ class GameScene extends Scene
         {
             let playerBullets = this._player.getWeapons()[w].getBullets();
             let noOfFrames = w == 2 ? 9 : 5;
-            let bulletAnimation =  w == 2 ? MINE_EXPLOSION_IMAGE : BULLET_EXPLOSION_IMAGE;
+            let bulletAnimation =  w == 2 ? "MINE" : "BULLET";
             let animationSize = w == 2 ? new Vec2(210,210) : new Vec2(256,256);
              /* Minion Player bullet collision */
             for( let row = 0; row < this._minions.length; row++)
@@ -822,7 +825,7 @@ class GameScene extends Scene
                             this._minions[row][col].setHealth = -this._player.getWeapons()[w].getDamage();
                             if(this._minions[row][col].checkHealth())
                             {
-                                this._animationManager.addAnimation(5,0.02,this._minions[row][col].getRect.getOrigin(),EXPLOSION_IMAGE,new Vec2(256,256));
+                                this._animationManager.addAnimation(5,0.02,this._minions[row][col].getRect.getOrigin(),"EXPLOSION",new Vec2(256,256));
                                 this._minions[row].splice(col,1);
                             }
                             //frames, transitiontime,pos,image,size,currentFrame,timer
@@ -846,7 +849,7 @@ class GameScene extends Scene
                         this._bombers[i].setHealth = -this._player.getWeapons()[w].getDamage();
                         if(this._bombers[i].checkHealth())
                         {
-                            this._animationManager.addAnimation(5,0.02,this._bombers[i].getRect.getOrigin(),EXPLOSION_IMAGE,new Vec2(256,256));
+                            this._animationManager.addAnimation(5,0.02,this._bombers[i].getRect.getOrigin(),"EXPLOSION",new Vec2(256,256));
                             this._bombers.splice(i,1);
                         }
                         this._animationManager.addAnimation(noOfFrames,0.02,playerBullets[b].getRect.getOrigin(),bulletAnimation,animationSize);
@@ -867,7 +870,7 @@ class GameScene extends Scene
                         this._asteroids[i].setHealth(-this._player.getWeapons()[w].getDamage());
                         if(this._asteroids[i].checkHealth())
                         {
-                            this._animationManager.addAnimation(5,0.02,this._asteroids[i].getRect().getOrigin(),EXPLOSION_IMAGE,new Vec2(256,256));
+                            this._animationManager.addAnimation(5,0.02,this._asteroids[i].getRect().getOrigin(),"EXPLOSION",new Vec2(256,256));
                             this._asteroids.splice(i,1);
                         }
                         this._animationManager.addAnimation(noOfFrames,0.02,playerBullets[b].getRect.getOrigin(),bulletAnimation,animationSize);
@@ -897,7 +900,7 @@ class GameScene extends Scene
                 if(CollisionManager.SATCollision(this._bombers[i]._bullets[b].getRect.getPoints(),this._player.getShape.getPoints()))
                 {
                     this.gui.get("healthValue")[0].getRenderSize().x -= (this.gui.get("healthValue")[0].getSize().x/100) * Bomber.bulletDamage;
-                    this._animationManager.addAnimation(5,0.02,this._bombers[i]._bullets[b].getRect.getOrigin(),EXPLOSION_IMAGE,new Vec2(256,256));
+                    this._animationManager.addAnimation(5,0.02,this._bombers[i]._bullets[b].getRect.getOrigin(),"EXPLOSION",new Vec2(256,256));
                     this._bombers[i]._bullets.splice(b,1);
                     
                     this._player.setHealth = -Bomber.bulletDamage;
@@ -923,7 +926,7 @@ class GameScene extends Scene
                 if (time >= Bomber.ttl)
                 {
                     //implode bomb
-                    this._animationManager.addAnimation(5,0.02,this._bombers[i]._bullets[b].getRect.getOrigin(),EXPLOSION_IMAGE,new Vec2(256,256));
+                    this._animationManager.addAnimation(5,0.02,this._bombers[i]._bullets[b].getRect.getOrigin(),"EXPLOSION",new Vec2(256,256));
                     this._bombers[i]._bullets.splice(b,1);
                 }
             }
@@ -945,7 +948,7 @@ class GameScene extends Scene
 
             if (time >= this._player.getAutoTurret().getTTL())
             {
-                this._animationManager.addAnimation(5,0.02,value[0].getRect.getOrigin(),BULLET_EXPLOSION_IMAGE,new Vec2(256,256));    
+                this._animationManager.addAnimation(5,0.02,value[0].getRect.getOrigin(),"BULLET",new Vec2(256,256));    
                 turretBullets.delete(key);
             }
         }
@@ -959,7 +962,7 @@ class GameScene extends Scene
                     if(CollisionManager.SATCollision(bullet[0].getRect.getPoints(),this._minions[row][col].getRect.getPoints()))
                     {
                         this._minions[row][col].setHealth = -this._player.getAutoTurret().getBulletDamage();
-                        this._animationManager.addAnimation(5,0.02,bullet[0].getRect.getOrigin(),BULLET_EXPLOSION_IMAGE,new Vec2(256,256));
+                        this._animationManager.addAnimation(5,0.02,bullet[0].getRect.getOrigin(),"BULLET",new Vec2(256,256));
                         turretBullets.delete(target);
                          //if there's still a bullet targetting the minion(inaccurate collision/ remove that bullet)
                         if(turretBullets.keys(this._minions[row][col].getRect.getOrigin()) != undefined)
@@ -968,7 +971,7 @@ class GameScene extends Scene
                         }
                         if(this._minions[row][col].checkHealth())
                         {
-                            this._animationManager.addAnimation(5,0.02,this._minions[row][col].getRect.getOrigin(),EXPLOSION_IMAGE,new Vec2(256,256));                 
+                            this._animationManager.addAnimation(5,0.02,this._minions[row][col].getRect.getOrigin(),"EXPLOSION",new Vec2(256,256));                 
                             this._minions[row].splice(col,1);
                         }
  
@@ -988,7 +991,7 @@ class GameScene extends Scene
                 if(CollisionManager.SATCollision(bullet[0].getRect.getPoints(), this._bombers[i].getRect.getPoints()))
                 {
                     this._bombers[i].setHealth = -this._player.getAutoTurret().getBulletDamage();
-                    this._animationManager.addAnimation(5,0.02,bullet[0].getRect.getOrigin(),BULLET_EXPLOSION_IMAGE,new Vec2(256,256));
+                    this._animationManager.addAnimation(5,0.02,bullet[0].getRect.getOrigin(),"BULLET",new Vec2(256,256));
                     turretBullets.delete(target);  
                     if(turretBullets.keys(this._bombers[i].getRect.getOrigin()) != undefined)
                     {
@@ -997,7 +1000,7 @@ class GameScene extends Scene
 
                     if(this._bombers[i].checkHealth())
                     {
-                        this._animationManager.addAnimation(5,0.02,this._bombers[i].getRect.getOrigin(),EXPLOSION_IMAGE,new Vec2(256,256));
+                        this._animationManager.addAnimation(5,0.02,this._bombers[i].getRect.getOrigin(),"EXPLOSION",new Vec2(256,256));
                         this._bombers.splice(i,1);
                     }
                   
@@ -1016,7 +1019,7 @@ class GameScene extends Scene
                 if(CollisionManager.SATCollision(bullet[0].getRect.getPoints(), this._asteroids[i].getRect().getPoints()))
                 {
                     this._asteroids[i].setHealth(-this._player.getAutoTurret().getBulletDamage());
-                    this._animationManager.addAnimation(5,0.02,bullet[0].getRect.getOrigin(),BULLET_EXPLOSION_IMAGE,new Vec2(256,256));
+                    this._animationManager.addAnimation(5,0.02,bullet[0].getRect.getOrigin(),"BULLET",new Vec2(256,256));
                     turretBullets.delete(target);  
                     if(turretBullets.keys(this._asteroids[i].getRect().getOrigin()) != undefined)
                     {
@@ -1024,7 +1027,7 @@ class GameScene extends Scene
                     }
                     if(this._asteroids[i].checkHealth())
                     {
-                        this._animationManager.addAnimation(5,0.02,this._asteroids[i].getRect().getOrigin(),EXPLOSION_IMAGE,new Vec2(256,256));
+                        this._animationManager.addAnimation(5,0.02,this._asteroids[i].getRect().getOrigin(),"EXPLOSION",new Vec2(256,256));
                         this._asteroids.splice(i,1);
                     }
                     if (turretBullets.size == 0)     
@@ -1061,7 +1064,7 @@ class GameScene extends Scene
         /* Draw bombers and bomber Bullets*/
         for(let i =0; i < this._bombers.length; i ++)
         {
-            this._bombers[i].draw(ctx,this._camera.getPos,BOMBER_IMAGE);
+            this._bombers[i].draw(ctx,this._camera.getPos);
             for(let b = 0; b < this._bombers[i]._bullets.length; b++)
             {
                 this._bombers[i]._bullets[b].draw(ctx,this._camera.getPos,BOMBER_BULLET_IMAGE);
@@ -1103,7 +1106,7 @@ class GameScene extends Scene
         
         this.map.drawMap(ctx,this._camera.getPos);
         this._animationManager.draw(ctx,this._camera.getPos);
-        this.map.drawObjects(ctx,this._camera.getPos,this._player.getSpriteAngle,this._player.getShape.getOrigin());
+        this.map.drawObjects(ctx,this._camera.getPos,this._player.getSpriteAngle,this._player.getShape.getOrigin(),this._animationManager);
 
        
        ctx.fillText('INF',((this._camera.getPos.x + this._camera.getSize.x/32) - this._camera.getPos.x),((this._camera.getPos.y + this._camera.getSize.y/1.183) - this._camera.getPos.y));

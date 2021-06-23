@@ -39,7 +39,7 @@ class MapGui extends GuiComponent
         {
             this._activateAnimation = true;
             this._radarAnimationClock = performance.now();
-            animationManager.addAnimation(6,0.5,this._pos,this._image,this._renderSize);
+            animationManager.addAnimation(6,0.5,this._pos,"MAP",this._renderSize);
         }//if radar animation activates, wait radar animation time duration
         if(this._activateAnimation && ((performance.now() - this._radarAnimationClock)/1000) >= this._radarAnimationTime)
         {
@@ -50,10 +50,10 @@ class MapGui extends GuiComponent
             this._radarReloadClock = performance.now();
         }
         //redner objects for given time
-        if(this._render && (performance.now() - this._renderClock)/1000 > this._renderTime)
+        /*if(this._render && (performance.now() - this._renderClock)/1000 > this._renderTime)
         {
             this._render = false;
-        }
+        }*/
 
     }
 
@@ -67,7 +67,7 @@ class MapGui extends GuiComponent
         ctx.restore();
     }
 
-    drawObjects(ctx,cameraPos = new Vec2(0,0), rotate, playerPos)
+    drawObjects(ctx,cameraPos = new Vec2(0,0), rotate, playerPos,animationManager)
     {
         ctx.save();
         ctx.beginPath();      
@@ -84,10 +84,12 @@ class MapGui extends GuiComponent
             this._npcPos[0].forEach(bomber =>
             {
                 this.calculateNPCRadarPos(bomber.getRect.getOrigin(), playerPos,cameraPos);
-                ctx.beginPath();
-                ctx.arc((cameraPos.x + this._enemyRadarPos.x) - cameraPos.x, (cameraPos.y + this._enemyRadarPos.y) - cameraPos.y, 5, 0, 2 * Math.PI);
-                ctx.fill();
-                ctx.closePath();
+                animationManager.addAnimation(4,0.2,new Vec2(cameraPos.x + this._enemyRadarPos.x,cameraPos.y + this._enemyRadarPos.y)
+                                                ,"BOMBER", new Vec2(20,30));
+                //ctx.beginPath();
+               // ctx.arc((cameraPos.x + this._enemyRadarPos.x) - cameraPos.x, (cameraPos.y + this._enemyRadarPos.y) - cameraPos.y, 5, 0, 2 * Math.PI);
+               // ctx.fill();
+               // ctx.closePath();
             });
             
             ctx.fillStyle  = "blue";
@@ -96,10 +98,12 @@ class MapGui extends GuiComponent
                 minionArray.forEach( minion => 
                 {
                     this.calculateNPCRadarPos(minion.getRect.getOrigin(), playerPos,cameraPos);
-                    ctx.beginPath();
+                    animationManager.addAnimation(4,0.2,new Vec2(cameraPos.x + this._enemyRadarPos.x,cameraPos.y + this._enemyRadarPos.y)
+                    ,"MINION", new Vec2(20,30));
+                    /*ctx.beginPath();
                     ctx.arc((cameraPos.x + this._enemyRadarPos.x) - cameraPos.x, (cameraPos.y + this._enemyRadarPos.y) - cameraPos.y, 4, 0, 2 * Math.PI);
                     ctx.fill();
-                    ctx.closePath();
+                    ctx.closePath();*/
                 });
             });
 
@@ -107,23 +111,28 @@ class MapGui extends GuiComponent
             this._npcPos[2].forEach(asteroid =>
             {
                 this.calculateNPCRadarPos(asteroid.getRect().getOrigin(), playerPos,cameraPos);
-                ctx.beginPath();
+                animationManager.addAnimation(4,0.2,new Vec2(cameraPos.x + this._enemyRadarPos.x,cameraPos.y + this._enemyRadarPos.y)
+                ,"ASTEROID", new Vec2(20,30));
+                /*ctx.beginPath();
                 ctx.arc((cameraPos.x + this._enemyRadarPos.x) - cameraPos.x, (cameraPos.y + this._enemyRadarPos.y) - cameraPos.y, 5, 0, 2 * Math.PI);
                 ctx.fill();
-                ctx.closePath();
+                ctx.closePath();*/
             });
 
             ctx.fillStyle  = "black";
             this._npcPos[3].forEach(bh =>
             {
                 this.calculateNPCRadarPos(bh.getRect().getOrigin(), playerPos,cameraPos);
-                ctx.beginPath();
+                animationManager.addAnimation(4,0.2,new Vec2(cameraPos.x + this._enemyRadarPos.x,cameraPos.y + this._enemyRadarPos.y)
+                ,"BH", new Vec2(20,30));
+                /*ctx.beginPath();
                 ctx.arc((cameraPos.x + this._enemyRadarPos.x) - cameraPos.x, (cameraPos.y + this._enemyRadarPos.y) - cameraPos.y, 5, 0, 2 * Math.PI);
                 ctx.fill();
-                ctx.closePath();
+                ctx.closePath();*/
             });
             ctx.restore();
         }
+        this._render = false;
     }
 
     calculateNPCRadarPos(enemyPos, playerPos,cameraPos)
@@ -137,6 +146,6 @@ class MapGui extends GuiComponent
             this._enemyRadarPos = Vec2.normalise(this._enemyRadarPos);
             this._enemyRadarPos.setMagnitude =  this._scalar;
             this._enemyRadarPos.x += (this._pos.x - cameraPos.x);
-            this._enemyRadarPos.y += (this._pos.y -cameraPos.y);
+            this._enemyRadarPos.y += (this._pos.y - cameraPos.y);
     }
 }

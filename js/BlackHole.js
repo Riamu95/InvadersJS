@@ -11,6 +11,8 @@ const BlackHole = function(pos,size)
     this._forceMagnitude = 0;
 }
 
+BlackHole.prototype.BLACKHOLE_IMAGE = document.getElementById('blackhole');
+
 BlackHole.prototype.update = function(dt)
 {
     this._rect.getAngle() >= 360 ? this._rect.setAngle(0) : this._rect.addAngle(0.1);
@@ -57,7 +59,7 @@ BlackHole.prototype.draw = function(ctx,cameraPos)
     ctx.beginPath();      
     ctx.translate(this._rect.getOrigin().x - cameraPos.x,this._rect.getOrigin().y - cameraPos.y);
     ctx.rotate(Math.PI/180 * this._rect.getAngle());
-    ctx.drawImage(BLACKHOLE_IMAGE,0,0,this._rect.getSize().x,this._rect.getSize().y,-this._rect.getSize().x/2,-this._rect.getSize().y/2,this._rect.getSize().x,this._rect.getSize().y);
+    ctx.drawImage(BlackHole.prototype.BLACKHOLE_IMAGE,0,0,this._rect.getSize().x,this._rect.getSize().y,-this._rect.getSize().x/2,-this._rect.getSize().y/2,this._rect.getSize().x,this._rect.getSize().y);
     ctx.closePath();
     ctx.restore();
 }
