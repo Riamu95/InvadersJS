@@ -14,12 +14,14 @@ class Bomber extends Enemy
         this._seek = new Vec2(0,0);
         this._health = 100;
     }
+    
     static collisionDamage = 40;
     static bomberImage = document.getElementById("bomber");
-   
-    move (dt,playerPos) 
+    static bomberBulletImage = document.getElementById('bomberBullet');
+
+    move (dt,playerPos,worldWidth,worldHeight) 
     {
-        this.generateFlockPoint();
+        this.generateFlockPoint(worldWidth,worldHeight);
         this.attack(playerPos);
 
         this._seek = this.seek();
@@ -47,11 +49,11 @@ class Bomber extends Enemy
         this._acceleration = new Vec2(0,0);
     }
 
-    generateFlockPoint()
+    generateFlockPoint(worldWidth,worldHeight)
     {
         if(Vec2.distance(this._rect.getOrigin(), this._flockPoint) < 50) 
         { 
-            this._flockPoint = new Vec2(Math.random() * WORLD_WIDTH, Math.random() * WORLD_HEIGHT);
+            this._flockPoint = new Vec2(Math.random() * worldWidth, Math.random() * worldHeight);
         }
     }
 

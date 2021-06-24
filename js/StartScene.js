@@ -1,19 +1,19 @@
 class StartScene extends Scene 
 {
-    constructor(scene)
+    constructor(scene,canvas)
     {
-        super();
+        super(canvas);
         this._scenes = scene;
 
         this._guiComponents = [];
 
         this._next = this.NextScene.bind(this);
         this._quit = this.QuitScene.bind(this);
-
-        this._guiComponents.push(new GuiComponent("MainMenuBackground",new Vec2(CANVAS_WIDTH/2,CANVAS_HEIGHT/2),new Vec2(CANVAS_WIDTH,CANVAS_HEIGHT),true));
-        this._guiComponents.push(new GuiComponent("Title",new Vec2(CANVAS_WIDTH/2,CANVAS_HEIGHT/3),new Vec2(550,180),true));
-        this._guiComponents.push(new GuiComponent("play",new Vec2(CANVAS_WIDTH/2,CANVAS_HEIGHT/2),new Vec2(400,185),true, {"click" : this._next} ,{"mouseenter": null},{"mouseleave": null}));
-        this._guiComponents.push(new GuiComponent("quit",new Vec2(CANVAS_WIDTH/2,CANVAS_HEIGHT/1.5),new Vec2(400,185),true,{"click" : this._quit} ,{"mouseenter": null},{"mouseleave": null}));
+    
+        this._guiComponents.push(new GuiComponent("MainMenuBackground",new Vec2(this._canvasWidth/2,this._canvasHeight/2),new Vec2(this._canvasWidth,this._canvasHeight),true));
+        this._guiComponents.push(new GuiComponent("Title",new Vec2(this._canvasWidth/2,this._canvasHeight/3),new Vec2(550,180),true));
+        this._guiComponents.push(new GuiComponent("play",new Vec2(this._canvasWidth/2,this._canvasHeight/2),new Vec2(400,185),true, {"click" : this._next} ,{"mouseenter": null},{"mouseleave": null}));
+        this._guiComponents.push(new GuiComponent("quit",new Vec2(this._canvasWidth/2,this._canvasHeight/1.5),new Vec2(400,185),true,{"click" : this._quit} ,{"mouseenter": null},{"mouseleave": null}));
     }
 
     
@@ -23,12 +23,12 @@ class StartScene extends Scene
         
     }
 
-    draw(ctx)
+    draw()
     {
-        ctx.clearRect(0,0,CANVAS_WIDTH,CANVAS_HEIGHT);
+        StartScene._ctx.clearRect(0,0,this._canvasWidth,this._canvasHeight);
         for(let i = 0; i < 2; i++)
         {
-            this._guiComponents[i].draw(ctx);
+            this._guiComponents[i].draw(StartScene._ctx);
         }
     }
 

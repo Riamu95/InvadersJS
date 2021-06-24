@@ -4,6 +4,8 @@ class GameScene extends Scene
     {
         super();
         this._scenes = scene;
+        this.worldWidth = 3376;
+        this.worldHeight = 6000;
         this._minions = [];
         this._flockPoints = [];
         this._bombers = [];
@@ -14,19 +16,23 @@ class GameScene extends Scene
         this.powerUps = [];
         this.ammunition = [];
         this._collisionManager = new CollisionManager();
-        this._player = new Player(new Vec2(WORLD_WIDTH/2,WORLD_HEIGHT/2),new Vec2(127,130));
-        this._camera = new Camera(this._player.getShape.getOrigin().x - CANVAS_WIDTH/2,this._player.getShape.getOrigin().y - CANVAS_HEIGHT/2,CANVAS_WIDTH,CANVAS_HEIGHT);
-        //let qt = new QuadTree(new Vec2(0,0),new Vec2(WORLD_WIDTH,WORLD_HEIGHT), 5);
+        this._player = new Player(new Vec2(this.worldWidth/2,this.worldHeight/2),new Vec2(127,130));
+        this._camera = new Camera(this._player.getShape.getOrigin().x - this._canvasWidth/2,this._player.getShape.getOrigin().y - this._canvasHeight/2,this._canvasWidth,this._canvasHeight, this.worldWidth,this.worldHeight);
+        //let qt = new QuadTree(new Vec2(0,0),new Vec2(this.worldWidth,this.worldHeight), 5);
         this._animationManager = new AnimationManager();
-        this._waveManager = new WaveManager();
+        this._waveManager = new WaveManager(this.worldWidth,this.worldHeight);
         this.gui = new Map();
-        this.map = new MapGui("map",new Vec2(CANVAS_WIDTH/1.1,CANVAS_HEIGHT/6),new Vec2(1596,266),true,{"mouseenter": null},{"mouseleave": null});
+        this.map = new MapGui("map",new Vec2(this._canvasWidth/1.1,this._canvasHeight/6),new Vec2(1596,266),true,{"mouseenter": null},{"mouseleave": null});
         this.map.addNPCPos(this._bombers);
         this.map.addNPCPos(this._minions);
         this.map.addNPCPos(this._asteroids);
         this.map.addNPCPos(this._blackHoles);
         this._playerPowerUps = [];
 
+      
+        
+        this._minionSpawnXOffset = 250;
+        this._minionSpawnYOffset = 138;
         this._spawnPoints = 37;
         this.init();
     }
@@ -36,8 +42,8 @@ class GameScene extends Scene
     {
         this.spawn();
         this.loadGui();
-        ctx.font = '24px serif';
-        ctx.fillStyle = 'blue';
+        GameScene._ctx.font = '24px serif';
+        GameScene._ctx.fillStyle = 'blue';
 
         document.addEventListener('keydown', (event) =>
         { 
@@ -71,17 +77,17 @@ class GameScene extends Scene
 
         this.gui.set("activePowerUp",[new GuiComponent("activePowerUpGui",new Vec2(this._camera.getSize.x/1.085,this._camera.getSize.y/1.235),new Vec2(253,138),false)]);
        
-        this.gui.set("healthSymbol",[new GuiComponent("healthSymbolGui",new Vec2(WORLD_WIDTH * 2,WORLD_HEIGHT * 2),new Vec2(110,110),false),
-                                                    new GuiComponent("healthSymbolGui",new Vec2(WORLD_WIDTH * 2,WORLD_HEIGHT * 2),new Vec2(110,110),false)]);
+        this.gui.set("healthSymbol",[new GuiComponent("healthSymbolGui",new Vec2(this.worldWidth * 2,this.worldHeight * 2),new Vec2(110,110),false),
+                                                    new GuiComponent("healthSymbolGui",new Vec2(this.worldWidth * 2,this.worldHeight * 2),new Vec2(110,110),false)]);
         
-        this.gui.set("fireRate",[new GuiComponent("fireRateGui",new Vec2(WORLD_WIDTH * 2, WORLD_HEIGHT * 2),new Vec2(110,110),false),
-                                                new GuiComponent("fireRateGui",new Vec2(WORLD_WIDTH * 2, WORLD_HEIGHT * 2),new Vec2(110,110),false)]);
+        this.gui.set("fireRate",[new GuiComponent("fireRateGui",new Vec2(this.worldWidth * 2, this.worldHeight * 2),new Vec2(110,110),false),
+                                                new GuiComponent("fireRateGui",new Vec2(this.worldWidth * 2, this.worldHeight * 2),new Vec2(110,110),false)]);
         
-        this.gui.set("speed",[new GuiComponent("speedGui",new Vec2(WORLD_WIDTH * 2, WORLD_HEIGHT * 2),new Vec2(110,110),false),
-                                            new GuiComponent("speedGui",new Vec2(WORLD_WIDTH * 2, WORLD_HEIGHT * 2),new Vec2(110,110),false)]);
+        this.gui.set("speed",[new GuiComponent("speedGui",new Vec2(this.worldWidth * 2, this.worldHeight * 2),new Vec2(110,110),false),
+                                            new GuiComponent("speedGui",new Vec2(this.worldWidth * 2, this.worldHeight * 2),new Vec2(110,110),false)]);
         
-        this.gui.set("turret",[new GuiComponent("turretGui",new Vec2(WORLD_WIDTH * 2, WORLD_HEIGHT * 2),new Vec2(110,110),false),
-                                             new GuiComponent("turretGui",new Vec2(WORLD_WIDTH * 2, WORLD_HEIGHT * 2),new Vec2(110,110),false)]);
+        this.gui.set("turret",[new GuiComponent("turretGui",new Vec2(this.worldWidth * 2, this.worldHeight * 2),new Vec2(110,110),false),
+                                             new GuiComponent("turretGui",new Vec2(this.worldWidth * 2, this.worldHeight * 2),new Vec2(110,110),false)]);
         
         this.gui.set("nullPowerUp",[new GuiComponent("nullPowerUpGui",new Vec2(this._camera.getSize.x/1.035,this._camera.getSize.y/1.215),new Vec2(378,128),true),
                                              new GuiComponent("nullPowerUpGui",new Vec2(this._camera.getSize.x/0.975,this._camera.getSize.y/1.215),new Vec2(378,128),true)]);
@@ -115,17 +121,17 @@ class GameScene extends Scene
             //create Power Ups
             for(let i = 0; i < this._waveManager.getPowerUpCount(); i++)
             {
-                let  temp = new PowerUp(new Vec2(Math.random() * WORLD_WIDTH, Math.random() * WORLD_HEIGHT), new Vec2(300,300),PowerUp.prototype.generateRandomType(Math.round(Math.random()* 2)),  Math.random() * 30);
+                let  temp = new PowerUp(new Vec2(Math.random() * this.worldWidth, Math.random() * this.worldHeight), new Vec2(300,300),PowerUp.prototype.generateRandomType(Math.round(Math.random()* 2)),  Math.random() * 30);
                 this.powerUps.push(temp);
             }
 
-            Ammo.prototype.initAmmo(this.ammunition);
+            Ammo.prototype.initAmmo(this.ammunition,this.worldWidth,this.worldHeight);
         
 
             /* Create Black Holes*/
             for(let i = 0; i < this._waveManager.getBlackHoleCount(); i++)
             {
-                let  temp = new BlackHole(new Vec2(Math.random() * WORLD_WIDTH - 643,Math.random() * WORLD_HEIGHT - 480), new Vec2(643,480));
+                let  temp = new BlackHole(new Vec2(Math.random() * this.worldWidth - 643,Math.random() * this.worldHeight - 480), new Vec2(643,480));
                 this._blackHoles.push(temp);
             }
             /* Createthis._asteroids */
@@ -146,13 +152,13 @@ class GameScene extends Scene
                     tempMinions.push(tempMinion);
                 }
                 this._minions.push(tempMinions);
-                this._flockPoints.push(new Vec2(Math.random() * (WORLD_WIDTH - MINION_SPAWN_XOFFSET), Math.random() * (WORLD_HEIGHT - MINION_SPAWN_YOFFSET)));
+                this._flockPoints.push(new Vec2(Math.random() * (this.worldWidth - this._minionSpawnXOffset), Math.random() * (this.worldHeight - this._minionSpawnYOffset)));
             }
             /* Create this._bombers*/
             for(let i = 0; i < this._waveManager.getBomberCount(); i++)
             {
                 let pos = this._waveManager.getSpawnPoint(Math.trunc(Math.random() * this._spawnPoints));
-                let flockPoint = new Vec2(Math.random() * WORLD_WIDTH, Math.random() * WORLD_HEIGHT);
+                let flockPoint = new Vec2(Math.random() * this.worldWidth, Math.random() * this.worldHeight);
                 let tempBomber = new Bomber(new Vec2(pos.x,pos.y), new Vec2(128,158), new Vec2(0,0),flockPoint);
                 this._bombers.push(tempBomber);
             }        
@@ -168,13 +174,13 @@ class GameScene extends Scene
         //for every array, allocate seek point and move the flock
         for( let row = 0; row < this._minions.length; row++)
         {
-            EnemyMinion.generateFlockPoint(this._minions[row], this._player.getShape.getOrigin(), this._flockPoints[row], dt);
+            EnemyMinion.generateFlockPoint(this._minions[row], this._player.getShape.getOrigin(), this._flockPoints[row], dt, this.worldWidth, this.worldHeight);
         }
     
         /* Bomber and bomber bullet MOVE */
         for(let i = 0; i <  this._bombers.length; i++ )
         {
-            this._bombers[i].move(dt, this._player.getShape.getOrigin());
+            this._bombers[i].move(dt, this._player.getShape.getOrigin(), this.worldWidth, this.worldHeight);
     
             for(let b = 0; b <  this._bombers[i]._bullets.length; b++)
             {
@@ -184,8 +190,8 @@ class GameScene extends Scene
         /* Black Holes update */
         this._blackHoles.forEach( bh =>
         {
-            bh.update(dt);
-            let [force, teleport] = bh.attract( this._player.getShape.getOrigin(), this._player.getMass);
+            bh.update();
+            let [force, teleport] = bh.attract(this._player.getShape.getOrigin(),this._player.getMass,this.worldWidth,this.worldHeight);
             if (!teleport)
             {
                 this._player.getAcceleration.addVec = force;
@@ -206,7 +212,7 @@ class GameScene extends Scene
 
         this.ammunition.forEach( a =>
         {
-            a.update(this._waveManager.getAmmoIntervalTimer());
+            a.update(this._waveManager.getAmmoIntervalTimer(),this.worldWidth,this.worldHeight);
         });
 
         this._player.getAutoTurret().getActive() &&  this._player.getAutoTurret().update(dt);
@@ -215,7 +221,7 @@ class GameScene extends Scene
         /* this._asteroids update */
         this._asteroids.forEach(ast =>
         {
-            ast.update(dt);
+            ast.update(this.worldWidth,this.worldHeight);
         })
 
         if(this._player.getUsingPowerUp())
@@ -305,7 +311,7 @@ class GameScene extends Scene
             }
         }
 
-        this.map.update(this._animationManager,this._camera.getPos);
+        this.map.update(this._animationManager,this._camera.getPos,this._canvasWidth,this._canvasHeight);
 
         this.inputHandling(dt);
         this.collisions();    
@@ -321,7 +327,7 @@ class GameScene extends Scene
                 this._player.addSpeed(this._player.getAccelerationRate);
             } 
             this._player.move(dt); 
-            this._camera.update( this._player.getShape.getOrigin());
+            this._camera.update(this._player.getShape.getOrigin(),this._canvasWidth,this._canvasHeight);
         }
         else if(this._pressedKeys['s'])
         {
@@ -330,7 +336,7 @@ class GameScene extends Scene
                 this._player.addSpeed(- this._player.getAccelerationRate);
             }  
             this._player.move(dt); 
-            this._camera.update( this._player.getShape.getOrigin());  
+            this._camera.update(this._player.getShape.getOrigin(),this._canvasWidth,this._canvasHeight);  
         }
         else if(!this._pressedKeys['w'] && !this._pressedKeys['s'])
         {
@@ -344,7 +350,7 @@ class GameScene extends Scene
             }
            
             this._player.move(dt); 
-            this._camera.update(this._player.getShape.getOrigin());  
+            this._camera.update(this._player.getShape.getOrigin(),this._canvasWidth,this._canvasHeight);  
         }
         if(this._pressedKeys['d'])
         {
@@ -1040,59 +1046,58 @@ class GameScene extends Scene
         //turret asteroid collision
     }
 
-    draw(ctx)
+    draw()
     {
-        ctx.clearRect(0,0,this.canvas_width,this.canvas_height);
-        this._camera.draw(ctx);
-        //qt.draw(ctx,camera.getPos);
+        this._camera.draw(GameScene._ctx);
+        //qt.draw(GameScene._ctx,camera.getPos);
         /* Draw Black Holes */
         this._blackHoles.forEach( bh =>
         {
-            bh.draw(ctx,this._camera.getPos)
+            bh.draw(GameScene._ctx,this._camera.getPos)
         });
         /* Draw Asteroids */
         this._asteroids.forEach( ast =>
         {
-            ast.draw(ctx,this._camera.getPos)
+            ast.draw(GameScene._ctx,this._camera.getPos)
         });
         /* Draw Player Bullets */   
         for(let i = 0; i < this._player.getWeapons().length; i++)
         {
-            this._player.getWeapons()[i].draw(ctx,this._camera.getPos);
+            this._player.getWeapons()[i].draw(GameScene._ctx,this._camera.getPos);
         }  
     
         /* Draw bombers and bomber Bullets*/
         for(let i =0; i < this._bombers.length; i ++)
         {
-            this._bombers[i].draw(ctx,this._camera.getPos);
+            this._bombers[i].draw(GameScene._ctx,this._camera.getPos);
             for(let b = 0; b < this._bombers[i]._bullets.length; b++)
             {
-                this._bombers[i]._bullets[b].draw(ctx,this._camera.getPos,BOMBER_BULLET_IMAGE);
+                this._bombers[i]._bullets[b].draw(GameScene._ctx,this._camera.getPos,Bomber.bomberBulletImage);
             } 
         };
 
-        this._player.draw(ctx,this._camera.getPos);
+        this._player.draw(GameScene._ctx,this._camera.getPos);
 
-        this._player.getAutoTurret().getActive() && this._player.getAutoTurret().draw(ctx,this._camera.getPos);
+        this._player.getAutoTurret().getActive() && this._player.getAutoTurret().draw(GameScene._ctx,this._camera.getPos);
 
         /* Draw all minions*/
         this._minions.forEach(array => 
         {
             array.forEach(minion =>
             {
-                minion.draw(ctx,this._camera.getPos);
+                minion.draw(GameScene._ctx,this._camera.getPos);
             }); 
         });
 
         this.powerUps.forEach( pu =>
         {
-            pu.draw(ctx,this._camera.getPos)
+            pu.draw(GameScene._ctx,this._camera.getPos)
         });
 
         this.ammunition.forEach( a =>
         {
             if(a.getActive())
-                a.draw(ctx,this._camera.getPos)
+                a.draw(GameScene._ctx,this._camera.getPos)
         });
         
         for (let value of this.gui.values())
@@ -1100,18 +1105,18 @@ class GameScene extends Scene
             value.forEach(val=> 
             {
                 if(val.getActive())
-                    val.draw(ctx, this._camera.getPos);
+                    val.draw(GameScene._ctx, this._camera.getPos);
             });
         }
         
-        this.map.drawMap(ctx,this._camera.getPos);
-        this._animationManager.draw(ctx,this._camera.getPos);
-        this.map.drawObjects(ctx,this._camera.getPos,this._player.getSpriteAngle,this._player.getShape.getOrigin(),this._animationManager);
+        this.map.drawMap(GameScene._ctx,this._camera.getPos);
+        this._animationManager.draw(GameScene._ctx,this._camera.getPos);
+        this.map.drawObjects(GameScene._ctx,this._camera.getPos,this._player.getSpriteAngle,this._player.getShape.getOrigin(),this._animationManager);
 
        
-       ctx.fillText('INF',((this._camera.getPos.x + this._camera.getSize.x/32) - this._camera.getPos.x),((this._camera.getPos.y + this._camera.getSize.y/1.183) - this._camera.getPos.y));
-       ctx.fillText(this._player.getWeapons()[1].getAmmoCount(),((this._camera.getPos.x + this._camera.getSize.x/10) - this._camera.getPos.x),((this._camera.getPos.y + this._camera.getSize.y/1.183) - this._camera.getPos.y));
-       ctx.fillText(this._player.getWeapons()[2].getAmmoCount(),((this._camera.getPos.x + this._camera.getSize.x/5.9) - this._camera.getPos.x),((this._camera.getPos.y + this._camera.getSize.y/1.183) - this._camera.getPos.y));
+       GameScene._ctx.fillText('INF',((this._camera.getPos.x + this._camera.getSize.x/32) - this._camera.getPos.x),((this._camera.getPos.y + this._camera.getSize.y/1.183) - this._camera.getPos.y));
+       GameScene._ctx.fillText(this._player.getWeapons()[1].getAmmoCount(),((this._camera.getPos.x + this._camera.getSize.x/10) - this._camera.getPos.x),((this._camera.getPos.y + this._camera.getSize.y/1.183) - this._camera.getPos.y));
+       GameScene._ctx.fillText(this._player.getWeapons()[2].getAmmoCount(),((this._camera.getPos.x + this._camera.getSize.x/5.9) - this._camera.getPos.x),((this._camera.getPos.y + this._camera.getSize.y/1.183) - this._camera.getPos.y));
     }
 
     NextScene()

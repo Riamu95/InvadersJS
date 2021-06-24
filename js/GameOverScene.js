@@ -10,11 +10,11 @@ class GameOverScene extends Scene
         this._quit = this.QuitScene.bind(this);
         
         this._guiComponents = [];
-        this._guiComponents.push(new GuiComponent("MainMenuBackground",new Vec2(CANVAS_WIDTH/2,CANVAS_HEIGHT/2),new Vec2(CANVAS_WIDTH,CANVAS_HEIGHT),true));
-        this._guiComponents.push(new GuiComponent("Title",new Vec2(CANVAS_WIDTH/2,CANVAS_HEIGHT/5),new Vec2(550,180),true));
-        this._guiComponents.push(new GuiComponent("GameOver", new Vec2(CANVAS_WIDTH/2,CANVAS_HEIGHT/2), new Vec2(550,180), true));
-        this._guiComponents.push(new GuiComponent("playAgain",new Vec2(CANVAS_WIDTH/2,CANVAS_HEIGHT/2),new Vec2(400,185),true, {"click" : this._next} ,{"mouseenter": null},{"mouseleave": null}));
-        this._guiComponents.push(new GuiComponent("quit",new Vec2(CANVAS_WIDTH/2,CANVAS_HEIGHT/1.5),new Vec2(400,185),true,{"click" : this._quit} ,{"mouseenter": null},{"mouseleave": null}));
+        this._guiComponents.push(new GuiComponent("MainMenuBackground",new Vec2(this._canvasWidth/2,this._canvasHeight/2),new Vec2(this._canvasWidth,this._canvasHeight),true));
+        this._guiComponents.push(new GuiComponent("Title",new Vec2(this._canvasWidth/2,this._canvasHeight/5),new Vec2(550,180),true));
+        this._guiComponents.push(new GuiComponent("GameOver", new Vec2(this._canvasWidth/2,this._canvasHeight/2), new Vec2(550,180), true));
+        this._guiComponents.push(new GuiComponent("playAgain",new Vec2(this._canvasWidth/2,this._canvasHeight/2),new Vec2(400,185),true, {"click" : this._next} ,{"mouseenter": null},{"mouseleave": null}));
+        this._guiComponents.push(new GuiComponent("quit",new Vec2(this._canvasWidth/2,this._canvasHeight/1.5),new Vec2(400,185),true,{"click" : this._quit} ,{"mouseenter": null},{"mouseleave": null}));
         
         this._guiComponents[2].getImage().style.display = "block";
         this._guiComponents[3].getImage().style.display = "block";
@@ -30,12 +30,11 @@ class GameOverScene extends Scene
         //if clicked on gameover button go to game over
     }
 
-    draw(ctx)
+    draw()
     {
-        ctx.clearRect(0,0,this.canvas_width,this.canvas_height);
         for(let i = 0; i < 2; i++)
         {
-            this._guiComponents[i].draw(ctx);
+            this._guiComponents[i].draw(GameOverScene._ctx);
         }
     }
 

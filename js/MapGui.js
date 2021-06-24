@@ -29,10 +29,10 @@ class MapGui extends GuiComponent
         this._npcPos.push(val);
     }
 
-    update(animationManager,cameraPos)
+    update(animationManager,cameraPos,canvasWidth,canvasHeight)
     {
-        this._pos.x = cameraPos.x + CANVAS_WIDTH/1.1;
-        this._pos.y = cameraPos.y + CANVAS_HEIGHT/6;
+        this._pos.x = cameraPos.x + canvasWidth/1.1;
+        this._pos.y = cameraPos.y + canvasHeight/6;
 
         //if radar timer has passed add radar animation
         if(!this._activateAnimation && ((performance.now() - this._radarReloadClock)/1000) >= this._radarReloadTime)

@@ -12,6 +12,7 @@ const AutoTurret = function(pos,size)
     this._bulletdamage = 10;
 }
 
+AutoTurret.prototype.playerBulletImage = document.getElementById('playerBullet');
 
 AutoTurret.prototype.update = function(dt)
 {
@@ -104,7 +105,7 @@ AutoTurret.prototype.draw = function(ctx,cameraPos)
     ctx.beginPath();      
     ctx.translate(this._rect.getOrigin().x - cameraPos.x,this._rect.getOrigin().y - cameraPos.y);
     ctx.rotate(Math.PI/180 * this._rect.getAngle());
-    ctx.drawImage(this._turretImage,0,0,this._rect.getSize().x,this._rect.getSize().y,-this._rect.getSize().x/2,-this._rect.getSize().y/2,this._rect.getSize().x,this._rect.getSize().y);
+    ctx.drawImage(AutoTurret.prototype.playerBulletImage,0,0,this._rect.getSize().x,this._rect.getSize().y,-this._rect.getSize().x/2,-this._rect.getSize().y/2,this._rect.getSize().x,this._rect.getSize().y);
     ctx.closePath();
     ctx.restore();
 

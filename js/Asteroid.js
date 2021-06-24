@@ -12,7 +12,7 @@ const Asteroid = function(pos, size)
 Asteroid.prototype.ASTEROID_IMAGE = document.getElementById('asteroid');
 Asteroid.prototype.collisionDamage = 30;
 
-Asteroid.prototype.update = function(dt)
+Asteroid.prototype.update = function(worldWidth,worldHeight)
 {
     this._spriteAngle >= 360 ? this._spriteAngle = 0 : this._spriteAngle += 0.2;
     this._rect.rotate();
@@ -25,35 +25,35 @@ Asteroid.prototype.update = function(dt)
     {
         this._rect._points.forEach(point =>
         {
-            point.x +=  WORLD_WIDTH;
+            point.x +=  worldWidth;
         })
-        this._rect._origin.x += WORLD_WIDTH;
+        this._rect._origin.x += worldWidth;
     }
-    else if (this._rect.getOrigin().x - this._rect.getSize().x/2 >= WORLD_WIDTH)
+    else if (this._rect.getOrigin().x - this._rect.getSize().x/2 >= worldWidth)
     {
         //wrap left
         this._rect._points.forEach(point =>
         {
-            point.x -= WORLD_WIDTH;
+            point.x -= worldWidth;
         })
-        this._rect.getOrigin().x -= WORLD_WIDTH;
+        this._rect.getOrigin().x -= worldWidth;
     }
 
     if(this._rect.getOrigin().y + this._rect.getSize().y/2 <= 0)
     {
         this._rect._points.forEach(point =>
         {
-            point.y += WORLD_HEIGHT;
+            point.y += worldHeight;
         })
-        this._rect.getOrigin().y += WORLD_HEIGHT;
+        this._rect.getOrigin().y += worldHeight;
     }
-    else if(this._rect.getOrigin().y - this._rect.getSize().y/2 >= WORLD_HEIGHT)
+    else if(this._rect.getOrigin().y - this._rect.getSize().y/2 >= worldHeight)
     {
         this._rect._points.forEach(point =>
         {
-            point.y -= WORLD_HEIGHT;
+            point.y -= worldHeight;
         })
-        this._rect.getOrigin().y -= WORLD_HEIGHT;
+        this._rect.getOrigin().y -= worldHeight;
     }
 }
 

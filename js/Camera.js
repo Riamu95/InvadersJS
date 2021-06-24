@@ -1,17 +1,18 @@
 class Camera
 {
-    constructor(x,y,width,height)
+    constructor(x,y,width,height,worldWidth,worldHeight)
     {   
         this._pos = new Vec2(x,y);
         this._size= new Vec2(width,height);
-        this._worldSize = new Vec2(WORLD_WIDTH,WORLD_HEIGHT);
+        this._worldSize = new Vec2(worldWidth,worldHeight);
     }
     static background = document.getElementById('background');
-    update(playerPos)
+
+    update(playerPos,canvasWidth,canvasHeight)
      {
         //dont use global variables here!!
-        this._pos.x = playerPos.x - CANVAS_WIDTH/2;
-        this._pos.y = playerPos.y - CANVAS_HEIGHT/2;
+        this._pos.x = playerPos.x - canvasWidth/2;
+        this._pos.y = playerPos.y - canvasHeight/2;
 
         if(this._pos.x <= 0 ) 
         {

@@ -13,7 +13,7 @@ const BlackHole = function(pos,size)
 
 BlackHole.prototype.BLACKHOLE_IMAGE = document.getElementById('blackhole');
 
-BlackHole.prototype.update = function(dt)
+BlackHole.prototype.update = function()
 {
     this._rect.getAngle() >= 360 ? this._rect.setAngle(0) : this._rect.addAngle(0.1);
 }
@@ -23,14 +23,14 @@ BlackHole.prototype.getRect = function()
    return  this._rect;
 }
 
-BlackHole.prototype.attract = function(origin, mass)
+BlackHole.prototype.attract = function(origin, mass, worldWidth,worldHeight)
 {
     if (Vec2.distance(this._rect.getOrigin(), origin) > this._activeDistance)  
             return [new Vec2(0,0), false];
 
     if (Vec2.distance(this._rect.getOrigin(), origin) < 100)
     {
-        let pos = BlackHole.teleport(origin);
+        let pos = BlackHole.teleport(worldWidth,worldHeight);
         return [pos, true];    
     }
     //direction of force
@@ -48,9 +48,9 @@ BlackHole.prototype.attract = function(origin, mass)
     return [this._directionalForce, false];
 }
 
-BlackHole.teleport = function(origin)
+BlackHole.teleport = function(worldWidth,worldHeight)
 {
-    return new Vec2(Math.random() * WORLD_WIDTH, Math.random() * WORLD_HEIGHT);  
+    return new Vec2(Math.random() * worldWidth, Math.random() * worldHeight);  
 }
 
 BlackHole.prototype.draw = function(ctx,cameraPos)

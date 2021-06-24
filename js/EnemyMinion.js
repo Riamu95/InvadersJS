@@ -28,7 +28,7 @@ class EnemyMinion extends Enemy {
     static collisionDamage = 10;
     static enemyMinionImage = document.getElementById("enemyMinion");
 
-    static generateFlockPoint(minions, playerPos , flockPoint, dt)
+    static generateFlockPoint(minions, playerPos , flockPoint, dt,worldWidth,worldHeight)
     {    
         let avgPos = new Vec2(0,0);
         //we know the tally of the array, remove and replace with array.length?
@@ -46,8 +46,8 @@ class EnemyMinion extends Enemy {
          // if not chasing and average flock pos is less than 50. generate new flockpoint
          if(Vec2.distance(avgPos, flockPoint) < 50) 
          { 
-             flockPoint.x = Math.random() * WORLD_WIDTH;
-             flockPoint.y = Math.random() * WORLD_HEIGHT;
+             flockPoint.x = Math.random() * worldWidth;
+             flockPoint.y = Math.random() * worldHeight;
          }
          
         minions.forEach(minion => 
@@ -65,8 +65,8 @@ class EnemyMinion extends Enemy {
             else if(Vec2.distance(avgPos, playerPos) > minion._attackDistance && minion._attack)
             {
                 //Being set for every minion, just needs to be set once
-                flockPoint.x = Math.random() * WORLD_WIDTH;
-                flockPoint.y = Math.random() * WORLD_HEIGHT;
+                flockPoint.x = Math.random() * worldWidth;
+                flockPoint.y = Math.random() * worldHeight;
                 minion._attack = false;
                 //alter weight values here
             }
