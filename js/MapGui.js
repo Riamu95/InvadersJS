@@ -39,7 +39,7 @@ class MapGui extends GuiComponent
         {
             this._activateAnimation = true;
             this._radarAnimationClock = performance.now();
-            animationManager.addAnimation(6,0.5,this._pos,"MAP",this._renderSize);
+            animationManager.addAnimation(6,0.5,this._pos,"MAP",this._renderSize,false);
         }//if radar animation activates, wait radar animation time duration
         if(this._activateAnimation && ((performance.now() - this._radarAnimationClock)/1000) >= this._radarAnimationTime)
         {
@@ -67,7 +67,7 @@ class MapGui extends GuiComponent
         ctx.restore();
     }
 
-    drawObjects(ctx,cameraPos = new Vec2(0,0), rotate, playerPos,animationManager)
+    drawObjects(ctx,cameraPos = new Vec2(0,0), rotate, playerPos,animationManager,canvasWidth,canvasHeight)
     {
         ctx.save();
         ctx.beginPath();      
@@ -83,13 +83,9 @@ class MapGui extends GuiComponent
             ctx.fillStyle  = "red";
             this._npcPos[0].forEach(bomber =>
             {
-                this.calculateNPCRadarPos(bomber.getRect.getOrigin(), playerPos,cameraPos);
-                animationManager.addAnimation(4,0.2,new Vec2(cameraPos.x + this._enemyRadarPos.x,cameraPos.y + this._enemyRadarPos.y)
-                                                ,"BOMBER", new Vec2(20,30));
-                //ctx.beginPath();
-               // ctx.arc((cameraPos.x + this._enemyRadarPos.x) - cameraPos.x, (cameraPos.y + this._enemyRadarPos.y) - cameraPos.y, 5, 0, 2 * Math.PI);
-               // ctx.fill();
-               // ctx.closePath();
+                this._enemyRadarPos = this.calculateNPCRadarPos(bomber.getRect.getOrigin(), playerPos,canvasWidth,canvasHeight);
+                animationManager.addAnimation(4,0.2,new Vec2(this._enemyRadarPos.x,this._enemyRadarPos.y)
+                                                ,"BOMBER", new Vec2(20,30),true);
             });
             
             ctx.fillStyle  = "blue";
@@ -97,55 +93,42 @@ class MapGui extends GuiComponent
             {
                 minionArray.forEach( minion => 
                 {
-                    this.calculateNPCRadarPos(minion.getRect.getOrigin(), playerPos,cameraPos);
-                    animationManager.addAnimation(4,0.2,new Vec2(cameraPos.x + this._enemyRadarPos.x,cameraPos.y + this._enemyRadarPos.y)
-                    ,"MINION", new Vec2(20,30));
-                    /*ctx.beginPath();
-                    ctx.arc((cameraPos.x + this._enemyRadarPos.x) - cameraPos.x, (cameraPos.y + this._enemyRadarPos.y) - cameraPos.y, 4, 0, 2 * Math.PI);
-                    ctx.fill();
-                    ctx.closePath();*/
+                    this._enemyRadarPos = this.calculateNPCRadarPos(minion.getRect.getOrigin(), playerPos,canvasWidth,canvasHeight);
+                    animationManager.addAnimation(4,0.2,new Vec2(this._enemyRadarPos.x,this._enemyRadarPos.y)
+                    ,"MINION", new Vec2(20,30),true);
                 });
             });
 
             ctx.fillStyle  = "yellow";
             this._npcPos[2].forEach(asteroid =>
             {
-                this.calculateNPCRadarPos(asteroid.getRect().getOrigin(), playerPos,cameraPos);
-                animationManager.addAnimation(4,0.2,new Vec2(cameraPos.x + this._enemyRadarPos.x,cameraPos.y + this._enemyRadarPos.y)
-                ,"ASTEROID", new Vec2(20,30));
-                /*ctx.beginPath();
-                ctx.arc((cameraPos.x + this._enemyRadarPos.x) - cameraPos.x, (cameraPos.y + this._enemyRadarPos.y) - cameraPos.y, 5, 0, 2 * Math.PI);
-                ctx.fill();
-                ctx.closePath();*/
+                this._enemyRadarPos = this.calculateNPCRadarPos(asteroid.getRect().getOrigin(), playerPos,canvasWidth,canvasHeight);
+                animationManager.addAnimation(4,0.2,new Vec2(this._enemyRadarPos.x,this._enemyRadarPos.y)
+                ,"ASTEROID", new Vec2(20,30),true);
             });
 
             ctx.fillStyle  = "black";
             this._npcPos[3].forEach(bh =>
             {
-                this.calculateNPCRadarPos(bh.getRect().getOrigin(), playerPos,cameraPos);
-                animationManager.addAnimation(4,0.2,new Vec2(cameraPos.x + this._enemyRadarPos.x,cameraPos.y + this._enemyRadarPos.y)
-                ,"BH", new Vec2(20,30));
-                /*ctx.beginPath();
-                ctx.arc((cameraPos.x + this._enemyRadarPos.x) - cameraPos.x, (cameraPos.y + this._enemyRadarPos.y) - cameraPos.y, 5, 0, 2 * Math.PI);
-                ctx.fill();
-                ctx.closePath();*/
+                this._enemyRadarPos = this.calculateNPCRadarPos(bh.getRect().getOrigin(), playerPos,canvasWidth,canvasHeight);
+                animationManager.addAnimation(4,0.2,new Vec2(this._enemyRadarPos.x,this._enemyRadarPos.y)
+                ,"BH", new Vec2(20,30),true);
             });
             ctx.restore();
         }
         this._render = false;
     }
 
-    calculateNPCRadarPos(enemyPos, playerPos,cameraPos)
+    calculateNPCRadarPos(enemyPos, playerPos,canvasWidth,canvasHeight)
     {
         Vec2.distance(enemyPos, playerPos) > this._radarRange ? this._scalar = this._radius 
             : this._scalar = Vec2.distance(enemyPos, playerPos)/25;
-
-            this._enemyRadarPos.x = enemyPos.x - playerPos.x;
-            this._enemyRadarPos.y = enemyPos.y - playerPos.y;
-
-            this._enemyRadarPos = Vec2.normalise(this._enemyRadarPos);
-            this._enemyRadarPos.setMagnitude =  this._scalar;
-            this._enemyRadarPos.x += (this._pos.x - cameraPos.x);
-            this._enemyRadarPos.y += (this._pos.y - cameraPos.y);
+            
+            let pos = new Vec2 (enemyPos.x - playerPos.x,enemyPos.y - playerPos.y);
+         
+            pos = Vec2.normalise(pos);
+            pos.setMagnitude =  this._scalar;
+            
+            return new Vec2(pos.x + (canvasWidth/1.1),pos.y + (canvasHeight/6));
     }
 }
