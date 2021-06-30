@@ -49,12 +49,6 @@ class MapGui extends GuiComponent
             this._renderClock = performance.now();
             this._radarReloadClock = performance.now();
         }
-        //redner objects for given time
-        /*if(this._render && (performance.now() - this._renderClock)/1000 > this._renderTime)
-        {
-            this._render = false;
-        }*/
-
     }
 
     drawMap(ctx,cameraPos = new Vec2(0,0))
