@@ -1,21 +1,19 @@
-<link rel="stylesheet" href="../CSS/Style.css">
+<link rel="stylesheet" href="../css/style.css">
 <canvas width="1920" height="1080"></canvas>
+
+<img id="MainMenuBackground" src="../Assets/background/BG.png" >
+<img id="play" src="../Assets/buttons/play.png">
+<img id="playAgain" src="../Assets/buttons/playAgain.png">
+<img id="quit" src="../Assets/buttons/unquit.png">
+<img id="Title" src="../Assets/titles/Invaders.png">
+
 <img id="background" src="../Assets/background/background.png" style = "display: none"/>
-<img id="MainMenuBackground" src="../Assets/background/BG.png" style = "display: none"/>
-<img id="playOne" src="../Assets/buttons/play.png">
-<img id="playAgainOne" src="../Assets/buttons/playAgain.png">
-<img id="playAgainTwo" src="../Assets/buttons/playAgainClicked.png">
-<img id="quitOne" src="../Assets/buttons/unquit.png">
-<img id="quitTwo" src="../Assets/buttons/quitClicked.png" >
-<img id="playTwo" src="../Assets/buttons/playClicked.png">
-<img id="Title" src="../Assets/titles/Invaders.png" style = "display: none"/>
+
 <img id="GameOver" src="../Assets/titles/GameOver.png">
+
 <img id="player" src="../Assets/ships/newplayer.png" style = "display: none"/>
 <img id="bomber" src="../Assets/ships/bomber.png" style = "display: none"/>
 <img id="enemyMinion" src="../Assets/ships/enemyMinion.png" style = "display: none"/>
-<img id="heart" src="../Assets/heart.png" style = "display: none"/>
-<img id="healthBar" src="../Assets/healthbar.png" style = "display: none"/>
-<img id="healthValue" src="../Assets/healthValue.png" style = "display: none"/>
 <img id="blackhole" src="../Assets/gameObjects/blackhole.png" style = "display: none"/>
 <img id="asteroid" src="../Assets/gameObjects/meteor.png" style = "display: none"/>
 <img id="bomberBullet" src="../Assets/weapons/bomberBullet.png" style = "display: none"/>
@@ -32,6 +30,25 @@
 <img id="autoTurret" src="../Assets/weapons/autoTurret.png" style = "display: none"/>
 <img id="shotgunAmmo" src="../Assets/weapons/shotgunAmmo.png" style = "display: none"/>
 <img id="mineAmmo" src="../Assets/weapons/mineAmmo.png" style = "display: none"/>
+
+<img id="healthGUI" src="../Assets/GUI/health.png" style = "display: none"/>
+<img id="healthValueGUI" src="../Assets/GUI/healthValueGui.png" style = "display: none"/>
+<img id="PowerUpGui" src="../Assets/GUI/PowerUpGui.png" style = "display: none"/>
+<img id="healthSymbolGui" src="../Assets/GUI/healthSymbolGUI.png" style = "display: none"/>
+<img id="fireRateGui" src="../Assets/GUI/fireRateSymbolGui.png" style = "display: none"/>
+<img id="speedGui" src="../Assets/GUI/speedSymbolGUI.png" style = "display: none"/>
+<img id="turretGui" src="../Assets/GUI/turretSymbolGUI.png" style = "display: none"/>
+<img id="leftAmmoGui" src="../Assets/GUI/leftActiveWeaponGui.png" style = "display: none"/>
+<img id="middleAmmoGui" src="../Assets/GUI/middleActiveWeaponGui.png" style = "display: none"/>
+<img id="rightAmmoGui" src="../Assets/GUI/rightActiveWeaponGUI.png" style = "display: none"/>
+<img id="nullPowerUpGui" src="../Assets/GUI/nullPowerUpGui.png" style = "display: none"/>
+<img id="activePowerUpGui" src="../Assets/GUI/activePowerUpGui.png" style = "display: none"/>
+<img id="map" src="../Assets/radarAnimation.png" style = "display: none"/>
+<img id="playerMap" src="../Assets/playerMap.png" style = "display: none"/>
+<img id="bomberRadarPing" src="../Assets/bomberRadarPing.png" style = "display: none"/>
+<img id="minionRadarPing" src="../Assets/minionRadarPing.png" style = "display: none"/>
+<img id="asteroidRadarPing" src="../Assets/asteroidRadarPing.png" style = "display: none"/>
+<img id="bhRadarPing" src="../Assets/bhRadarPing.png" style = "display: none"/>
 
 <script src="../js/Camera.js"></script>
 <script src="../js/Shape.js"></script>
@@ -55,6 +72,9 @@
 <script src="../js/PowerUp.js"></script>
 <script src="../js/Ammo.js"></script>
 <script src="../js/AutoTurret.js"></script>
+<script src="../js/GuiComponent.js"></script>
+<script src="../js/MapGui.js"></script>
+<script src="../js/guiText.js"></script>
 <script src="../js/Scene.js"></script>
 <script src="../js/StartScene.js"></script>
 <script src="../js/GameScene.js"></script>

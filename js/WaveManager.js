@@ -1,9 +1,9 @@
-const WaveManager = function()
+const WaveManager = function(worldWidth,worldHeight)
 {
     this._npcList = new Map();
     this._spawnPoints = new Map();
         //minion,flock,bomber,asteroid,black hole, power up
-    this._npcList.set(1,[5,3,5,5,1,3,10]);
+    this._npcList.set(1,[5,3,1,2,1,0,10]);
     this._npcList.set(2,[5,3,1,5,0,3,15]);
     this._npcList.set(3,[5,5,2,5,2,3,20]);
     this._npcList.set(4,[5,5,5,5,2,5,20]);
@@ -20,25 +20,25 @@ const WaveManager = function()
     this._wave = 0;
     this.index = 0;
 
-    for (let x = 0; x < WORLD_WIDTH/500; x++)
+    for (let x = 0; x < worldWidth/500; x++)
     {
         this._spawnPoints.set(this.index,[false , new Vec2(x * 500, -100)]);
         this.index++;
     }
 
-    for(let y = 0; y < WORLD_HEIGHT/500; y++)
+    for(let y = 0; y < worldHeight/500; y++)
     {
-        this._spawnPoints.set(this.index,[false , new Vec2(WORLD_WIDTH + 100, y * 500)]);
+        this._spawnPoints.set(this.index,[false , new Vec2(worldWidth + 100, y * 500)]);
         this.index++;
     }
 
-    for (let x = WORLD_WIDTH/500; x > 0; x--)
+    for (let x = worldWidth/500; x > 0; x--)
     {
-        this._spawnPoints.set(this.index,[false , new Vec2(x * 500, WORLD_HEIGHT + 100)]);
+        this._spawnPoints.set(this.index,[false , new Vec2(x * 500, worldHeight + 100)]);
         this.index++;
     }
 
-    for(let y = WORLD_HEIGHT/500; y > 0 ; y--)
+    for(let y = worldHeight/500; y > 0 ; y--)
     {
         this._spawnPoints.set(this.index,[false , new Vec2(- 100, y * 500)]);
         this.index++;

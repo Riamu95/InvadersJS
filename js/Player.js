@@ -46,6 +46,8 @@ class Player
         this._collisionDamage = 10;
     }
 
+    static playerIMG = document.getElementById('player');
+
 
     createShape()
     {
@@ -89,7 +91,7 @@ class Player
         ctx.beginPath();      
         ctx.translate(this._shape.getOrigin().x - cameraPos.x,this._shape.getOrigin().y- cameraPos.y);
         ctx.rotate(this._spriteAngle * (Math.PI/180));
-        ctx.drawImage(playerIMG,0,0,this._shape.getSize().x,this._shape.getSize().y,-this._shape.getSize().x/2,-this._shape.getSize().y/2,this._shape.getSize().x,this._shape.getSize().y);
+        ctx.drawImage(Player.playerIMG,0,0,this._shape.getSize().x,this._shape.getSize().y,-this._shape.getSize().x/2,-this._shape.getSize().y/2,this._shape.getSize().x,this._shape.getSize().y);
         ctx.closePath();
         ctx.restore();
 

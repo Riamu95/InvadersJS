@@ -40,7 +40,7 @@ Ammo.prototype.getType = function()
 }
 
 
-Ammo.prototype.update = function(timeInterval)
+Ammo.prototype.update = function(timeInterval,worldWidth,worldHedight)
 {
     if (this._active)
         this._rect.addAngle(0.2);
@@ -49,14 +49,14 @@ Ammo.prototype.update = function(timeInterval)
         if(((performance.now() - this._timer)/1000) > timeInterval)
         {
             this._active = true;
-            this.reset();
+            this.reset(worldWidth,worldHedight);
         }
     }
 }
 
-Ammo.prototype.reset = function()
+Ammo.prototype.reset = function(worldWidth,worldHedight)
 {
-    this._rect.setRect(new Vec2(Math.random()* WORLD_WIDTH, Math.random() * WORLD_HEIGHT));
+    this._rect.setRect(new Vec2(Math.random()* worldWidth, Math.random() * worldHedight));
 }
 
 Ammo.prototype.setTimer = function(val)
@@ -64,10 +64,10 @@ Ammo.prototype.setTimer = function(val)
     this._timer = val;
 }
 
-Ammo.prototype.initAmmo = function(ammunition)
+Ammo.prototype.initAmmo = function(ammunition,worldWidth,worldHeight)
 {
-    let mineAmmo = new Ammo(new Vec2(Math.random() * WORLD_WIDTH, Math.random() * WORLD_HEIGHT), new Vec2(138,153),AmmoType.MINE);
-    let shotgunAmmo = new Ammo(new Vec2(Math.random() * WORLD_WIDTH, Math.random() * WORLD_HEIGHT), new Vec2(156,152),AmmoType.SHOTGUN);
+    let mineAmmo = new Ammo(new Vec2(Math.random() * worldWidth, Math.random() * worldHeight), new Vec2(138,153),AmmoType.MINE);
+    let shotgunAmmo = new Ammo(new Vec2(Math.random() * worldWidth, Math.random() * worldHeight), new Vec2(156,152),AmmoType.SHOTGUN);
     ammunition.push(mineAmmo);
     ammunition.push(shotgunAmmo);
 }

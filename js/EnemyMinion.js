@@ -3,7 +3,7 @@ class EnemyMinion extends Enemy {
     constructor (pos,size,vel)
     {
         super(pos,size,vel);
-      
+        
         this._alignmentDistance = 50;
         this._cohesionDistance = 450;
         this._seperationDistance = 90;
@@ -26,8 +26,9 @@ class EnemyMinion extends Enemy {
         this._health = 10;
     }
     static collisionDamage = 10;
+    static enemyMinionImage = document.getElementById("enemyMinion");
 
-    static generateFlockPoint(minions, playerPos , flockPoint, dt)
+    static generateFlockPoint(minions, playerPos , flockPoint, dt,worldWidth,worldHeight)
     {    
         let avgPos = new Vec2(0,0);
         //we know the tally of the array, remove and replace with array.length?
@@ -45,8 +46,8 @@ class EnemyMinion extends Enemy {
          // if not chasing and average flock pos is less than 50. generate new flockpoint
          if(Vec2.distance(avgPos, flockPoint) < 50) 
          { 
-             flockPoint.x = Math.random() * WORLD_WIDTH;
-             flockPoint.y = Math.random() * WORLD_HEIGHT;
+             flockPoint.x = Math.random() * worldWidth;
+             flockPoint.y = Math.random() * worldHeight;
          }
          
         minions.forEach(minion => 
@@ -64,8 +65,8 @@ class EnemyMinion extends Enemy {
             else if(Vec2.distance(avgPos, playerPos) > minion._attackDistance && minion._attack)
             {
                 //Being set for every minion, just needs to be set once
-                flockPoint.x = Math.random() * WORLD_WIDTH;
-                flockPoint.y = Math.random() * WORLD_HEIGHT;
+                flockPoint.x = Math.random() * worldWidth;
+                flockPoint.y = Math.random() * worldHeight;
                 minion._attack = false;
                 //alter weight values here
             }
@@ -191,12 +192,14 @@ class EnemyMinion extends Enemy {
         return steering;
     }
 
+   
+    
     draw(ctx,cameraPos)
     {
         ctx.save();
         ctx.beginPath();
         ctx.translate(this._rect.getOrigin().x - cameraPos.x,this._rect.getOrigin().y - cameraPos.y);
-        ctx.drawImage(enemyMinionImage,0,0,this._rect.getSize().x,this._rect.getSize().y,-this._rect.getSize().x/2,-this._rect.getSize().y/2,this._rect.getSize().x,this._rect.getSize().y);
+        ctx.drawImage(EnemyMinion.enemyMinionImage,0,0,this._rect.getSize().x,this._rect.getSize().y,-this._rect.getSize().x/2,-this._rect.getSize().y/2,this._rect.getSize().x,this._rect.getSize().y);
         ctx.closePath();
         ctx.restore();
         this._rect.draw(ctx,cameraPos, this._color);

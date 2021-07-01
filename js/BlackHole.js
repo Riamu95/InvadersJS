@@ -1,7 +1,6 @@
 const BlackHole = function(pos,size)
 {
     this._rect = new Rect(pos,size);
-    BlackHole.positions.push(this._rect.getOrigin());
     this._acitve = false;
     this._activeDistance = 750;
     this._gravitationalForce = 0;
@@ -12,19 +11,26 @@ const BlackHole = function(pos,size)
     this._forceMagnitude = 0;
 }
 
-BlackHole.prototype.update = function(dt)
+BlackHole.prototype.BLACKHOLE_IMAGE = document.getElementById('blackhole');
+
+BlackHole.prototype.update = function()
 {
     this._rect.getAngle() >= 360 ? this._rect.setAngle(0) : this._rect.addAngle(0.1);
 }
 
-BlackHole.prototype.attract = function(origin, mass)
+BlackHole.prototype.getRect = function()
+{
+   return  this._rect;
+}
+
+BlackHole.prototype.attract = function(origin, mass, worldWidth,worldHeight)
 {
     if (Vec2.distance(this._rect.getOrigin(), origin) > this._activeDistance)  
             return [new Vec2(0,0), false];
 
     if (Vec2.distance(this._rect.getOrigin(), origin) < 100)
     {
-        let pos = BlackHole.teleport(origin);
+        let pos = BlackHole.teleport(worldWidth,worldHeight);
         return [pos, true];    
     }
     //direction of force
@@ -42,25 +48,10 @@ BlackHole.prototype.attract = function(origin, mass)
     return [this._directionalForce, false];
 }
 
-BlackHole.teleport = function(origin)
+BlackHole.teleport = function(worldWidth,worldHeight)
 {
-    let pos = new Vec2(Math.random() * WORLD_WIDTH, Math.random() * WORLD_HEIGHT);
-
-   /* for( pos of BlackHole.positions)
-    {
-        if((rect._origin.x - rect._size.x / 2 > this._origin.x + this._size.x / 2 ||
-            rect._origin.x + rect._size.x / 2 < this._origin.x - this._size.x / 2 ||
-            rect._origin.y - rect._size.y / 2 > this._origin.y + this._size.y / 2 ||
-            rect._origin.y + rect._size.y / 2 < this._origin.y - this._size.y / 2))
-        {
-            BlackHole.teleport();
-        }
-    }*/
-
-    return pos;
+    return new Vec2(Math.random() * worldWidth, Math.random() * worldHeight);  
 }
-
-BlackHole.positions = [];
 
 BlackHole.prototype.draw = function(ctx,cameraPos)
 {
@@ -68,7 +59,7 @@ BlackHole.prototype.draw = function(ctx,cameraPos)
     ctx.beginPath();      
     ctx.translate(this._rect.getOrigin().x - cameraPos.x,this._rect.getOrigin().y - cameraPos.y);
     ctx.rotate(Math.PI/180 * this._rect.getAngle());
-    ctx.drawImage(BLACKHOLE_IMAGE,0,0,this._rect.getSize().x,this._rect.getSize().y,-this._rect.getSize().x/2,-this._rect.getSize().y/2,this._rect.getSize().x,this._rect.getSize().y);
+    ctx.drawImage(BlackHole.prototype.BLACKHOLE_IMAGE,0,0,this._rect.getSize().x,this._rect.getSize().y,-this._rect.getSize().x/2,-this._rect.getSize().y/2,this._rect.getSize().x,this._rect.getSize().y);
     ctx.closePath();
     ctx.restore();
 }
