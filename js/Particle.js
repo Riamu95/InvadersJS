@@ -5,6 +5,7 @@ class Particle
         this._beginSize = new Vec2(particle.size.x,particle.size.y);
         this._rect =  new Rect(particle.pos,particle.size);
         this._velocity =  new Vec2(particle.velocity.x, particle.velocity.y);
+        this._directionalVelocity = new Vec2(particle.dirVel.x, particle.dirVel.y);
         this._colourEnd = particle.colourEnd;
         this._colourBegin =  [particle.colourBegin[0],particle.colourBegin[1],particle.colourBegin[2],particle.colourBegin[3]];
         this._colour =  [particle.colourBegin[0],particle.colourBegin[1],particle.colourBegin[2],particle.colourBegin[3]];
@@ -12,8 +13,6 @@ class Particle
         this._remainingLife = particle.remainingLife;
         this._ttl = particle.ttl;
         this._totalLifeTime = particle.totalLifeTime;
-        //this._beginAngle = particle.beginAngle;
-       // this._endAngle = particle.endAngle;
         this._angle = particle.angle;
         this._maxSpeed = particle.maxSpeed;
         this._speed = this._maxSpeed;
@@ -106,13 +105,21 @@ class Particle
 
     setVelocity(dt)
     {   
-        this._velocity.x = Math.cos(this._angle  * Math.PI / 180);
-        this._velocity.y = Math.sin(this._angle  * Math.PI / 180);
+       // this._velocity.x = Math.cos(this._angle  * Math.PI / 180);
+       // this._velocity.y = Math.sin(this._angle  * Math.PI / 180);
+        this._velocity.x = this._directionalVelocity.x;
+        this._velocity.y = this._directionalVelocity.y;
 
         this._velocity.setMagnitude = this._speed;
 
         this._velocity.x = this._velocity.x * dt;
         this._velocity.y = this._velocity.y * dt;
+    }
+
+    setDirectionalVelocity(val)
+    {   
+        this._directionalVelocity.x = val.x;
+        this._directionalVelocity.y = val.y;
     }
 
     setColourBegin(val)

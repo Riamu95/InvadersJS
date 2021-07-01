@@ -313,19 +313,16 @@ class GameScene extends Scene
 
         this.map.update(this._animationManager,this._camera.getPos,this._canvasWidth,this._canvasHeight);
 
-        if(Vec2.length(this._player.getVelocity()) > 0.1)
+       if(Vec2.length(this._player.getVelocity()) > 0.1)
         {
             while(((performance.now() - this.particleTimer)/1000) > 0.1)
             {
-                for(let i = 0; i < 10; i++)
-                {
-                    let anglePercentage = i/10;
-                    let angle = Lerp.LerpFloat(75,105,anglePercentage);
-        
-                    let temp = new ParticleProps(new Vec2(this._player.getShape.getOrigin().x,this._player.getShape.getOrigin().y), new Vec2(15,15),new Vec2(0,0), 
-                                            [226, 40, 34, 1],
-                                            [255,255,0,0],
-                                            true,1,angle,Math.random() * 0.1);
+                for(let i = 0; i < 20; i++)
+                {  
+                    let temp = new ParticleProps(new Vec2(this._player.getShape.getOrigin().x,this._player.getShape.getOrigin().y),
+                                                 new Vec2(15,15),new Vec2(0,0),new Vec2((this._player.getDirection().x +  Math.cos((Math.random() *360 )  * Math.PI / 180)) * -1, this._player.getDirection().y +  Math.sin((Math.random() * 360)  * Math.PI / 180) * -1), 
+                                                [226, 40, 34, 1], [255,255,0,0],
+                                                true,1,0,Math.random() * 0.1);
                     this.particleSystem.emit(temp);
                 }
                  this.particleTimer = performance.now();

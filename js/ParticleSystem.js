@@ -3,14 +3,15 @@ const ParticleProps = function(...properties)
     this.pos = properties[0],
     this.size =  properties[1],
     this.velocity = properties[2],
-    this.colourBegin = properties[3],
-    this.colourEnd = properties[4],
-    this.active = properties[5],
-    this.ttl = properties[6],
-    this.totalLifeTime = properties[6],
+    this.dirVel = properties[3],
+    this.colourBegin = properties[4],
+    this.colourEnd = properties[5],
+    this.active = properties[6],
+    this.ttl = properties[7],
+    this.totalLifeTime = properties[7],
     this.remainingLife = 0,
-    this.angle = properties[7],
-    this.maxSpeed = properties[8];
+    this.angle = properties[8],
+    this.maxSpeed = properties[9];
 }
 
 class ParticleSystem
@@ -27,7 +28,7 @@ class ParticleSystem
     {
         for(let i = 0; i < ParticleSystem.particleCount; i++)
         {
-            this._particles.push(new Particle(new ParticleProps(new Vec2(0,0), new Vec2(15,15),
+            this._particles.push(new Particle(new ParticleProps(new Vec2(0,0), new Vec2(15,15),new Vec2(0,0),
             new Vec2(0,0), [0,0,0, 0],[0, 0, 0,0],false,0,0,0)));
         }
     }
@@ -43,6 +44,7 @@ class ParticleSystem
         this._particles[ParticleSystem.currentIndex].setColour();
         this._particles[ParticleSystem.currentIndex].setAngle(particleProp.angle);
         this._particles[ParticleSystem.currentIndex].setMaxSpeed(particleProp.maxSpeed);
+        this._particles[ParticleSystem.currentIndex].setDirectionalVelocity(particleProp.dirVel);
 
         ParticleSystem.currentIndex > 0 ?  ParticleSystem.currentIndex = --ParticleSystem.currentIndex % this._particles.length :  ParticleSystem.currentIndex = this._particles.length - 1;
     }
@@ -89,6 +91,7 @@ class ParticleSystem
 
     render(ctx, cameraPos)
     {
+        ctx.save();
        for(let p =  this._particles.length - 1; p >= 0; p--)
        {
             if(!this._particles[p]._active)
@@ -109,6 +112,7 @@ class ParticleSystem
 
             ctx.fill();
             ctx.closePath();
-       }   
+       }  
+       ctx.restore(); 
     }
 }
