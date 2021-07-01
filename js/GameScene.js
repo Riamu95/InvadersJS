@@ -29,8 +29,8 @@ class GameScene extends Scene
         this.map.addNPCPos(this._blackHoles);
         this._playerPowerUps = [];
 
-      
-        
+        this.particleSystem = new ParticleSystem();
+        this.particleTimer = 0;
         this._minionSpawnXOffset = 250;
         this._minionSpawnYOffset = 138;
         this._spawnPoints = 37;
@@ -312,6 +312,27 @@ class GameScene extends Scene
         }
 
         this.map.update(this._animationManager,this._camera.getPos,this._canvasWidth,this._canvasHeight);
+
+        if(Vec2.length(this._player.getVelocity()) > 0.1)
+        {
+            while(((performance.now() - this.particleTimer)/1000) > 0.1)
+            {
+                for(let i = 0; i < 10; i++)
+                {
+                    let anglePercentage = i/10;
+                    let angle = Lerp.LerpFloat(75,105,anglePercentage);
+        
+                    let temp = new ParticleProps(new Vec2(this._player.getShape.getOrigin().x,this._player.getShape.getOrigin().y), new Vec2(15,15),new Vec2(0,0), 
+                                            [226, 40, 34, 1],
+                                            [255,255,0,0],
+                                            true,1,angle,Math.random() * 0.1);
+                    this.particleSystem.emit(temp);
+                }
+                 this.particleTimer = performance.now();
+            }
+        }
+
+        this.particleSystem.update(dt);
 
         this.inputHandling(dt);
         this.collisions();    
@@ -1076,6 +1097,8 @@ class GameScene extends Scene
             } 
         };
 
+        this.particleSystem.render(GameScene._ctx,this._camera.getPos);
+        
         this._player.draw(GameScene._ctx,this._camera.getPos);
 
         this._player.getAutoTurret().getActive() && this._player.getAutoTurret().draw(GameScene._ctx,this._camera.getPos);

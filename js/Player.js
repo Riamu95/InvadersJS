@@ -136,6 +136,11 @@ class Player
         return this._mass;
     }
 
+    getVelocity()
+    {
+        return this._velocity;
+    }
+
     get getMaxBulletSpeed()
     {
         return this._maxbulletSpeed;
