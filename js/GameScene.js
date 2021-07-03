@@ -47,6 +47,7 @@ class GameScene extends Scene
         this.loadGui();
         GameScene._ctx.font = '24px serif';
         GameScene._ctx.fillStyle = 'blue';
+        PowerUp.prototype.setWorldSize(new Vec2(this.worldWidth,this.worldHeight));
 
         document.addEventListener('keydown', (event) =>
         { 
@@ -76,9 +77,9 @@ class GameScene extends Scene
         
         this.gui.set("healthValue",[new GuiComponent("healthValueGUI",new Vec2(this.gui.get("health")[0].getPos().x + 43,this.gui.get("health")[0].getPos().y),new Vec2(222,59),true)]);
         
-        this.gui.set("PowerUp",[new GuiComponent("PowerUpGui",new Vec2(this._camera.getSize.x/1.09,this._camera.getSize.y/1.25),new Vec2(253,138),true)]);
+        this.gui.set("PowerUp",[new GuiComponent("PowerUpGui",new Vec2(this._camera.getSize.x/1.09,this._camera.getSize.y/1.1),new Vec2(253,138),true)]);
 
-        this.gui.set("activePowerUp",[new GuiComponent("activePowerUpGui",new Vec2(this._camera.getSize.x/1.085,this._camera.getSize.y/1.235),new Vec2(253,138),false)]);
+        this.gui.set("activePowerUp",[new GuiComponent("activePowerUpGui",new Vec2(this._camera.getSize.x/1.085,this._camera.getSize.y/1.085),new Vec2(253,138),false)]);
        
         this.gui.set("healthSymbol",[new GuiComponent("healthSymbolGui",new Vec2(this.worldWidth * 2,this.worldHeight * 2),new Vec2(110,110),false),
                                                     new GuiComponent("healthSymbolGui",new Vec2(this.worldWidth * 2,this.worldHeight * 2),new Vec2(110,110),false)]);
@@ -92,12 +93,12 @@ class GameScene extends Scene
         this.gui.set("turret",[new GuiComponent("turretGui",new Vec2(this.worldWidth * 2, this.worldHeight * 2),new Vec2(110,110),false),
                                              new GuiComponent("turretGui",new Vec2(this.worldWidth * 2, this.worldHeight * 2),new Vec2(110,110),false)]);
         
-        this.gui.set("nullPowerUp",[new GuiComponent("nullPowerUpGui",new Vec2(this._camera.getSize.x/1.035,this._camera.getSize.y/1.215),new Vec2(378,128),true),
-                                             new GuiComponent("nullPowerUpGui",new Vec2(this._camera.getSize.x/0.975,this._camera.getSize.y/1.215),new Vec2(378,128),true)]);
+        this.gui.set("nullPowerUp",[new GuiComponent("nullPowerUpGui",new Vec2(this._camera.getSize.x/1.035,this._camera.getSize.y/1.07),new Vec2(378,128),true),
+                                             new GuiComponent("nullPowerUpGui",new Vec2(this._camera.getSize.x/0.975,this._camera.getSize.y/1.07),new Vec2(378,128),true)]);
         
-        this.gui.set("ammo",[new GuiComponent("leftAmmoGui",new Vec2(this._camera.getSize.x/9.5,this._camera.getSize.y/1.25),new Vec2(378,128),true),
-                                new GuiComponent("middleAmmoGui",new Vec2(this._camera.getSize.x/9.5,this._camera.getSize.y/1.25),new Vec2(378,128),false),
-                                new GuiComponent("rightAmmoGui",new Vec2(this._camera.getSize.x/9.5,this._camera.getSize.y/1.25),new Vec2(378,128),false)]);
+        this.gui.set("ammo",[new GuiComponent("leftAmmoGui",new Vec2(this._camera.getSize.x/9.5,this._camera.getSize.y/1.1),new Vec2(378,128),true),
+                                new GuiComponent("middleAmmoGui",new Vec2(this._camera.getSize.x/9.5,this._camera.getSize.y/1.1),new Vec2(378,128),false),
+                                new GuiComponent("rightAmmoGui",new Vec2(this._camera.getSize.x/9.5,this._camera.getSize.y/1.1),new Vec2(378,128),false)]);
     }
 
     spawn()
@@ -300,7 +301,7 @@ class GameScene extends Scene
                         {
                             if(powerUpSymbol.getActive())
                             {
-                                powerUpSymbol.setPos(new Vec2(this._camera.getSize.x/1.13,this._camera.getSize.y/1.255));
+                                powerUpSymbol.setPos(new Vec2(this._camera.getSize.x/1.13,this._camera.getSize.y/1.105));
                                 this._playerPowerUps.shift();
                                 this.gui.get("nullPowerUp")[1].setActive(true);
                             }
@@ -329,7 +330,7 @@ class GameScene extends Scene
                     let temp = new ParticleProps(new Vec2(this._player.getShape.getOrigin().x,this._player.getShape.getOrigin().y),
                                                  new Vec2(15,15),new Vec2(0,0), new Vec2((this._player.getDirection().x + angleX) * -1, (this._player.getDirection().y +  angleY) * -1),
                                                 [226, 40, 34, 1], [255,255,0,0],
-                                                true,0.5,0, Math.random() * 0.1);
+                                                true,1,0, Math.random() * 0.05);
                     this.particleSystem.emit(temp);
                 }
                  this.particleTimer = performance.now();
@@ -517,8 +518,8 @@ class GameScene extends Scene
                     this._playerPowerUps.pop();
                 }
                 //left and right power up gui positions
-                let powerupGuiLeft = new Vec2(this._camera.getSize.x/1.13,this._camera.getSize.y/1.255);
-                let powerupGuiRight = new Vec2(this._camera.getSize.x/1.05,this._camera.getSize.y/1.255);
+                let powerupGuiLeft = new Vec2(this._camera.getSize.x/1.13,this._camera.getSize.y/1.105);
+                let powerupGuiRight = new Vec2(this._camera.getSize.x/1.0525,this._camera.getSize.y/1.105);
                 let index = 0;
 
                 switch(this.powerUps[i].getType()) 
@@ -1141,9 +1142,9 @@ class GameScene extends Scene
         this.map.drawObjects(GameScene._ctx,this._camera.getPos,this._player.getSpriteAngle,this._player.getShape.getOrigin(),this._animationManager, this._canvasWidth, this._canvasHeight);
 
        
-       GameScene._ctx.fillText('INF',((this._camera.getPos.x + this._camera.getSize.x/32) - this._camera.getPos.x),((this._camera.getPos.y + this._camera.getSize.y/1.183) - this._camera.getPos.y));
-       GameScene._ctx.fillText(this._player.getWeapons()[1].getAmmoCount(),((this._camera.getPos.x + this._camera.getSize.x/10) - this._camera.getPos.x),((this._camera.getPos.y + this._camera.getSize.y/1.183) - this._camera.getPos.y));
-       GameScene._ctx.fillText(this._player.getWeapons()[2].getAmmoCount(),((this._camera.getPos.x + this._camera.getSize.x/5.9) - this._camera.getPos.x),((this._camera.getPos.y + this._camera.getSize.y/1.183) - this._camera.getPos.y));
+       GameScene._ctx.fillText('INF',((this._camera.getPos.x + this._camera.getSize.x/32) - this._camera.getPos.x),((this._camera.getPos.y + this._camera.getSize.y/1.043) - this._camera.getPos.y));
+       GameScene._ctx.fillText(this._player.getWeapons()[1].getAmmoCount(),((this._camera.getPos.x + this._camera.getSize.x/10) - this._camera.getPos.x),((this._camera.getPos.y + this._camera.getSize.y/1.043) - this._camera.getPos.y));
+       GameScene._ctx.fillText(this._player.getWeapons()[2].getAmmoCount(),((this._camera.getPos.x + this._camera.getSize.x/5.9) - this._camera.getPos.x),((this._camera.getPos.y + this._camera.getSize.y/1.043) - this._camera.getPos.y));
     
        GameScene._ctx.fillStyle = 'blue';
        GameScene._ctx.fillText(`fps : ${this.fps }`, (this._camera.getPos.x + 100) - this._camera.getPos.x,(this._camera.getPos.y + 50) - this._camera.getPos.y);

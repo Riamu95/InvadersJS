@@ -105,7 +105,7 @@ AutoTurret.prototype.draw = function(ctx,cameraPos)
     ctx.beginPath();      
     ctx.translate(this._rect.getOrigin().x - cameraPos.x,this._rect.getOrigin().y - cameraPos.y);
     ctx.rotate(Math.PI/180 * this._rect.getAngle());
-    ctx.drawImage(AutoTurret.prototype.playerBulletImage,0,0,this._rect.getSize().x,this._rect.getSize().y,-this._rect.getSize().x/2,-this._rect.getSize().y/2,this._rect.getSize().x,this._rect.getSize().y);
+    ctx.drawImage(this._turretImage,0,0,this._rect.getSize().x,this._rect.getSize().y,-this._rect.getSize().x/2,-this._rect.getSize().y/2,this._rect.getSize().x,this._rect.getSize().y);
     ctx.closePath();
     ctx.restore();
 
@@ -113,7 +113,7 @@ AutoTurret.prototype.draw = function(ctx,cameraPos)
     for(let value of this._bullets.values())
     {
         if (value[1] == true)
-            value[0].draw(ctx,cameraPos,PLAYER_BULLET_IMAGE); 
+            value[0].draw(ctx,cameraPos,AutoTurret.prototype.playerBulletImage); 
         
     }     
 }
