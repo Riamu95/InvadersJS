@@ -318,23 +318,25 @@ class GameScene extends Scene
 
         this.map.update(this._animationManager,this._camera.getPos,this._canvasWidth,this._canvasHeight);
 
-       if(Vec2.length(this._player.getVelocity()) > 0.1)
+        if(Vec2.length(this._player.getVelocity()) > 0.1)
         {
             while(((performance.now() - this.particleTimer)/1000) > 0.1)
             {
-                for(let i = 0; i < 10; i++)
+                for(let i = 0; i < 100; i++)
                 {  
-                    let angle = Math.random() * (90 - (-90)) + (-90);
+                    let angle = this._player.getSpriteAngle;
+                    let angleOffset = Math.random() * (45 - (-45)) + (-45);
+                    
+                    angle += angleOffset;
 
-                    let angleX = Math.cos(angle  * (Math.PI / 180));
-                    let angleY = Math.sin(angle  * (Math.PI / 180));
-
+                    let direction = new Vec2( (Math.cos(angle  * (Math.PI / 180))) * -1, (Math.sin(angle  * (Math.PI / 180))) * -1);
                     let pos = new Vec2(this._player.getShape.getPoints()[0].x + this._player.getShape.getPoints()[5].x, this._player.getShape.getPoints()[0].y + this._player.getShape.getPoints()[5].y);
-                    pos.x  /= 2;
+                    
+                    pos.x /= 2;
                     pos.y /= 2;
 
-                    let temp = new ParticleProps(pos, new Vec2(15,15), new Vec2(0,0), new Vec2((this._player.getDirection().x + angleX) * -1, (this._player.getDirection().y +  angleY) * -1),
-                                                [226, 40, 34, 1], [255,255,0,0],  true , 0.3 , 0 , Math.random() * 0.05);
+                    let temp = new ParticleProps(pos, new Vec2(15,15), new Vec2(0,0), new Vec2(direction.x,direction.y),
+                                                [226, 40, 34, 1], [255,255,0,0],  true , 0.5 , 0 , Math.random() * 0.3);
                     this.particleSystem.emit(temp);
                 }
                  this.particleTimer = performance.now();
