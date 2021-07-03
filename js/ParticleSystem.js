@@ -30,7 +30,7 @@ class ParticleSystem
         for(let i = 0; i < ParticleSystem.particleCount; i++)
         {
             this._particles.push(new Particle(new ParticleProps(new Vec2(0,0), new Vec2(15,15),new Vec2(0,0),
-            new Vec2(0,0), [0,0,0, 0],[0, 0, 0,0],false,0,0,0)));
+            new Vec2(0,0), [0,0,0],[0, 0, 0],false,0,0,0)));
         }
     }
 
@@ -80,10 +80,6 @@ class ParticleSystem
         this._particles[i].setVelocity(dt);
         
         this._particles[i].getRect().updatePoints(new Vec2(this._particles[i].getVelocity().x, this._particles[i].getVelocity().y));
-       
-        //this._particles[i].getRect().setSize(Lerp.LerpVec(this._particles[i].getBeginSize(), new Vec2(0,0), value));
-        //this._particles[i].getRect().setSizes();
-        //console.log( this._particles[i].getRect().getSize());
 
         this._particles[i].getColour()[0] = Lerp.LerpFloat(this._particles[i].getColourBegin()[0], this._particles[i].getColourEnd()[0], value);
         this._particles[i].getColour()[1] = Lerp.LerpFloat(this._particles[i].getColourBegin()[1], this._particles[i].getColourEnd()[1], value);
@@ -112,9 +108,8 @@ class ParticleSystem
 
                 ctx.lineTo(this._particles[p].getPoints()[0].x  - cameraPos.x, this._particles[p].getPoints()[0].y - cameraPos.y);
 
-                ctx.fillStyle = `rgba(${this._particles[p]._colour[0]}, ${this._particles[p]._colour[1]},${this._particles[p]._colour[2]}, ${this._particles[p].getOpacity()})`;
+                ctx.fillStyle = `rgba(${this._particles[p].getColour()[0]}, ${this._particles[p].getColour()[1]},${this._particles[p].getColour()[2]}, ${this._particles[p].getOpacity()})`;
                 ctx.fill();
-               // ctx.fill([this._particles[p]._colour[0]}, ${this._particles[p]._colour[1]},${this._particles[p]._colour[2]}, ${this._particles[p]._colour[3]]);
                 ctx.closePath();
         }  
         

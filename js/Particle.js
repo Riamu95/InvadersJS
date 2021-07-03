@@ -2,13 +2,13 @@ class Particle
 {
     constructor(particle)
     {
-        this._beginSize = new Vec2(particle.size.x,particle.size.y);
+        //this._beginSize = new Vec2(particle.size.x,particle.size.y);
         this._rect =  new Rect(particle.pos,particle.size);
         this._velocity =  new Vec2(particle.velocity.x, particle.velocity.y);
         this._directionalVelocity = new Vec2(particle.dirVel.x, particle.dirVel.y);
         this._colourEnd = particle.colourEnd;
-        this._colourBegin =  [particle.colourBegin[0],particle.colourBegin[1],particle.colourBegin[2],particle.colourBegin[3]];
-        this._colour =  [particle.colourBegin[0],particle.colourBegin[1],particle.colourBegin[2],particle.colourBegin[3]];
+        this._colourBegin =  [particle.colourBegin[0],particle.colourBegin[1],particle.colourBegin[2]];
+        this._colour =  [particle.colourBegin[0],particle.colourBegin[1],particle.colourBegin[2]];
         this._active = particle.active;
         this._remainingLife = particle.remainingLife;
         this._ttl = particle.ttl;
@@ -27,7 +27,7 @@ class Particle
 
     getOpacity()
     {
-        return this.opacity;
+        return this._opacity;
     }
 
     setOpacity(val)
@@ -151,7 +151,6 @@ class Particle
         this._colourBegin[0] = val[0];
         this._colourBegin[1] = val[1];
         this._colourBegin[2] = val[2];
-        this._colourBegin[3] = val[3];
     }
 
     setColour()
@@ -159,7 +158,6 @@ class Particle
         this._colour[0] = this._colourBegin[0];
         this._colour[1] = this._colourBegin[1];
         this._colour[2] = this._colourBegin[2];
-        this._colour[3] = this._colourBegin[3];
     }
 
     setColourEnd(val)
@@ -167,7 +165,6 @@ class Particle
         this._colourEnd[0] = val[0];
         this._colourEnd[1] = val[1];
         this._colourEnd[2] = val[2];
-        this._colourEnd[3] = val[3];
     }
 
     setTTl(val)
