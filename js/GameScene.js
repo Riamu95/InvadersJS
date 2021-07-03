@@ -34,6 +34,9 @@ class GameScene extends Scene
         this._minionSpawnXOffset = 250;
         this._minionSpawnYOffset = 138;
         this._spawnPoints = 37;
+
+        this.fps = 0;
+
         this.init();
     }
      
@@ -166,6 +169,8 @@ class GameScene extends Scene
 
     update(dt)
     {
+        this.fps  = 1000 / dt;
+
         for( let i = 0; i < this._player.getWeapons().length; i++)
         {
             this._player.getWeapons()[i].update(dt);
@@ -215,8 +220,7 @@ class GameScene extends Scene
             a.update(this._waveManager.getAmmoIntervalTimer(),this.worldWidth,this.worldHeight);
         });
 
-        this._player.getAutoTurret().getActive() &&  this._player.getAutoTurret().update(dt);
-           
+        this._player.getAutoTurret().getActive() &&  this._player.getAutoTurret().update(dt);   
 
         /* this._asteroids update */
         this._asteroids.forEach(ast =>
@@ -317,12 +321,15 @@ class GameScene extends Scene
         {
             while(((performance.now() - this.particleTimer)/1000) > 0.1)
             {
-                for(let i = 0; i < 20; i++)
+                for(let i = 0; i < 10; i++)
                 {  
+                    let angle = Math.random() * (180 - (-180)) + (-180);
+                    let angleX = Math.cos(angle  * (Math.PI / 180));
+                    let angleY = Math.sin(angle  * (Math.PI / 180));
                     let temp = new ParticleProps(new Vec2(this._player.getShape.getOrigin().x,this._player.getShape.getOrigin().y),
-                                                 new Vec2(15,15),new Vec2(0,0),new Vec2((this._player.getDirection().x +  Math.cos((Math.random() *360 )  * Math.PI / 180)) * -1, this._player.getDirection().y +  Math.sin((Math.random() * 360)  * Math.PI / 180) * -1), 
+                                                 new Vec2(15,15),new Vec2(0,0), new Vec2((this._player.getDirection().x + angleX) * -1, (this._player.getDirection().y +  angleY) * -1),
                                                 [226, 40, 34, 1], [255,255,0,0],
-                                                true,1,0,Math.random() * 0.1);
+                                                true,0.5,0, Math.random() * 0.1);
                     this.particleSystem.emit(temp);
                 }
                  this.particleTimer = performance.now();
@@ -1137,6 +1144,9 @@ class GameScene extends Scene
        GameScene._ctx.fillText('INF',((this._camera.getPos.x + this._camera.getSize.x/32) - this._camera.getPos.x),((this._camera.getPos.y + this._camera.getSize.y/1.183) - this._camera.getPos.y));
        GameScene._ctx.fillText(this._player.getWeapons()[1].getAmmoCount(),((this._camera.getPos.x + this._camera.getSize.x/10) - this._camera.getPos.x),((this._camera.getPos.y + this._camera.getSize.y/1.183) - this._camera.getPos.y));
        GameScene._ctx.fillText(this._player.getWeapons()[2].getAmmoCount(),((this._camera.getPos.x + this._camera.getSize.x/5.9) - this._camera.getPos.x),((this._camera.getPos.y + this._camera.getSize.y/1.183) - this._camera.getPos.y));
+    
+       GameScene._ctx.fillStyle = 'blue';
+       GameScene._ctx.fillText(`fps : ${this.fps }`, (this._camera.getPos.x + 100) - this._camera.getPos.x,(this._camera.getPos.y + 50) - this._camera.getPos.y);
     }
 
     NextScene()

@@ -120,6 +120,8 @@ class Particle
     {   
         this._directionalVelocity.x = val.x;
         this._directionalVelocity.y = val.y;
+
+        this._directionalVelocity = Vec2.normalise( this._directionalVelocity);
     }
 
     setColourBegin(val)

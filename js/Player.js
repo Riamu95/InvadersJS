@@ -115,12 +115,12 @@ class Player
         this._direction.x = Math.cos(this._spriteAngle  * Math.PI / 180);
         this._direction.y = Math.sin(this._spriteAngle  * Math.PI / 180);
 
-       // this._direction.setMagnitude = this._speed;
+        this._direction.setMagnitude = this._speed;
 
         this._acceleration.x += this._direction.x;
         this._acceleration.y += this._direction.y;
 
-        this._acceleration.setMagnitude = this._speed;
+        //this._acceleration.setMagnitude = this._speed;
         
         this._velocity.x =  this._acceleration.x * dt;
         this._velocity.y = this._acceleration.y * dt;
