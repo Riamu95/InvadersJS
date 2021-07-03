@@ -21,8 +21,8 @@ class ParticleSystem
         this._particles = [];
         this.init();
     }
-    static particleCount = 1000;
-    static currentIndex = 999;
+    static particleCount = 10000;
+    static currentIndex = 9999;
 
     init()
     {
@@ -86,33 +86,36 @@ class ParticleSystem
         this._particles[i].getColour()[1] = Lerp.LerpFloat(this._particles[i].getColourBegin()[1], this._particles[i].getColourEnd()[1], value);
         this._particles[i].getColour()[2] = Lerp.LerpFloat(this._particles[i].getColourBegin()[2], this._particles[i].getColourEnd()[2], value);
         this._particles[i].getColour()[3] = Lerp.LerpFloat(this._particles[i].getColourBegin()[3], 0, value);
-        
+        this._particles[i].getRect().rotate();
     }
 
     render(ctx, cameraPos)
     {
         ctx.save();
-       for(let p =  this._particles.length - 1; p >= 0; p--)
-       {
-            if(!this._particles[p]._active)
-                 continue;
+        for(let p =  this._particles.length - 1; p >= 0; p--)
+        {
+                if(!this._particles[p]._active)
+                    continue;
 
-            ctx.beginPath();
-            ctx.fillStyle = `rgba(${this._particles[p]._colour[0]}, ${this._particles[p]._colour[1]},${this._particles[p]._colour[2]}, ${this._particles[p]._colour[3]})`;
-    
-            this._particles[p].getRect().rotate();
-            ctx.moveTo(this._particles[p].getPoints()[0].x - cameraPos.x , this._particles[p].getPoints()[0].y - cameraPos.y);
-        
-            for( let i = 1; i < this._particles[p].getPoints().length; i++)
-            {
-                ctx.lineTo(this._particles[p].getPoints()[i].x - cameraPos.x, this._particles[p].getPoints()[i].y - cameraPos.y);
-            }
+                ctx.beginPath();
+               // ctx.fillStyle = `rgba(${this._particles[p]._colour[0]}, ${this._particles[p]._colour[1]},${this._particles[p]._colour[2]}, ${this._particles[p]._colour[3]})`;
+               // ctx.fillRect(this._particles[p].getRect().getOrigin().x - cameraPos.x,this._particles[p].getRect().getOrigin().y - cameraPos.y,this._particles[p].getRect().getSize().x,this._particles[p].getRect().getSize().y);
+                ctx.moveTo(this._particles[p].getPoints()[0].x - cameraPos.x , this._particles[p].getPoints()[0].y - cameraPos.y);
+            
+                for( let i = 1; i < this._particles[p].getPoints().length; i++)
+                {
+                    ctx.lineTo(this._particles[p].getPoints()[i].x - cameraPos.x, this._particles[p].getPoints()[i].y - cameraPos.y);
+                }
 
-            ctx.lineTo(this._particles[p].getPoints()[0].x  - cameraPos.x, this._particles[p].getPoints()[0].y - cameraPos.y);
+                ctx.lineTo(this._particles[p].getPoints()[0].x  - cameraPos.x, this._particles[p].getPoints()[0].y - cameraPos.y);
 
-            ctx.fill();
-            ctx.closePath();
-       }  
-       ctx.restore(); 
+                ctx.fillStyle = `rgba(${this._particles[p]._colour[0]}, ${this._particles[p]._colour[1]},${this._particles[p]._colour[2]}, ${this._particles[p]._colour[3]})`;
+                ctx.fill();
+               // ctx.fill([this._particles[p]._colour[0]}, ${this._particles[p]._colour[1]},${this._particles[p]._colour[2]}, ${this._particles[p]._colour[3]]);
+                ctx.closePath();
+        }  
+        ctx.restore(); 
     }
+
+
 }

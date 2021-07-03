@@ -324,13 +324,17 @@ class GameScene extends Scene
             {
                 for(let i = 0; i < 10; i++)
                 {  
-                    let angle = Math.random() * (180 - (-180)) + (-180);
+                    let angle = Math.random() * (90 - (-90)) + (-90);
+
                     let angleX = Math.cos(angle  * (Math.PI / 180));
                     let angleY = Math.sin(angle  * (Math.PI / 180));
-                    let temp = new ParticleProps(new Vec2(this._player.getShape.getOrigin().x,this._player.getShape.getOrigin().y),
-                                                 new Vec2(15,15),new Vec2(0,0), new Vec2((this._player.getDirection().x + angleX) * -1, (this._player.getDirection().y +  angleY) * -1),
-                                                [226, 40, 34, 1], [255,255,0,0],
-                                                true,1,0, Math.random() * 0.05);
+
+                    let pos = new Vec2(this._player.getShape.getPoints()[0].x + this._player.getShape.getPoints()[5].x, this._player.getShape.getPoints()[0].y + this._player.getShape.getPoints()[5].y);
+                    pos.x  /= 2;
+                    pos.y /= 2;
+
+                    let temp = new ParticleProps(pos, new Vec2(15,15), new Vec2(0,0), new Vec2((this._player.getDirection().x + angleX) * -1, (this._player.getDirection().y +  angleY) * -1),
+                                                [226, 40, 34, 1], [255,255,0,0],  true , 0.3 , 0 , Math.random() * 0.05);
                     this.particleSystem.emit(temp);
                 }
                  this.particleTimer = performance.now();
