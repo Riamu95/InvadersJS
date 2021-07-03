@@ -35,6 +35,11 @@ class GameScene extends Scene
         this._minionSpawnYOffset = 138;
         this._spawnPoints = 37;
 
+
+        this.engineBeginColour = [226, 40, 34];
+        this.engineEndColour = [255,255,0];
+        this.engineTTL = 1;
+
         this.fps = 0;
 
         this.init();
@@ -322,8 +327,9 @@ class GameScene extends Scene
         {
             while(((performance.now() - this.particleTimer)/1000) > 0.1)
             {
-                for(let i = 0; i < 100; i++)
+                for(let i = 0; i < 50; i++)
                 {  
+
                     let angle = this._player.getSpriteAngle;
                     let angleOffset = Math.random() * (45 - (-45)) + (-45);
                     
@@ -331,13 +337,11 @@ class GameScene extends Scene
 
                     let direction = new Vec2( (Math.cos(angle  * (Math.PI / 180))) * -1, (Math.sin(angle  * (Math.PI / 180))) * -1);
                     let pos = new Vec2(this._player.getShape.getPoints()[0].x + this._player.getShape.getPoints()[5].x, this._player.getShape.getPoints()[0].y + this._player.getShape.getPoints()[5].y);
-                    
+                     
                     pos.x /= 2;
                     pos.y /= 2;
 
-                    let temp = new ParticleProps(pos, new Vec2(15,15), new Vec2(0,0), new Vec2(direction.x,direction.y),
-                                                [226, 40, 34, 1], [255,255,0,0],  true , 0.5 , 0 , Math.random() * 0.3);
-                    this.particleSystem.emit(temp);
+                    this.particleSystem.emit(pos, direction, this.engineBeginColour, this.engineEndColour , this.engineTTL , 0 , Math.random() * 0.1);
                 }
                  this.particleTimer = performance.now();
             }

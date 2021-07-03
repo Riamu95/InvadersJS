@@ -16,6 +16,28 @@ class Particle
         this._angle = particle.angle;
         this._maxSpeed = particle.maxSpeed;
         this._speed = this._maxSpeed;
+        this._startingOpacity = 1;
+        this._opacity = 1;
+    }
+
+    getStartingOpacity()
+    {
+        return this._startingOpacity;
+    }
+
+    getOpacity()
+    {
+        return this.opacity;
+    }
+
+    setOpacity(val)
+    {
+        this._opacity = val;
+    }
+
+    getActive()
+    {
+        return this._active;
     }
 
     getRect()
