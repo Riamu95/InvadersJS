@@ -133,6 +133,7 @@ class Player
         this._acceleration.y = 0;
     }
 
+
     get getMass()
     {
         return this._mass;

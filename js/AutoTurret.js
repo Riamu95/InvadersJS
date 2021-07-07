@@ -113,7 +113,6 @@ AutoTurret.prototype.draw = function(ctx,cameraPos)
     for(let value of this._bullets.values())
     {
         if (value[1] == true)
-            value[0].draw(ctx,cameraPos,AutoTurret.prototype.playerBulletImage); 
-        
+            value[0].draw(ctx,cameraPos,AutoTurret.prototype.playerBulletImage);   
     }     
 }
