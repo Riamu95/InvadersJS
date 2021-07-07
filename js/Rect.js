@@ -29,6 +29,7 @@ Rect.prototype.getRect = function()
 {
     return this._points;
 }
+
 Rect.prototype.setRect = function(pos)
 {
     this._origin.x = pos.x;

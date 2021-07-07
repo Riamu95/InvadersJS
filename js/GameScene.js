@@ -1002,7 +1002,6 @@ class GameScene extends Scene
             }
         }
 
-
         for(let [target,bullet]  of turretBullets.entries())
         {
             for(let i = this.bombers.length -1; i >= 0; i--)

@@ -32,7 +32,7 @@ class Player
         this._usingPowerUp = false;
         this._currentPowerUp = null;
         this._nextPowerUp = null;
-        this._autoTurret = new AutoTurret(this._shape.getOrigin(), new Vec2(93,94));
+       
         this.createShape();
 
         this._weapons = [];
@@ -41,7 +41,7 @@ class Player
         this._weapons.push(new Pistol(new Vec2(30,30),1000,5,10));
         this._weapons.push(new Shotgun(new Vec2(30,30),12,3,15));
         this._weapons.push(new Mine(new Vec2(70,68),5,20,100));
-
+        this._autoTurret = new AutoTurret(this._shape.getOrigin(), new Vec2(93,94),this._weapons[0].getBulletSize());
         this._currentWeapon = this._weapons[0];
         this._collisionDamage = 10;
     }
