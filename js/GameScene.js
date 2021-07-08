@@ -12,21 +12,25 @@ class GameScene extends Scene
         this.asteroids = [];
         this.blackHoles = [];
         this.pressedKeys = new Set();
-        this.buttons = ['w','a','s','d','e','1','2','3'];
+        this.buttons = Object.freeze(['w','a','s','d','e','1','2','3']);
         this.powerUps = [];
         this.ammunition = [];
+
         this.collisionManager = new CollisionManager();
-        this.player = new Player(new Vec2(this.worldWidth/2,this.worldHeight/2),new Vec2(127,130));
+        this.player = new Player(new Vec2(this.worldWidth/2,this.worldHeight/2),new Vec2(156,151));//new Vec2(127,130));
         this.camera = new Camera(this.player.getShape.getOrigin().x - this._canvasWidth/2,this.player.getShape.getOrigin().y - this._canvasHeight/2,this._canvasWidth,this._canvasHeight, this.worldWidth,this.worldHeight);
         //let qt = new QuadTree(new Vec2(0,0),new Vec2(this.worldWidth,this.worldHeight), 5);
         this.animationManager = new AnimationManager();
         this.waveManager = new WaveManager(this.worldWidth,this.worldHeight);
+        
         this.gui = new Map();
+        
         this.map = new MapGui("map",new Vec2(this._canvasWidth/1.1,this._canvasHeight/6),new Vec2(1596,266),true,{"mouseenter": null},{"mouseleave": null});
         this.map.addNPCPos(this.bombers);
         this.map.addNPCPos(this.minions);
         this.map.addNPCPos(this.asteroids);
         this.map.addNPCPos(this.blackHoles);
+        
         this.playerPowerUps = [];
 
         this.particleSystem = new ParticleSystem();
@@ -338,6 +342,18 @@ class GameScene extends Scene
 
     inputHandling(dt)
     {
+
+        if(this.player.getFired() && (performance.now() - this.player.getFireTimer) /1000 >= this.player.getFireRate && this.player.getCurrentWeapon().getAmmoCount() > 0)
+        {
+            const bulletSpawnPoint = new Vec2((this.player.getShape.getPoints()[3].x + this.player.getShape.getPoints()[2].x) /2, (this.player.getShape.getPoints()[3].y + this.player.getShape.getPoints()[2].y) /2);
+
+            this.player.getCurrentWeapon().addBullet( bulletSpawnPoint ,this.player.getCurrentWeapon().getBulletSize(),this.player.getSpriteAngle * Math.PI/180,this.player.getMaxBulletSpeed);
+            this.player.setFired(false);
+        }
+
+
+
+
         if(this.pressedKeys['w'])
         {
             if(this.player.getSpeed() <=  this.player.getMaxAcceleration)
@@ -404,11 +420,6 @@ class GameScene extends Scene
             this.player.getShape.rotate();
         }
 
-        if(this.player.getFired() && (performance.now() - this.player.getFireTimer) /1000 >= this.player.getFireRate && this.player.getCurrentWeapon().getAmmoCount() > 0)
-        {
-            this.player.getCurrentWeapon().addBullet(this.player.getShape.getOrigin(),this.player.getCurrentWeapon().getBulletSize(),this.player.getSpriteAngle * Math.PI/180,this.player.getMaxBulletSpeed);
-            this.player.setFired(false);
-        }
 
         if(this.pressedKeys['e']  && this.player.getCurrentPowerUp() != null)
         {

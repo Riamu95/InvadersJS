@@ -127,8 +127,6 @@ class Particle
 
     setVelocity(dt)
     {   
-       // this._velocity.x = Math.cos(this._angle  * Math.PI / 180);
-       // this._velocity.y = Math.sin(this._angle  * Math.PI / 180);
         this._velocity.x = this._directionalVelocity.x;
         this._velocity.y = this._directionalVelocity.y;
 

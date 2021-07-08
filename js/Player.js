@@ -22,7 +22,7 @@ class Player
         this._rotationSpeed = 1.5;
         this._spriteAngle = 0;
         this._ttl = 3;
-        this._maxbulletSpeed = 8;
+        this._maxbulletSpeed = 10;
         this._color = 'red'; 
         this._fired = false;
         this._fireRate = 0.5;
@@ -38,8 +38,8 @@ class Player
         this._weapons = [];
         this._currentWeapon = null;
                                     //size,ammoCount,ttl,damage
-        this._weapons.push(new Pistol(new Vec2(30,30),1000,5,10));
-        this._weapons.push(new Shotgun(new Vec2(30,30),12,3,15));
+        this._weapons.push(new Pistol(new Vec2(20,20),1000,5,10));
+        this._weapons.push(new Shotgun(new Vec2(25,25),12,3,15));
         this._weapons.push(new Mine(new Vec2(70,68),5,20,100));
         this._autoTurret = new AutoTurret(this._shape.getOrigin(), new Vec2(93,94),this._weapons[0].getBulletSize());
         this._currentWeapon = this._weapons[0];
@@ -54,9 +54,9 @@ class Player
         //should be based around origin??
         this._shape.addPoint(new Vec2(this._shape.getOrigin().x - this._shape.getSize().x/2, this._shape.getOrigin().y - this._shape.getSize().y/2));
         this._shape.addPoint(new Vec2((this._shape.getOrigin().x - this._shape.getSize().x/2) + 32, this._shape.getOrigin().y - this._shape.getSize().y/2));
-        this._shape.addPoint(new Vec2(this._shape.getOrigin().x + this._shape.getSize().x/2, (this._shape.getOrigin().y - this._shape.getSize().y/2) + 59));
         this._shape.addPoint(new Vec2(this._shape.getOrigin().x + this._shape.getSize().x/2, (this._shape.getOrigin().y - this._shape.getSize().y/2) + 70));
-        this._shape.addPoint(new Vec2((this._shape.getOrigin().x - this._shape.getSize().x/2) + 32, this._shape.getOrigin().y + this._shape.getSize().y/2));
+        this._shape.addPoint(new Vec2(this._shape.getOrigin().x + this._shape.getSize().x/2, (this._shape.getOrigin().y - this._shape.getSize().y/2) + 79));
+        this._shape.addPoint(new Vec2((this._shape.getOrigin().x - this._shape.getSize().x/2 ) + 32, (this._shape.getOrigin().y + this._shape.getSize().y/2)));
         this._shape.addPoint(new Vec2(this._shape.getOrigin().x - this._shape.getSize().x/2,this._shape.getOrigin().y + this._shape.getSize().y/2));
     }
 
@@ -119,8 +119,6 @@ class Player
 
         this._acceleration.x += this._direction.x;
         this._acceleration.y += this._direction.y;
-
-        //this._acceleration.setMagnitude = this._speed;
         
         this._velocity.x =  this._acceleration.x * dt;
         this._velocity.y = this._acceleration.y * dt;

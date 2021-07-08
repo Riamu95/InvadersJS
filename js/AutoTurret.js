@@ -54,7 +54,7 @@ AutoTurret.prototype.addBullet = function(target)
 {
     if(this._bullets.get(target) == undefined)
     {
-        let temp = new Bullet(new Vec2(this._rect.getOrigin().x,this._rect.getOrigin().y), new Vec2(20,20), 0,8);
+        let temp = new Bullet(new Vec2(this._rect.getOrigin().x,this._rect.getOrigin().y), new Vec2(30,30), 0,8);
         this._bullets.set(target,[temp,false]);
         this._fireTimer = performance.now();
     }
@@ -108,7 +108,7 @@ AutoTurret.prototype.draw = function(ctx,cameraPos)
     ctx.beginPath();      
     ctx.translate(this._rect.getOrigin().x - cameraPos.x,this._rect.getOrigin().y - cameraPos.y);
     ctx.rotate(Math.PI/180 * this._rect.getAngle());
-    ctx.drawImage(this._turretImage,0,0,this._rect.getSize().x,this._rect.getSize().y,-this._rect.getSize().x/2,-this._rect.getSize().y/2,AutoTurret.prototype.renderSize.x,AutoTurret.prototype.renderSize.y);
+    ctx.drawImage(this._turretImage,0,0,this._rect.getSize().x,this._rect.getSize().y,-this._rect.getSize().x/2,-this._rect.getSize().y/2,this._rect.getSize().x,this._rect.getSize().y);
     ctx.closePath();
     ctx.restore();
 
