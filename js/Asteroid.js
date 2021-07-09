@@ -1,7 +1,6 @@
 const Asteroid = function(pos, size) 
 {
     this._rect = new Rect(pos,size);
-    
     this._acceleration = new Vec2(0,0);
     this._velocity = new Vec2(Math.random() * 1,(Math.random() * 1));
     this._maxSpeed = Math.random() * 2;
@@ -9,6 +8,7 @@ const Asteroid = function(pos, size)
     this._rect.setAngle(0.2);
     this._spriteAngle = 0;
 }
+
 Asteroid.prototype.ASTEROID_IMAGE = document.getElementById('asteroid');
 Asteroid.prototype.collisionDamage = 30;
 
@@ -16,45 +16,28 @@ Asteroid.prototype.update = function(worldWidth,worldHeight)
 {
     this._spriteAngle >= 360 ? this._spriteAngle = 0 : this._spriteAngle += 0.2;
     this._rect.rotate();
+
     this._velocity.setMagnitude = this._maxSpeed;
 
     //boundary wrapping
     this._rect.updatePoints(this._velocity);
 
+    this.boundaryCheck(worldWidth,worldHeight);    
+}
+
+Asteroid.prototype.boundaryCheck = function(worldWidth, worldHeight)
+{
     if (this._rect.getOrigin().x + this._rect.getSize().x/2 <= 0)
-    {
-        this._rect._points.forEach(point =>
-        {
-            point.x +=  worldWidth;
-        })
-        this._rect._origin.x += worldWidth;
-    }
+          this._rect.updatePoints(new Vec2(worldWidth,0));
+
     else if (this._rect.getOrigin().x - this._rect.getSize().x/2 >= worldWidth)
-    {
-        //wrap left
-        this._rect._points.forEach(point =>
-        {
-            point.x -= worldWidth;
-        })
-        this._rect.getOrigin().x -= worldWidth;
-    }
+        this._rect.updatePoints(new Vec2(-worldWidth,0));
 
     if(this._rect.getOrigin().y + this._rect.getSize().y/2 <= 0)
-    {
-        this._rect._points.forEach(point =>
-        {
-            point.y += worldHeight;
-        })
-        this._rect.getOrigin().y += worldHeight;
-    }
+        this._rect.updatePoints(new Vec2(0,worldHeight));
+
     else if(this._rect.getOrigin().y - this._rect.getSize().y/2 >= worldHeight)
-    {
-        this._rect._points.forEach(point =>
-        {
-            point.y -= worldHeight;
-        })
-        this._rect.getOrigin().y -= worldHeight;
-    }
+        this._rect.updatePoints(new Vec2(0,-worldHeight));
 }
 
 Asteroid.prototype.draw = function(ctx, cameraPos)
@@ -88,4 +71,10 @@ Asteroid.prototype.setHealth = function (val)
 Asteroid.prototype.checkHealth = function()
 {
     return this._health < 1;
+}
+
+Asteroid.prototype.addVelocity = function(val)
+{
+    this._velocity.x += val.x;
+    this._velocity.y += val.y;
 }

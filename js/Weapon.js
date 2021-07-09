@@ -48,16 +48,14 @@ Weapon.prototype.getImage = function()
     return this._image;
 }
 
-Weapon.prototype.addAmmo = function(val)
+Weapon.prototype.addAmmo = function(ammoVal)
 {
-    console.log(`Before reload ${this._ammoCount}`);
-    let i = 0;
-    while(this._ammoCount < this._maxAmmo && i < val)
+    let ammoIndex = 0;
+    while(this._ammoCount < this._maxAmmo && ammoIndex < ammoVal)
     {
         this._ammoCount += 1;
-        i++;
+        ammoIndex++;
     }
-    console.log(`After reload ${this._ammoCount}`);
 }
 Weapon.prototype.getTTL = function()
 {

@@ -14,6 +14,7 @@ const PowerUp = function(pos,size,type, spawnTimer)
     this._active = true;
     this._inactiveTimer = 0;
 }
+
 PowerUp.prototype.healthIncreaseAmount = 0;
 PowerUp.prototype.healthIncreaseValue = 10;
 PowerUp.prototype.MaxPowerUpCount = 5;
@@ -31,6 +32,15 @@ PowerUp.prototype.speed_image = document.getElementById('speed');
 PowerUp.prototype.activatePowerUp = function()
 { 
 
+}
+
+PowerUp.prototype.worldWidth = 0;
+PowerUp.prototype.worldHeight = 0;
+
+PowerUp.prototype.setWorldSize = function(val)
+{
+    PowerUp.prototype.worldWidth = val.x;
+    PowerUp.prototype.worldHeight = val.y;
 }
 
 PowerUp.prototype.generateRandomType = function(val)
@@ -88,7 +98,7 @@ PowerUp.prototype.update = function(dt)
 PowerUp.prototype.reset = function()
 {
     this._active = true;
-    this._rect.pos = new Vec2(Math.random() * WORLD_WIDTH, Math.random() * WORLD_HEIGHT);
+    this._rect.pos = new Vec2(Math.random() * PowerUp.prototype.worldWidth, Math.random() * PowerUp.prototype.worldHeight);
     this._type = this.generateRandomType(Math.round(Math.random() * 3));
 }
 

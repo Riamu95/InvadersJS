@@ -22,7 +22,7 @@ class Player
         this._rotationSpeed = 1.5;
         this._spriteAngle = 0;
         this._ttl = 3;
-        this._maxbulletSpeed = 8;
+        this._maxbulletSpeed = 10;
         this._color = 'red'; 
         this._fired = false;
         this._fireRate = 0.5;
@@ -32,16 +32,16 @@ class Player
         this._usingPowerUp = false;
         this._currentPowerUp = null;
         this._nextPowerUp = null;
-        this._autoTurret = new AutoTurret(this._shape.getOrigin(), new Vec2(93,94));
+       
         this.createShape();
 
         this._weapons = [];
         this._currentWeapon = null;
                                     //size,ammoCount,ttl,damage
-        this._weapons.push(new Pistol(new Vec2(30,30),1000,5,10));
-        this._weapons.push(new Shotgun(new Vec2(30,30),12,3,15));
+        this._weapons.push(new Pistol(new Vec2(20,20),1000,5,10));
+        this._weapons.push(new Shotgun(new Vec2(25,25),12,3,15));
         this._weapons.push(new Mine(new Vec2(70,68),5,20,100));
-
+        this._autoTurret = new AutoTurret(this._shape.getOrigin(), new Vec2(93,94),this._weapons[0].getBulletSize());
         this._currentWeapon = this._weapons[0];
         this._collisionDamage = 10;
     }
@@ -52,12 +52,20 @@ class Player
     createShape()
     {
         //should be based around origin??
+        
         this._shape.addPoint(new Vec2(this._shape.getOrigin().x - this._shape.getSize().x/2, this._shape.getOrigin().y - this._shape.getSize().y/2));
         this._shape.addPoint(new Vec2((this._shape.getOrigin().x - this._shape.getSize().x/2) + 32, this._shape.getOrigin().y - this._shape.getSize().y/2));
-        this._shape.addPoint(new Vec2(this._shape.getOrigin().x + this._shape.getSize().x/2, (this._shape.getOrigin().y - this._shape.getSize().y/2) + 59));
         this._shape.addPoint(new Vec2(this._shape.getOrigin().x + this._shape.getSize().x/2, (this._shape.getOrigin().y - this._shape.getSize().y/2) + 70));
-        this._shape.addPoint(new Vec2((this._shape.getOrigin().x - this._shape.getSize().x/2) + 32, this._shape.getOrigin().y + this._shape.getSize().y/2));
+        this._shape.addPoint(new Vec2(this._shape.getOrigin().x + this._shape.getSize().x/2, (this._shape.getOrigin().y - this._shape.getSize().y/2) + 79));
+        this._shape.addPoint(new Vec2((this._shape.getOrigin().x - this._shape.getSize().x/2 ) + 32, (this._shape.getOrigin().y + this._shape.getSize().y/2)));
         this._shape.addPoint(new Vec2(this._shape.getOrigin().x - this._shape.getSize().x/2,this._shape.getOrigin().y + this._shape.getSize().y/2));
+        
+        /*
+        this._shape.addPoint(new Vec2(this._shape.getOrigin().x - this._shape.getSize().x/2, this._shape.getOrigin().y - this._shape.getSize().y/2));
+        this._shape.addPoint(new Vec2((this._shape.getOrigin().x - this._shape.getSize().x/2), this._shape.getOrigin().y + this._shape.getSize().y/2));
+        this._shape.addPoint(new Vec2(this._shape.getOrigin().x + this._shape.getSize().x/2, (this._shape.getOrigin().y + this._shape.getSize().y/2)));
+        this._shape.addPoint(new Vec2(this._shape.getOrigin().x + this._shape.getSize().x/2, (this._shape.getOrigin().y - this._shape.getSize().y/2) ));
+        */
     }
 
     setShapePosition()
@@ -69,10 +77,10 @@ class Player
         this._shape._points[1].y = this._shape.getOrigin().y - this._shape.getSize().y/2;
 
         this._shape._points[2].x = this._shape.getOrigin().x + this._shape.getSize().x/2;
-        this._shape._points[2].y = (this._shape.getOrigin().y - this._shape.getSize().y/2) + 59;
+        this._shape._points[2].y = (this._shape.getOrigin().y - this._shape.getSize().y/2) + 70;
 
         this._shape._points[3].x = this._shape.getOrigin().x + this._shape.getSize().x/2;
-        this._shape._points[3].y = (this._shape.getOrigin().y - this._shape.getSize().y/2) + 70;
+        this._shape._points[3].y = (this._shape.getOrigin().y - this._shape.getSize().y/2) + 79;
 
         this._shape._points[4].x = (this._shape.getOrigin().x - this._shape.getSize().x/2) + 32;
         this._shape._points[4].y =  this._shape.getOrigin().y + this._shape.getSize().y/2;
@@ -83,6 +91,28 @@ class Player
         
         this._shape.rotate(this._spriteAngle  * Math.PI / 180);
         this._collisionRect.setRect(new Vec2(this._shape.getOrigin().x, this._shape.getOrigin().y));
+    }
+
+    move(dt)
+    {        
+
+        this._direction.x = Math.cos(this._spriteAngle  * Math.PI / 180);
+        this._direction.y = Math.sin(this._spriteAngle  * Math.PI / 180);
+
+        this._direction.setMagnitude = this._speed;
+
+        this._acceleration.x += this._direction.x;
+        this._acceleration.y += this._direction.y;
+        
+        this._velocity.x =  this._acceleration.x * dt;
+        this._velocity.y = this._acceleration.y * dt;
+
+
+        this._shape.updatePoints(this._velocity);
+        this._collisionRect.updatePoints(this._velocity);
+
+        this._acceleration.x = 0;
+        this._acceleration.y = 0;
     }
 
     draw(ctx,cameraPos)
@@ -109,31 +139,14 @@ class Player
         ctx.restore();
     }
 
-    move(dt)
-    {        
-
-        this._direction.x = Math.cos(this._spriteAngle  * Math.PI / 180);
-        this._direction.y = Math.sin(this._spriteAngle  * Math.PI / 180);
-
-        this._direction.setMagnitude = this._speed;
-
-        this._acceleration.x += this._direction.x;
-        this._acceleration.y += this._direction.y;      
-
-        this._velocity.x =  this._acceleration.x * dt;
-        this._velocity.y = this._acceleration.y * dt;
-
-
-        this._shape.updatePoints(this._velocity);
-        this._collisionRect.updatePoints(this._velocity);
-
-        this._acceleration.x = 0;
-        this._acceleration.y = 0;
-    }
-
     get getMass()
     {
         return this._mass;
+    }
+
+    getVelocity()
+    {
+        return this._velocity;
     }
 
     get getMaxBulletSpeed()
@@ -311,6 +324,12 @@ class Player
     setMaxAcceleration(val)
     {
          this._maxAcceleration = val;
+    }
+
+    addAcceleration(val)
+    {
+        this._acceleration.x += val.x;
+        this._acceleration.y += val.y;
     }
 
     getCurrentWeapon()
