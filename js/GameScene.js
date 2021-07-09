@@ -362,7 +362,7 @@ class GameScene extends Scene
             } 
             this.player.move(dt); 
             this.camera.update(this.player.getShape.getOrigin(),this._canvasWidth,this._canvasHeight);
-
+            
             while(((performance.now() - this.particleTimer)/1000) > 0.05)
             {
                 for(let i = 0; i < 25; i++)
@@ -471,8 +471,8 @@ class GameScene extends Scene
 
     collisions()
     {
-           this.objectCollisions();
-           this.bulletCollisions();
+        this.objectCollisions();
+        this.bulletCollisions();
     }
 
     objectCollisions()

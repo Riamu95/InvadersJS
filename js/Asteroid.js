@@ -72,3 +72,9 @@ Asteroid.prototype.checkHealth = function()
 {
     return this._health < 1;
 }
+
+Asteroid.prototype.addVelocity = function(val)
+{
+    this._velocity.x += val.x;
+    this._velocity.y += val.y;
+}
