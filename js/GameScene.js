@@ -62,16 +62,33 @@ class GameScene extends Scene
         GameScene._ctx.fillStyle = 'blue';
         PowerUp.prototype.setWorldSize(new Vec2(this.worldWidth,this.worldHeight));
 
+        AudioManager.getInstance().addSound("background", "../Assets/Audio/background.wav", { loop : true });
+        AudioManager.getInstance().addSound("engine", "../Assets/Audio/engine.ogg", { loop : true });
+        AudioManager.getInstance().addSound("pistol", "../Assets/Audio/pistol.ogg", { loop : false });
+        AudioManager.getInstance().addSound("shotgun", "../Assets/Audio/shotgun.ogg", { loop : false });
+        AudioManager.getInstance().addSound("reload", "../Assets/Audio/Reload.ogg", { loop : false });
+        AudioManager.getInstance().addSound("mine", "../Assets/Audio/mine.ogg", { loop : false });
+        AudioManager.getInstance().addSound("mineExplosion", "../Assets/Audio/mineExplosion.wav", { loop : false });
+        AudioManager.getInstance().addSound("pistolExplosion", "../Assets/Audio/pistolExplosion.wav", { loop : false });
+        AudioManager.getInstance().addSound("powerUp", "../Assets/Audio/powerUp.wav", { loop : false });
+        AudioManager.getInstance().addSound("turret", "../Assets/Audio/turret.wav", { loop : false });
+
         document.addEventListener('keydown', (event) =>
         { 
            if (this.buttons.includes(event.key))
                 this.pressedKeys[event.key] = true;
+            
+            if(event.key == "w")
+                AudioManager.getInstance().playEngine();
         });   
 
         document.addEventListener('keyup', (event) =>
         {
             if(this.buttons.includes(event.key))
                 this.pressedKeys[event.key] = false;
+
+            if(event.key == "w")
+                AudioManager.getInstance().stopEngine();
         });
 
         document.addEventListener('click', () =>
@@ -81,6 +98,14 @@ class GameScene extends Scene
                 this.player.setFired(true);
                 this.player.setFireTimer(performance.now()); 
             }
+
+            this.player.getCurrentWeapon().getAmmoCount() <= 0 &&   AudioManager.getInstance().playSound("reload");
+        });
+
+        AudioManager.getInstance().getSound("engine").on('fade', () =>
+        {
+            if(AudioManager.getInstance().getSound("engine").volume() == 0)
+                AudioManager.m_engineToggle = false;
         });
     }
 
@@ -351,9 +376,6 @@ class GameScene extends Scene
             this.player.setFired(false);
         }
 
-
-
-
         if(this.pressedKeys['w'])
         {
             if(this.player.getSpeed() <=  this.player.getMaxAcceleration)
@@ -524,6 +546,7 @@ class GameScene extends Scene
  
              if(CollisionManager.SATCollision(this.powerUps[i].getRect().getPoints(), this.player._shape.getPoints()))
              {
+                 AudioManager.getInstance().playSound("powerUp");
                  for( let p = 0 ; p < 50; p++)
                  {
                     let percentage = p/50;
@@ -834,14 +857,38 @@ class GameScene extends Scene
     bulletCollisions()
     {
         this.turretCollisions();
-       // let playerBullets = this.player.getCurrentWeapon().getBullets();
+      
         //for all the players weapons // check bullets against game objects
         for(let w = 0; w < this.player.getWeapons().length; w++)
         {
             let playerBullets = this.player.getWeapons()[w].getBullets();
-            let noOfFrames = w == 2 ? 9 : 5;
-            let bulletExplosionAnimation =  w == 2 ? "MINE" : "BULLET";
-            let animationSize = w == 2 ? new Vec2(210,210) : new Vec2(256,256);
+            let noOfFrames = null;
+            let bulletExplosionAnimation = null;
+            let animationSize = null;
+            let bulletExplosionSound = null;
+            
+            if(w == 0)
+            {
+                animationSize =  new Vec2(256,256);
+                noOfFrames = 5;
+                bulletExplosionAnimation = "BULLET";
+                bulletExplosionSound = "pistolExplosion";
+            }
+            else if (w == 1)
+            {
+                animationSize =  new Vec2(256,256);
+                noOfFrames = 5;
+                bulletExplosionAnimation = "BULLET";
+                bulletExplosionSound = "shotgunExplosion";
+            }
+            else if(w == 2)
+            {
+                animationSize =  new Vec2(210,210);
+                noOfFrames = 9;
+                bulletExplosionAnimation = "MINE";
+                bulletExplosionSound = "mineExplosion";
+            }
+                    
              /* Minion Player bullet collision */
             for( let row = 0; row < this.minions.length; row++)
             {
@@ -851,7 +898,7 @@ class GameScene extends Scene
                     {
                         if(CollisionManager.SATCollision(playerBullets[b].getRect.getPoints(),this.minions[row][col].getRect.getPoints()))
                         {
-                            
+                            AudioManager.getInstance().playSound(bulletExplosionSound);
                             this.minions[row][col].setHealth = -this.player.getWeapons()[w].getDamage();
                             if(this.minions[row][col].checkHealth())
                             {
@@ -875,7 +922,8 @@ class GameScene extends Scene
                 {
                     if(CollisionManager.SATCollision(playerBullets[b].getRect.getPoints(), this.bombers[i].getRect.getPoints()))
                     {
-                        //decrease bomber health   
+                        //decrease bomber health  
+                        AudioManager.getInstance().playSound(bulletExplosionSound); 
                         this.bombers[i].setHealth = -this.player.getWeapons()[w].getDamage();
                         if(this.bombers[i].checkHealth())
                         {
@@ -897,6 +945,7 @@ class GameScene extends Scene
                 {
                     if(CollisionManager.SATCollision(playerBullets[b].getRect.getPoints(), this.asteroids[i].getRect().getPoints()))
                     {
+                        AudioManager.getInstance().playSound(bulletExplosionSound);
                         this.asteroids[i].setHealth(-this.player.getWeapons()[w].getDamage());
                         if(this.asteroids[i].checkHealth())
                         {
@@ -915,8 +964,10 @@ class GameScene extends Scene
             for(let i = playerBullets.length -1 ; i >= 0; i--)
             {
                 let  time = Math.round((performance.now() - playerBullets[i].getTimer())/1000);
+               
                 if (time >= this.player.getWeapons()[w].getTTL())
                 {
+                    AudioManager.getInstance().playSound(bulletExplosionSound);
                     this.animationManager.addAnimation(noOfFrames,0.02,playerBullets[i].getRect.getOrigin(),bulletExplosionAnimation,animationSize,false);
                     playerBullets.splice(i,1);
                 }
@@ -1154,21 +1205,3 @@ class GameScene extends Scene
         this.scenes.shift();
     }
 }
-
-
-                        //this.gui.get("healthSymbol")[0].getActive() == false ? index = 0 : index = 1;
-                        //get current active healthSymbol ( there's 2)
-                        /*if (this.player.getCurrentPowerUp() == null )
-                        {   //set current power up, set healthguipoweup to active and set it to the left powrupgui slot
-                            this.player.setCurrentPowerUp(PowerUpType.HEALTH);
-                            this.gui.get("healthSymbol")[index].setActive(true);
-                            this.gui.get("healthSymbol")[index].setPos(this.powerupGuiLeftPos);
-                            this.playerPowerUps[0] = "healthSymbol";
-                        }
-                        else
-                        {   //set current power up, set healthguipoweup to active and set it to the right powrupgui slot
-                            this.player.setNextPowerUp(PowerUpType.HEALTH);
-                            this.gui.get("healthSymbol")[index].setActive(true);
-                            this.gui.get("healthSymbol")[index].setPos(this.powerupGuiRightPos);
-                            this.playerPowerUps[1] = "healthSymbol";
-                        }*/

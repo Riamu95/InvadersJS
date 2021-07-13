@@ -18,5 +18,6 @@ Shotgun.prototype.addBullet = function(pos,size,angle,maxSpeed)
         this._ammoCount--;
         i++;
     }
+    AudioManager.getInstance().playSound("shotgun");
 }
 
