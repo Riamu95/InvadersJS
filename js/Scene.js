@@ -10,6 +10,8 @@ class Scene
         Scene._canvas.height = window.innerHeight;
         this._canvasWidth = Scene._canvas.width;
         this._canvasHeight = Scene._canvas.height;
+        AudioManager.getInstance().addSound("buttonHover", "../Assets/Audio/buttonHover.ogg", { loop : false });
+        AudioManager.getInstance().addSound("buttonClick", "../Assets/Audio/buttonClick.wav", { loop : false });
     }
 
 

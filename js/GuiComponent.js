@@ -39,6 +39,8 @@ GuiComponent.prototype.setActive = function(val)
 
 GuiComponent.prototype.mouseEnter = function(e)
 {
+    AudioManager.getInstance().playSound("buttonHover");
+    
     if(e.target.src == 'file:///C:/Users/Predator/Desktop/InvadersJs/Assets/buttons/play.png')
     {
         e.target.src = 'file:///C:/Users/Predator/Desktop/InvadersJs/Assets/buttons/playClicked.png';

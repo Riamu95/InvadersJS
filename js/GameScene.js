@@ -72,6 +72,9 @@ class GameScene extends Scene
         AudioManager.getInstance().addSound("pistolExplosion", "../Assets/Audio/pistolExplosion.wav", { loop : false });
         AudioManager.getInstance().addSound("powerUp", "../Assets/Audio/powerUp.wav", { loop : false });
         AudioManager.getInstance().addSound("turret", "../Assets/Audio/turret.wav", { loop : false });
+        AudioManager.getInstance().addSound("powerUpActivate", "../Assets/Audio/powerUpActivate.wav", { loop : false });
+        AudioManager.getInstance().addSound("ammo", "../Assets/Audio/ammo.wav", { loop : false });
+        AudioManager.getInstance().addSound("switch", "../Assets/Audio/switch.ogg", { loop : false });
 
         document.addEventListener('keydown', (event) =>
         { 
@@ -446,6 +449,7 @@ class GameScene extends Scene
         if(this.pressedKeys['e']  && this.player.getCurrentPowerUp() != null)
         {
             this.player.setUsingPowerUp(true);
+            AudioManager.getInstance().playSound("powerUpActivate");
             PowerUp.prototype.currentPowerUpTimer = performance.now();
             this.gui.get("activePowerUp")[0].setActive(true);
             switch(this.player.getCurrentPowerUp()) 
@@ -468,8 +472,14 @@ class GameScene extends Scene
             }
             this.pressedKeys['e'] = false;
         }
+        else if (this.pressedKeys['e']  && this.player.getCurrentPowerUp() == null)
+        {
+            AudioManager.getInstance().playSound("reload");
+        }
+
         if (this.pressedKeys['1'])
         {
+            AudioManager.getInstance().playSound("switch");
             this.player.setCurrentWeapon(0);
             this.gui.get("ammo")[0].setActive(true);
             this.gui.get("ammo")[1].setActive(false);
@@ -477,6 +487,7 @@ class GameScene extends Scene
         }
         else if (this.pressedKeys['2'])
         {
+            AudioManager.getInstance().playSound("switch");
             this.player.setCurrentWeapon(1); 
             this.gui.get("ammo")[1].setActive(true);
             this.gui.get("ammo")[0].setActive(false);
@@ -484,6 +495,7 @@ class GameScene extends Scene
         }
         else if (this.pressedKeys['3'])
         {
+            AudioManager.getInstance().playSound("switch");
             this.player.setCurrentWeapon(2);
             this.gui.get("ammo")[2].setActive(true);
             this.gui.get("ammo")[0].setActive(false);
@@ -619,6 +631,7 @@ class GameScene extends Scene
  
              if(CollisionManager.SATCollision(this.ammunition[i].getRect().getPoints(), this.player._shape.getPoints()))
              {
+                 AudioManager.getInstance().playSound("ammo");
                  if (this.ammunition[i].getType() == AmmoType.MINE)
                      this.player.getWeapons()[2].addAmmo(this.ammunition[i].getAmmount());
                  else if (this.ammunition[i].getType() == AmmoType.SHOTGUN)
@@ -980,6 +993,7 @@ class GameScene extends Scene
             {
                 if(CollisionManager.SATCollision(this.bombers[i]._bullets[b].getRect.getPoints(),this.player.getShape.getPoints()))
                 {
+                    AudioManager.getInstance().playSound("mineExplosion");
                     this.gui.get("healthValue")[0].getRenderSize().x -= (this.gui.get("healthValue")[0].getSize().x/100) * Bomber.bulletDamage;
                     this.animationManager.addAnimation(5,0.02,this.bombers[i]._bullets[b].getRect.getOrigin(),"EXPLOSION",new Vec2(256,256),false);
                     this.bombers[i]._bullets.splice(b,1);

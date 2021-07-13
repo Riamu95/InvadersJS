@@ -41,6 +41,7 @@ class GameOverScene extends Scene
 
     NextScene()
     {
+        AudioManager.getInstance().playSound("buttonClick");
         this._guiComponents.forEach(gui =>
         {
             gui.removeListeners();
@@ -58,6 +59,7 @@ class GameOverScene extends Scene
 
     QuitScene()
     {
+        AudioManager.getInstance().playSound("buttonClick");
         this._guiComponents.forEach(gui =>
         {
             gui.removeListeners();
