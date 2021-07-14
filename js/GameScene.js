@@ -75,6 +75,8 @@ class GameScene extends Scene
         AudioManager.getInstance().addSound("powerUpActivate", "../Assets/Audio/powerUpActivate.wav", { loop : false });
         AudioManager.getInstance().addSound("ammo", "../Assets/Audio/ammo.wav", { loop : false });
         AudioManager.getInstance().addSound("switch", "../Assets/Audio/switch.ogg", { loop : false });
+        AudioManager.getInstance().addSound("collisionDamage", "../Assets/Audio/damageNew.ogg", { loop : false });
+        AudioManager.getInstance().addSound("collisionDeath", "../Assets/Audio/deathNew.ogg", { loop : false });
 
         document.addEventListener('keydown', (event) =>
         { 
@@ -82,7 +84,7 @@ class GameScene extends Scene
                 this.pressedKeys[event.key] = true;
             
             if(event.key == "w")
-                AudioManager.getInstance().playEngine();
+                AudioManager.getInstance().playEngine(this.player.getShape.getOrigin());
         });   
 
         document.addEventListener('keyup', (event) =>
@@ -102,7 +104,7 @@ class GameScene extends Scene
                 this.player.setFireTimer(performance.now()); 
             }
 
-            this.player.getCurrentWeapon().getAmmoCount() <= 0 &&   AudioManager.getInstance().playSound("reload");
+            this.player.getCurrentWeapon().getAmmoCount() <= 0 &&   AudioManager.getInstance().playSound("reload", this.player.getShape.getOrigin());
         });
 
         AudioManager.getInstance().getSound("engine").on('fade', () =>
@@ -209,7 +211,7 @@ class GameScene extends Scene
     update(dt)
     {
         this.fps  = 1000 / dt;
-
+        Howler.pos(this.player.getShape.getOrigin().x, this.player.getShape.getOrigin().y, -0.5);
         for( let i = 0; i < this.player.getWeapons().length; i++)
         {
             this.player.getWeapons()[i].update(dt);
@@ -449,7 +451,7 @@ class GameScene extends Scene
         if(this.pressedKeys['e']  && this.player.getCurrentPowerUp() != null)
         {
             this.player.setUsingPowerUp(true);
-            AudioManager.getInstance().playSound("powerUpActivate");
+            AudioManager.getInstance().playSound("powerUpActivate", this.player.getShape.getOrigin());
             PowerUp.prototype.currentPowerUpTimer = performance.now();
             this.gui.get("activePowerUp")[0].setActive(true);
             switch(this.player.getCurrentPowerUp()) 
@@ -474,12 +476,12 @@ class GameScene extends Scene
         }
         else if (this.pressedKeys['e']  && this.player.getCurrentPowerUp() == null)
         {
-            AudioManager.getInstance().playSound("reload");
+            AudioManager.getInstance().playSound("reload", this.player.getShape.getOrigin());
         }
 
         if (this.pressedKeys['1'])
         {
-            AudioManager.getInstance().playSound("switch");
+            AudioManager.getInstance().playSound("switch", this.player.getShape.getOrigin());
             this.player.setCurrentWeapon(0);
             this.gui.get("ammo")[0].setActive(true);
             this.gui.get("ammo")[1].setActive(false);
@@ -487,7 +489,7 @@ class GameScene extends Scene
         }
         else if (this.pressedKeys['2'])
         {
-            AudioManager.getInstance().playSound("switch");
+            AudioManager.getInstance().playSound("switch", this.player.getShape.getOrigin());
             this.player.setCurrentWeapon(1); 
             this.gui.get("ammo")[1].setActive(true);
             this.gui.get("ammo")[0].setActive(false);
@@ -495,7 +497,7 @@ class GameScene extends Scene
         }
         else if (this.pressedKeys['3'])
         {
-            AudioManager.getInstance().playSound("switch");
+            AudioManager.getInstance().playSound("switch", this.player.getShape.getOrigin());
             this.player.setCurrentWeapon(2);
             this.gui.get("ammo")[2].setActive(true);
             this.gui.get("ammo")[0].setActive(false);
@@ -558,7 +560,7 @@ class GameScene extends Scene
  
              if(CollisionManager.SATCollision(this.powerUps[i].getRect().getPoints(), this.player._shape.getPoints()))
              {
-                 AudioManager.getInstance().playSound("powerUp");
+                 AudioManager.getInstance().playSound("powerUp", this.powerUps[i].getRect().getOrigin());
                  for( let p = 0 ; p < 50; p++)
                  {
                     let percentage = p/50;
@@ -631,7 +633,7 @@ class GameScene extends Scene
  
              if(CollisionManager.SATCollision(this.ammunition[i].getRect().getPoints(), this.player._shape.getPoints()))
              {
-                 AudioManager.getInstance().playSound("ammo");
+                 AudioManager.getInstance().playSound("ammo",this.ammunition[i].getRect().getOrigin());
                  if (this.ammunition[i].getType() == AmmoType.MINE)
                      this.player.getWeapons()[2].addAmmo(this.ammunition[i].getAmmount());
                  else if (this.ammunition[i].getType() == AmmoType.SHOTGUN)
@@ -661,7 +663,16 @@ class GameScene extends Scene
                          this.player.getAutoTurret().getBullets().delete(this.minions[row][col].getRect.getOrigin());
                      }
  
-                     this.minions[row][col].checkHealth() &&  this.minions[row].splice(col,1);
+                     if(this.minions[row][col].checkHealth())
+                     {
+                        AudioManager.getInstance().playSound("collisionDeath", this.minions[row][col].getRect.getOrigin());
+                        this.minions[row].splice(col,1);
+                     }
+                     else
+                     {
+                        AudioManager.getInstance().playSound("collisionDamage", this.minions[row][col].getRect.getOrigin());
+                     } 
+
                      this.player.checkHealth() && this.NextScene();
          
                      this.spawn();
@@ -677,7 +688,16 @@ class GameScene extends Scene
                  this.player.setHealth = -Bomber.collisionDamage;
                  this.bombers[b].setHealth = -this.player.getCollisionDamage();
                  
-                 this.bombers[b].checkHealth() && this.bombers.splice(b,1);
+                 if( this.bombers[b].checkHealth())
+                 {
+                    AudioManager.getInstance().playSound("collisionDeath",this.bombers[b].getRect.getOrigin());
+                    this.bombers.splice(b,1);
+                 }
+                 else
+                 {
+                    AudioManager.getInstance().playSound("collisionDamage",this.bombers[b].getRect.getOrigin());
+                 }
+                
                  this.player.checkHealth() &&  this.NextScene();
                  
                  this.spawn();
@@ -704,8 +724,13 @@ class GameScene extends Scene
                  }
                  if (this.asteroids[a].checkHealth())
                  {
+                     AudioManager.getInstance().playSound("collisionDeath",this.asteroids[a].getRect().getOrigin());
                      this.animationManager.addAnimation(5,0.02,this.asteroids[a].getRect().getOrigin(),"EXPLOSION",new Vec2(256,256),false);
                      this.asteroids.splice(a,1);
+                 }
+                 else
+                 {
+                    AudioManager.getInstance().playSound("collisionDamage",this.asteroids[a].getRect().getOrigin());
                  }
  
                  if(this.player.checkHealth())
@@ -911,7 +936,7 @@ class GameScene extends Scene
                     {
                         if(CollisionManager.SATCollision(playerBullets[b].getRect.getPoints(),this.minions[row][col].getRect.getPoints()))
                         {
-                            AudioManager.getInstance().playSound(bulletExplosionSound);
+                            AudioManager.getInstance().playSound(bulletExplosionSound,playerBullets[b].getRect.getOrigin());
                             this.minions[row][col].setHealth = -this.player.getWeapons()[w].getDamage();
                             if(this.minions[row][col].checkHealth())
                             {
@@ -936,7 +961,7 @@ class GameScene extends Scene
                     if(CollisionManager.SATCollision(playerBullets[b].getRect.getPoints(), this.bombers[i].getRect.getPoints()))
                     {
                         //decrease bomber health  
-                        AudioManager.getInstance().playSound(bulletExplosionSound); 
+                        AudioManager.getInstance().playSound(bulletExplosionSound, playerBullets[b].getRect.getOrigin()); 
                         this.bombers[i].setHealth = -this.player.getWeapons()[w].getDamage();
                         if(this.bombers[i].checkHealth())
                         {
@@ -958,7 +983,7 @@ class GameScene extends Scene
                 {
                     if(CollisionManager.SATCollision(playerBullets[b].getRect.getPoints(), this.asteroids[i].getRect().getPoints()))
                     {
-                        AudioManager.getInstance().playSound(bulletExplosionSound);
+                        AudioManager.getInstance().playSound(bulletExplosionSound, this.asteroids[i].getRect().getOrigin());
                         this.asteroids[i].setHealth(-this.player.getWeapons()[w].getDamage());
                         if(this.asteroids[i].checkHealth())
                         {
@@ -980,7 +1005,7 @@ class GameScene extends Scene
                
                 if (time >= this.player.getWeapons()[w].getTTL())
                 {
-                    AudioManager.getInstance().playSound(bulletExplosionSound);
+                    AudioManager.getInstance().playSound(bulletExplosionSound, playerBullets[i].getRect.getOrigin());
                     this.animationManager.addAnimation(noOfFrames,0.02,playerBullets[i].getRect.getOrigin(),bulletExplosionAnimation,animationSize,false);
                     playerBullets.splice(i,1);
                 }
@@ -993,7 +1018,7 @@ class GameScene extends Scene
             {
                 if(CollisionManager.SATCollision(this.bombers[i]._bullets[b].getRect.getPoints(),this.player.getShape.getPoints()))
                 {
-                    AudioManager.getInstance().playSound("mineExplosion");
+                    AudioManager.getInstance().playSound("mineExplosion", this.bombers[i]._bullets[b].getRect.getOrigin());
                     this.gui.get("healthValue")[0].getRenderSize().x -= (this.gui.get("healthValue")[0].getSize().x/100) * Bomber.bulletDamage;
                     this.animationManager.addAnimation(5,0.02,this.bombers[i]._bullets[b].getRect.getOrigin(),"EXPLOSION",new Vec2(256,256),false);
                     this.bombers[i]._bullets.splice(b,1);

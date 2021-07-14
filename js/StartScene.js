@@ -16,11 +16,8 @@ class StartScene extends Scene
         this._guiComponents.push(new GuiComponent("quit",new Vec2(this._canvasWidth/2,this._canvasHeight/1.5),new Vec2(400,185),true,{"click" : this._quit} ,{"mouseenter": null},{"mouseleave": null}));
     }
 
-    
-
     update()
-    {
-        
+    { 
     }
 
     draw()

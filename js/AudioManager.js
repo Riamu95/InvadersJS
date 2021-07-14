@@ -31,24 +31,26 @@ class AudioManager
         this._sounds.set(id, new Howl({src : [src],  "loop" : loop }));
     }
 
-    playSound(sound)
+    playSound(sound, pos = new Vec2(0,0))
     {
-       this._sounds.get(sound).play();
+       let id = this._sounds.get(sound).play();
+       this._sounds.get(sound).pos(pos.x
+        , pos.y, -0.5, id);
     }
 
-    playEngine()
+    playEngine(pos)
     {
         if(!AudioManager.m_engineToggle)
         {
-            this._sounds.get("engine").fade(0,0.25,1000);
-            this.playSound("engine");
+            this._sounds.get("engine").fade(0,0.5,1000);
+            this.playSound("engine",pos);
             AudioManager.m_engineToggle = true;
         }
     }
 
     stopEngine()
     {
-        this._sounds.get("engine").fade(0.25,0,1000);
+        this._sounds.get("engine").fade(0.5,0,1000);
     }
 
     stopSound(sound)
