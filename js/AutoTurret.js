@@ -33,7 +33,7 @@ AutoTurret.prototype.update = function(dt)
                     value[0].getRect.setRect(this._rect.getOrigin());
                     value[0].setTimer = performance.now();
                     this._fireTimer = performance.now();
-                    AudioManager.getInstance().playSound("turret",value[0].getRect().getOrigin());
+                    AudioManager.getInstance().playSound("turret",value[0].getRect.getOrigin());
                     break;
                 }
                 else

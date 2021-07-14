@@ -64,21 +64,22 @@ class GameScene extends Scene
         
         AudioManager.getInstance().addSound("background", "../Assets/Audio/background.wav", { loop : true }, { volume : 1 });
         AudioManager.getInstance().addSound("shotgun", "../Assets/Audio/shotgun.ogg", { loop : false }, { volume : 1 });
-        AudioManager.getInstance().addSound("reload", "../Assets/Audio/Reload.ogg", { loop : false }, { volume : 1 });
+        AudioManager.getInstance().addSound("reload", "../Assets/Audio/Reload.ogg", { loop : false }, { volume : 0.5 });
         AudioManager.getInstance().addSound("mine", "../Assets/Audio/mine.ogg", { loop : false }, { volume : 1 });
         AudioManager.getInstance().addSound("mineExplosion", "../Assets/Audio/mineExplosion.wav", { loop : false }, { volume : 1 });
         AudioManager.getInstance().addSound("pistolExplosion", "../Assets/Audio/pistolExplosion.wav", { loop : false }, { volume : 1 });
         AudioManager.getInstance().addSound("powerUp", "../Assets/Audio/powerUp.wav", { loop : false }, { volume : 1 });
         AudioManager.getInstance().addSound("turret", "../Assets/Audio/turret.wav", { loop : false }, { volume : 1 });
-        AudioManager.getInstance().addSound("powerUpActivate", "../Assets/Audio/powerUpActivate.wav", { loop : false } , { volume : 0.1 });
+        AudioManager.getInstance().addSound("powerUpActivate", "../Assets/Audio/powerUpActivate.wav", { loop : false } , { volume : 0.5 });
         AudioManager.getInstance().addSound("ammo", "../Assets/Audio/ammo.wav", { loop : false },  { volume : 1 });
     
-        AudioManager.getInstance().addSound("engine", "../Assets/Audio/engine.ogg", { loop : true }, { volume : 1  });
+        AudioManager.getInstance().addSound("engine", "../Assets/Audio/engine.ogg", { loop : true }, { volume : 0  });
         AudioManager.getInstance().addSound("pistol", "../Assets/Audio/pistol.ogg", { loop : false }, { volume : 1 });
         AudioManager.getInstance().addSound("switch", "../Assets/Audio/switch.ogg", { loop : false }, { volume : 0.1 });
         AudioManager.getInstance().addSound("collisionDamage", "../Assets/Audio/damageNew.ogg", { loop : false },  { volume : 1 });
         AudioManager.getInstance().addSound("collisionDeath", "../Assets/Audio/deathNew.ogg", { loop : false }, { volume : 1 });
-    
+        AudioManager.getInstance().addSound("shotgunCollision", "../Assets/Audio/shotgunCollision.wav", { loop : false }, { volume : 1 });
+        AudioManager.getInstance().setListenerPos(this.player.getShape.getOrigin());
 
         document.addEventListener('keydown', (event) =>
         { 
@@ -106,7 +107,7 @@ class GameScene extends Scene
                 this.player.setFireTimer(performance.now()); 
             }
 
-            this.player.getCurrentWeapon().getAmmoCount() <= 0 &&   AudioManager.getInstance().playSound("reload", this.player.getShape.getOrigin());
+            this.player.getCurrentWeapon().getAmmoCount() <= 0 &&  AudioManager.getInstance().playSound("reload");
         });
 
         AudioManager.getInstance().getSound("engine").on('fade', () =>
@@ -213,7 +214,8 @@ class GameScene extends Scene
     update(dt)
     {
         this.fps  = 1000 / dt;
-        Howler.pos(this.player.getShape.getOrigin().x, this.player.getShape.getOrigin().y, -0.5);
+       
+
         for( let i = 0; i < this.player.getWeapons().length; i++)
         {
             this.player.getWeapons()[i].update(dt);
@@ -359,15 +361,11 @@ class GameScene extends Scene
         }
 
         this.map.update(this.animationManager,this.camera.getPos,this._canvasWidth,this._canvasHeight);
-        /*
-        if(Vec2.length(this.player.getVelocity()) > 0.1)
-        {
-           
-        }*/
 
         this.particleSystem.update(dt);
 
         this.inputHandling(dt);
+        Howler.pos(this.player.getShape.getOrigin().x, this.player.getShape.getOrigin().y, -0.5);
         this.collisions();    
     }
     
@@ -452,8 +450,8 @@ class GameScene extends Scene
 
         if(this.pressedKeys['e']  && this.player.getCurrentPowerUp() != null)
         {
+            !this.player.getUsingPowerUp() && AudioManager.getInstance().playSound("powerUpActivate");
             this.player.setUsingPowerUp(true);
-            AudioManager.getInstance().playSound("powerUpActivate", this.player.getShape.getOrigin());
             PowerUp.prototype.currentPowerUpTimer = performance.now();
             this.gui.get("activePowerUp")[0].setActive(true);
             switch(this.player.getCurrentPowerUp()) 
@@ -478,12 +476,12 @@ class GameScene extends Scene
         }
         else if (this.pressedKeys['e']  && this.player.getCurrentPowerUp() == null)
         {
-            AudioManager.getInstance().playSound("reload", this.player.getShape.getOrigin());
+           !AudioManager.getInstance().getSound("reload").playing() && AudioManager.getInstance().playSound("reload");
         }
 
         if (this.pressedKeys['1'])
         {
-            AudioManager.getInstance().playSound("switch", this.player.getShape.getOrigin());
+            AudioManager.getInstance().playSound("switch");
             this.player.setCurrentWeapon(0);
             this.gui.get("ammo")[0].setActive(true);
             this.gui.get("ammo")[1].setActive(false);
@@ -491,7 +489,7 @@ class GameScene extends Scene
         }
         else if (this.pressedKeys['2'])
         {
-            AudioManager.getInstance().playSound("switch", this.player.getShape.getOrigin());
+            AudioManager.getInstance().playSound("switch");
             this.player.setCurrentWeapon(1); 
             this.gui.get("ammo")[1].setActive(true);
             this.gui.get("ammo")[0].setActive(false);
@@ -499,7 +497,7 @@ class GameScene extends Scene
         }
         else if (this.pressedKeys['3'])
         {
-            AudioManager.getInstance().playSound("switch", this.player.getShape.getOrigin());
+            AudioManager.getInstance().playSound("switch");
             this.player.setCurrentWeapon(2);
             this.gui.get("ammo")[2].setActive(true);
             this.gui.get("ammo")[0].setActive(false);
@@ -919,7 +917,7 @@ class GameScene extends Scene
                 animationSize =  new Vec2(256,256);
                 noOfFrames = 5;
                 bulletExplosionAnimation = "BULLET";
-                bulletExplosionSound = "shotgunExplosion";
+                bulletExplosionSound = "shotgunCollision";
             }
             else if(w == 2)
             {

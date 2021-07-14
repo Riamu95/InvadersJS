@@ -2,7 +2,7 @@ class AudioManager
 {
     static m_instance = null;
     static m_engineToggle = false;
-
+   
     constructor()
     {
         if(AudioManager.m_instance == null)
@@ -11,7 +11,7 @@ class AudioManager
         }
 
         this._sounds = new Map();
-        
+        this._pos = new Vec2(0,0);
     }
 
     static getInstance()
@@ -29,16 +29,19 @@ class AudioManager
     {
         let { loop } = properties[0];
         let  volume  = properties?.[1];
-        console.log(volume);
-        //let { volume } = properties?[1];
         this._sounds.set(id, new Howl({src : [src],  "loop" : loop, "volume" : volume.volume}));
     }
 
-    playSound(sound, pos = new Vec2(0,0))
+    playSound(sound, pos = this._pos)
     {
        let id = this._sounds.get(sound).play();
        this._sounds.get(sound).pos(pos.x
         , pos.y, -0.5, id);
+    }
+
+    setListenerPos(pos)
+    {
+        this._pos = pos;
     }
 
     playEngine(pos)
@@ -60,6 +63,7 @@ class AudioManager
     {
        this._sounds.get(sound).stop();
     }
+
     addBackgroundSound(sound, type)
     {
         let soundAffect = this._sounds.get(sound);
