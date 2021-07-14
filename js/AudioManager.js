@@ -28,7 +28,10 @@ class AudioManager
     addSound(id, src, ...properties)
     {
         let { loop } = properties[0];
-        this._sounds.set(id, new Howl({src : [src],  "loop" : loop }));
+        let  volume  = properties?.[1];
+        console.log(volume);
+        //let { volume } = properties?[1];
+        this._sounds.set(id, new Howl({src : [src],  "loop" : loop, "volume" : volume.volume}));
     }
 
     playSound(sound, pos = new Vec2(0,0))

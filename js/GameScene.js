@@ -61,22 +61,24 @@ class GameScene extends Scene
         GameScene._ctx.font = '24px serif';
         GameScene._ctx.fillStyle = 'blue';
         PowerUp.prototype.setWorldSize(new Vec2(this.worldWidth,this.worldHeight));
-
-        AudioManager.getInstance().addSound("background", "../Assets/Audio/background.wav", { loop : true });
-        AudioManager.getInstance().addSound("engine", "../Assets/Audio/engine.ogg", { loop : true });
-        AudioManager.getInstance().addSound("pistol", "../Assets/Audio/pistol.ogg", { loop : false });
-        AudioManager.getInstance().addSound("shotgun", "../Assets/Audio/shotgun.ogg", { loop : false });
-        AudioManager.getInstance().addSound("reload", "../Assets/Audio/Reload.ogg", { loop : false });
-        AudioManager.getInstance().addSound("mine", "../Assets/Audio/mine.ogg", { loop : false });
-        AudioManager.getInstance().addSound("mineExplosion", "../Assets/Audio/mineExplosion.wav", { loop : false });
-        AudioManager.getInstance().addSound("pistolExplosion", "../Assets/Audio/pistolExplosion.wav", { loop : false });
-        AudioManager.getInstance().addSound("powerUp", "../Assets/Audio/powerUp.wav", { loop : false });
-        AudioManager.getInstance().addSound("turret", "../Assets/Audio/turret.wav", { loop : false });
-        AudioManager.getInstance().addSound("powerUpActivate", "../Assets/Audio/powerUpActivate.wav", { loop : false });
-        AudioManager.getInstance().addSound("ammo", "../Assets/Audio/ammo.wav", { loop : false });
-        AudioManager.getInstance().addSound("switch", "../Assets/Audio/switch.ogg", { loop : false });
-        AudioManager.getInstance().addSound("collisionDamage", "../Assets/Audio/damageNew.ogg", { loop : false });
-        AudioManager.getInstance().addSound("collisionDeath", "../Assets/Audio/deathNew.ogg", { loop : false });
+        
+        AudioManager.getInstance().addSound("background", "../Assets/Audio/background.wav", { loop : true }, { volume : 1 });
+        AudioManager.getInstance().addSound("shotgun", "../Assets/Audio/shotgun.ogg", { loop : false }, { volume : 1 });
+        AudioManager.getInstance().addSound("reload", "../Assets/Audio/Reload.ogg", { loop : false }, { volume : 1 });
+        AudioManager.getInstance().addSound("mine", "../Assets/Audio/mine.ogg", { loop : false }, { volume : 1 });
+        AudioManager.getInstance().addSound("mineExplosion", "../Assets/Audio/mineExplosion.wav", { loop : false }, { volume : 1 });
+        AudioManager.getInstance().addSound("pistolExplosion", "../Assets/Audio/pistolExplosion.wav", { loop : false }, { volume : 1 });
+        AudioManager.getInstance().addSound("powerUp", "../Assets/Audio/powerUp.wav", { loop : false }, { volume : 1 });
+        AudioManager.getInstance().addSound("turret", "../Assets/Audio/turret.wav", { loop : false }, { volume : 1 });
+        AudioManager.getInstance().addSound("powerUpActivate", "../Assets/Audio/powerUpActivate.wav", { loop : false } , { volume : 0.1 });
+        AudioManager.getInstance().addSound("ammo", "../Assets/Audio/ammo.wav", { loop : false },  { volume : 1 });
+    
+        AudioManager.getInstance().addSound("engine", "../Assets/Audio/engine.ogg", { loop : true }, { volume : 1  });
+        AudioManager.getInstance().addSound("pistol", "../Assets/Audio/pistol.ogg", { loop : false }, { volume : 1 });
+        AudioManager.getInstance().addSound("switch", "../Assets/Audio/switch.ogg", { loop : false }, { volume : 0.1 });
+        AudioManager.getInstance().addSound("collisionDamage", "../Assets/Audio/damageNew.ogg", { loop : false },  { volume : 1 });
+        AudioManager.getInstance().addSound("collisionDeath", "../Assets/Audio/deathNew.ogg", { loop : false }, { volume : 1 });
+    
 
         document.addEventListener('keydown', (event) =>
         { 
