@@ -9,12 +9,15 @@ class GameOverScene extends Scene
         this._next = this.NextScene.bind(this);
         this._quit = this.QuitScene.bind(this);
         
+        this._enter = this.MouseEnter.bind(this);
+        this._leave = this.Mouseleave.bind(this);
+
         this._guiComponents = [];
         this._guiComponents.push(new GuiComponent("MainMenuBackground",new Vec2(this._canvasWidth/2,this._canvasHeight/2),new Vec2(this._canvasWidth,this._canvasHeight),true));
         this._guiComponents.push(new GuiComponent("Title",new Vec2(this._canvasWidth/2,this._canvasHeight/5),new Vec2(550,180),true));
         this._guiComponents.push(new GuiComponent("GameOver", new Vec2(this._canvasWidth/2,this._canvasHeight/2), new Vec2(550,180), true));
-        this._guiComponents.push(new GuiComponent("playAgain",new Vec2(this._canvasWidth/2,this._canvasHeight/2),new Vec2(400,185),true, {"click" : this._next} ,{"mouseenter": null},{"mouseleave": null}));
-        this._guiComponents.push(new GuiComponent("quit",new Vec2(this._canvasWidth/2,this._canvasHeight/1.5),new Vec2(400,185),true,{"click" : this._quit} ,{"mouseenter": null},{"mouseleave": null}));
+        this._guiComponents.push(new GuiComponent("playAgain",new Vec2(this._canvasWidth/2,this._canvasHeight/2),new Vec2(400,185),true, {"click" : this._next} ,{"mouseenter": this._enter},{"mouseleave": this._leave}));
+        this._guiComponents.push(new GuiComponent("quit",new Vec2(this._canvasWidth/2,this._canvasHeight/1.5),new Vec2(400,185),true,{"click" : this._quit} ,{"mouseenter": this._enter},{"mouseleave": this._leave}));
         
         this._guiComponents[2].getImage().style.display = "block";
         this._guiComponents[3].getImage().style.display = "block";
@@ -35,6 +38,31 @@ class GameOverScene extends Scene
         for(let i = 0; i < 2; i++)
         {
             this._guiComponents[i].draw(GameOverScene._ctx);
+        }
+    }
+
+    MouseEnter(e)
+    {
+        AudioManager.getInstance().playSound("buttonHover");
+        if(e.target.id == "playAgain")
+        {
+            e.target.src = "../Assets/buttons/playAgainClicked.png"
+        }
+        else if (e.target.id == "quit")
+        {
+            e.target.src = "../Assets/buttons/quitClicked.png"
+        }
+    }
+
+    Mouseleave(e)
+    {
+        if(e.target.id == "playAgain")
+        {
+            e.target.src = "../Assets/buttons/playAgain.png"
+        }
+        else if (e.target.id == "quit")
+        {
+            e.target.src = "../Assets/buttons/unquit.png"
         }
     }
 

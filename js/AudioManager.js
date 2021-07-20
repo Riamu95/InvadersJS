@@ -12,6 +12,8 @@ class AudioManager
 
         this._sounds = new Map();
         this._pos = new Vec2(0,0);
+        this.soundID = null;
+        this.engineID = null;
     }
 
     static getInstance()
@@ -24,7 +26,12 @@ class AudioManager
         return AudioManager.m_instance;
     }
 
+    update(pos)
+    {
 
+    }
+    
+ 
     addSound(id, src, ...properties)
     {
         let { loop } = properties[0];
@@ -32,31 +39,43 @@ class AudioManager
         this._sounds.set(id, new Howl({src : [src],  "loop" : loop, "volume" : volume.volume}));
     }
 
-    playSound(sound, pos = this._pos)
+    playSound(sound)
     {
-       let id = this._sounds.get(sound).play();
-       this._sounds.get(sound).pos(pos.x
-        , pos.y, -0.5, id);
+        this.soundID =  this._sounds.get(sound).play();
+          
+    }
+    
+    playSpatialSound(sound, pos = this._pos)
+    {
+        this.soundID =  this._sounds.get(sound).play();
+        this._sounds.get(sound).pos(pos.x, pos.y, -0.5, this.soundID);
+        let panner = this._sounds.get(sound)._pannerAttr;
+        panner.rolloffFactor = 0.99;
     }
 
     setListenerPos(pos)
     {
         this._pos = pos;
+        this.engineID = this._sounds.get("engine");
     }
 
-    playEngine(pos)
+    playEngine()
     {
         if(!AudioManager.m_engineToggle)
         {
-            this._sounds.get("engine").fade(0,0.5,1000);
-            this.playSound("engine",pos);
+            this.engineID.fade(0,0.025,1000);
+            this.engineID.play();
             AudioManager.m_engineToggle = true;
         }
+    }
+    getEngineID()
+    {
+        return this.engineID;
     }
 
     stopEngine()
     {
-        this._sounds.get("engine").fade(0.5,0,1000);
+        this.engineID.fade(0.025,0,1000);
     }
 
     stopSound(sound)
