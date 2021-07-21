@@ -16,7 +16,7 @@ const PowerUp = function(pos,size,type, spawnTimer)
 }
 
 PowerUp.prototype.healthIncreaseAmount = 0;
-PowerUp.prototype.healthIncreaseValue = 10;
+PowerUp.prototype.healthIncreaseValue = 30;
 PowerUp.prototype.MaxPowerUpCount = 5;
 PowerUp.prototype.currentPowerUpTimer = 0;
 PowerUp.prototype.timeToLive = 5;

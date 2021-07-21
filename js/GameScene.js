@@ -17,8 +17,13 @@ class GameScene extends Scene
         this.ammunition = [];
 
         this.collisionManager = new CollisionManager();
-        this.player = new Player(new Vec2(this.worldWidth/2,this.worldHeight/2),new Vec2(156,151));//new Vec2(127,130));
-        this.camera = new Camera(this.player.getShape.getOrigin().x - this._canvasWidth/2,this.player.getShape.getOrigin().y - this._canvasHeight/2,this._canvasWidth,this._canvasHeight, this.worldWidth,this.worldHeight);
+        this.player = new Player(new Vec2(this.worldWidth/2,this.worldHeight/2),new Vec2(156,151));
+
+        this.teleporting = false;
+        this.teleportClock = 0;
+        this.teleportTime = 3;
+
+        this.camera = new Camera(this.player.getShape.getOrigin().x - this._canvasWidth/2,this.player.getShape.getOrigin().y - this._canvasHeight/2,this._canvasWidth,this._canvasHeight, this.worldWidth,this.worldHeight, this.teleportTime/2);
         //let qt = new QuadTree(new Vec2(0,0),new Vec2(this.worldWidth,this.worldHeight), 5);
         this.animationManager = new AnimationManager();
         this.waveManager = new WaveManager(this.worldWidth,this.worldHeight);
@@ -50,6 +55,14 @@ class GameScene extends Scene
 
         this.powerupGuiLeftPos = new Vec2(this.camera.getSize.x/1.13,this.camera.getSize.y/1.105);
         this.powerupGuiRightPos = new Vec2(this.camera.getSize.x/1.0525,this.camera.getSize.y/1.105);
+
+        this.gameOver = false;
+        this.playerRender = true;
+
+        this.boss = new Boss(new Vec2(this.worldWidth/2,this.worldHeight/100), new Vec2(261, 235));
+
+        this.gameOverClock = 0;
+        this.gameOverTimer = 1;
     }
      
 
@@ -61,17 +74,47 @@ class GameScene extends Scene
         GameScene._ctx.font = '24px serif';
         GameScene._ctx.fillStyle = 'blue';
         PowerUp.prototype.setWorldSize(new Vec2(this.worldWidth,this.worldHeight));
-
+        
+        AudioManager.getInstance().addSound("background", "../Assets/Audio/background.wav", { loop : true }, { volume : 0.1 });
+        AudioManager.getInstance().addSound("shotgun", "../Assets/Audio/shotgun.ogg", { loop : false }, { volume : 1 });
+        AudioManager.getInstance().addSound("reload", "../Assets/Audio/Reload.ogg", { loop : false }, { volume : 0.05});
+        AudioManager.getInstance().addSound("mine", "../Assets/Audio/mine.ogg", { loop : false }, { volume : 1 });
+        AudioManager.getInstance().addSound("mineExplosion", "../Assets/Audio/mineExplosion.wav", { loop : false }, { volume : 1 });
+        AudioManager.getInstance().addSound("pistolExplosion", "../Assets/Audio/pistolExplosion.wav", { loop : false }, { volume : 1 });
+        AudioManager.getInstance().addSound("powerUp", "../Assets/Audio/powerUp.wav", { loop : false }, { volume : 1 });
+        AudioManager.getInstance().addSound("turret", "../Assets/Audio/turret.wav", { loop : false }, { volume : 1 });
+        AudioManager.getInstance().addSound("powerUpActivate", "../Assets/Audio/powerUpActivate.wav", { loop : false } , { volume : 0.2 });
+        AudioManager.getInstance().addSound("ammo", "../Assets/Audio/ammo.wav", { loop : false },  { volume : 1 });
+    
+        AudioManager.getInstance().addSound("engine", "../Assets/Audio/engine.ogg", { loop : true }, { volume : 0 });
+        AudioManager.getInstance().addSound("pistol", "../Assets/Audio/pistol.ogg", { loop : false }, { volume : 1 });
+        AudioManager.getInstance().addSound("switch", "../Assets/Audio/switch.ogg", { loop : false }, { volume : 0.05 });
+        AudioManager.getInstance().addSound("collisionDamage", "../Assets/Audio/damageNew.ogg", { loop : false },  { volume : 1 });
+        AudioManager.getInstance().addSound("collisionDeath", "../Assets/Audio/deathNew.ogg", { loop : false }, { volume : 1 });
+        AudioManager.getInstance().addSound("shotgunCollision", "../Assets/Audio/shotgunCollision.wav", { loop : false }, { volume : 0.6 });
+        AudioManager.getInstance().addSound("blackHoleTeleport", "../Assets/Audio/blackhole.wav", { loop : false }, { volume : 0.6 });
+        AudioManager.getInstance().addSound("death", "../Assets/Audio/playerDeath.wav", { loop : false }, { volume : 1 });
+       
+        AudioManager.getInstance().setListenerPos(this.player.getShape.getOrigin());
+        AudioManager.getInstance().playSound("background");
+        
+        
         document.addEventListener('keydown', (event) =>
         { 
            if (this.buttons.includes(event.key))
                 this.pressedKeys[event.key] = true;
+            
+            if(event.key == "w")
+                AudioManager.getInstance().playEngine();
         });   
 
         document.addEventListener('keyup', (event) =>
         {
             if(this.buttons.includes(event.key))
                 this.pressedKeys[event.key] = false;
+
+            if(event.key == "w")
+                AudioManager.getInstance().stopEngine();
         });
 
         document.addEventListener('click', () =>
@@ -81,6 +124,14 @@ class GameScene extends Scene
                 this.player.setFired(true);
                 this.player.setFireTimer(performance.now()); 
             }
+
+            this.player.getCurrentWeapon().getAmmoCount() <= 0 &&  AudioManager.getInstance().playSound("reload");
+        });
+
+        AudioManager.getInstance().getEngineID().on('fade', () =>
+        {
+            if(AudioManager.getInstance().getEngineID().volume() == 0.0)
+                AudioManager.m_engineToggle = false;
         });
     }
 
@@ -175,35 +226,19 @@ class GameScene extends Scene
                 let flockPoint = new Vec2(Math.random() * this.worldWidth, Math.random() * this.worldHeight);
                 let tempBomber = new Bomber(new Vec2(pos.x,pos.y), new Vec2(128,158), new Vec2(0,0),flockPoint);
                 this.bombers.push(tempBomber);
-            }        
+            } 
+            
+            for( let i = 0; i < this.waveManager.getBossCount(); i++)
+            {
+
+            }
     }
 
     update(dt)
     {
         this.fps  = 1000 / dt;
-
-        for( let i = 0; i < this.player.getWeapons().length; i++)
-        {
-            this.player.getWeapons()[i].update(dt);
-        }  
-    
-        //for every array, allocate seek point and move the flock
-        for( let row = 0; row < this.minions.length; row++)
-        {
-            EnemyMinion.generateFlockPoint(this.minions[row], this.player.getShape.getOrigin(), this.flockPoints[row], dt, this.worldWidth, this.worldHeight);
-        }
-    
-        /* Bomber and bomber bullet MOVE */
-        for(let i = 0; i <  this.bombers.length; i++ )
-        {
-            this.bombers[i].move(dt, this.player.getShape.getOrigin(), this.worldWidth, this.worldHeight);
-    
-            for(let b = 0; b <  this.bombers[i]._bullets.length; b++)
-            {
-                this.bombers[i]._bullets[b].seek(dt, this.player.getShape.getOrigin());
-            } 
-        }
-        /* Black Holes update */
+        
+         /* Black Holes update */
         this.blackHoles.forEach( bh =>
         {
             bh.update();
@@ -216,127 +251,169 @@ class GameScene extends Scene
             {
                 this.player.getShape.setOrigin(force);
                 this.player.setShapePosition();
+
+                AudioManager.getInstance().playSound("blackHoleTeleport");
+
+                this.teleporting = true;
+                this.teleportClock = performance.now();
+                this.camera.setFadeClock(performance.now());
+                this.camera.setFadeIn(true); 
                 //animate here apply initiala impulsesss
             }
         });
 
-
-        this.powerUps.forEach( pu =>
+        if((performance.now() - this.teleportClock)/ 1000 > this.teleportTime && this.teleporting)
         {
-            pu.update();
-        });
-
-        this.ammunition.forEach( a =>
-        {
-            a.update(this.waveManager.getAmmoIntervalTimer(),this.worldWidth,this.worldHeight);
-        });
-
-        this.player.getAutoTurret().getActive() &&  this.player.getAutoTurret().update(dt);   
-
-        /* this.asteroids update */
-        this.asteroids.forEach(ast =>
-        {
-            ast.update(this.worldWidth,this.worldHeight);
-        })
-
-        if(this.player.getUsingPowerUp())
-        {                                          
-            let time  = Math.round((performance.now() - PowerUp.prototype.currentPowerUpTimer)/1000);
-            let index = 0;  
-            switch(this.player.getPowerUpType()) 
-            {
-                case PowerUpType.HEALTH:
-                    if(this.player.getHealth + PowerUp.prototype.healthIncreaseValue > 100)
-                        PowerUp.prototype.healthIncreaseAmount = PowerUp.prototype.healthIncreaseValue - ((this.player.getHealth + PowerUp.prototype.healthIncreaseValue) - 100);
-                    else
-                        PowerUp.prototype.healthIncreaseAmount = 10;
-
-                   index = this.gui.get("healthSymbol")[0].getActive() == true ? index = 0 : index = 1;
-
-                   this.player.setHealth =  PowerUp.prototype.healthIncreaseAmount;
-                   this.gui.get("healthValue")[0].getRenderSize().x += (this.gui.get("healthValue")[0].getRenderSize().x/100) *  PowerUp.prototype.healthIncreaseAmount;
-                   this.player.resetPowerUp();
-                   this.gui.get("healthSymbol")[index].setActive(false);  
-                    break;
-                case  PowerUpType.FIRE_RATE: 
-                index = this.gui.get("fireRate")[0].getActive() == true ? index = 0 : index = 1;
-                    if (time >= PowerUp.prototype.fireRateTimer)
-                    {
-                        this.player.setFireRate = 0.5;
-                        this.player.resetPowerUp();
-                        this.gui.get("fireRate")[index].setActive(false);
-                    }  
-                    break;
-                case  PowerUpType.AUTOTURRET:
-                    index = this.gui.get("turret")[0].getActive() == true ? index = 0 : index = 1;
-                    if(time >= PowerUp.prototype.AutoTurretTimer)
-                    {
-                        
-                        this.player.getAutoTurret().setActive(false);
-                        this.player.resetPowerUp();
-                        this.gui.get("turret")[index].setActive(false);
-                        //explosion animation for all remaining bullets
-                        for(let value of this.player.getAutoTurret().getBullets().values())
-                        {
-                            if (value[1] == true)
-                            {
-                                this.animationManager.addAnimation(5,0.02,value[0].getRect.getOrigin(),"BULLET",new Vec2(256,256),false);    
-                            }
-                        }
-                        this.player.getAutoTurret().clear();
-                    }  
-                    break;
-                case PowerUpType.SPEED:
-                    index = this.gui.get("speed")[0].getActive() == true ? index = 0 : index = 1;
-                    if(time >= PowerUp.prototype.speedTimer)
-                    { 
-                        this.player.setMaxAcceleration(0.5);
-                        this.player.setSpeed(0.5);
-                        this.player.resetPowerUp();
-                        this.gui.get("speed")[index].setActive(false);
-                    }
-                    break;
-            }
-
-            if (this.player.getCurrentPowerUp() == null && this.player.getNextPowerUp() != null)
-            {
-                this.player.setCurrentPowerUp(this.player.getNextPowerUp());
-                this.player.setNextPowerUp(null);
-                this.gui.get("activePowerUp")[0].setActive(false);
-                for( let [powerUpGuiType,powerUpGuiSymbol] of this.gui.entries())
-                {
-                    if(powerUpGuiType == "healthSymbol" || powerUpGuiType =="fireRate" || powerUpGuiType == "speed" || powerUpGuiType == "turret")
-                    {
-                        for( let powerUpSymbol of powerUpGuiSymbol)
-                        {
-                            if(powerUpSymbol.getActive())
-                            {
-                                powerUpSymbol.setPos(new Vec2(this.camera.getSize.x/1.13,this.camera.getSize.y/1.105));
-                                this.playerPowerUps.shift();
-                                this.gui.get("nullPowerUp")[1].setActive(true);
-                            }
-                        }
-                    }
-                }
-            }
-            else if (this.player.getCurrentPowerUp() == null && this.player.getNextPowerUp() == null)
-            {
-                this.gui.get("nullPowerUp")[0].setActive(true);
-                this.gui.get("activePowerUp")[0].setActive(false);
-            }
+            this.teleporting = false;
+            console.log("opacity " , GameScene._ctx.globalAlpha);
         }
 
-        this.map.update(this.animationManager,this.camera.getPos,this._canvasWidth,this._canvasHeight);
-        /*
-        if(Vec2.length(this.player.getVelocity()) > 0.1)
+        if(!this.gameOver)
         {
-           
-        }*/
+            if(!this.teleporting)
+            {
+                for( let i = 0; i < this.player.getWeapons().length; i++)
+                {
+                    this.player.getWeapons()[i].update(dt);
+                }  
+            
+                //for every array, allocate seek point and move the flock
+                for( let row = 0; row < this.minions.length; row++)
+                {
+                    EnemyMinion.generateFlockPoint(this.minions[row], this.player.getShape.getOrigin(), this.flockPoints[row], dt, this.worldWidth, this.worldHeight);
+                }
+            
+                /* Bomber and bomber bullet MOVE */
+                for(let i = 0; i <  this.bombers.length; i++ )
+                {
+                    this.bombers[i].move(dt, this.player.getShape.getOrigin(), this.worldWidth, this.worldHeight);
+            
+                    for(let b = 0; b <  this.bombers[i]._bullets.length; b++)
+                    {
+                        this.bombers[i]._bullets[b].seek(dt, this.player.getShape.getOrigin());
+                    } 
+                }
 
-        this.particleSystem.update(dt);
+                this.powerUps.forEach( pu =>
+                {
+                    pu.update();
+                });
 
-        this.inputHandling(dt);
-        this.collisions();    
+                this.ammunition.forEach( a =>
+                {
+                    a.update(this.waveManager.getAmmoIntervalTimer(),this.worldWidth,this.worldHeight);
+                });
+
+                this.player.getAutoTurret().getActive() &&  this.player.getAutoTurret().update(dt);   
+
+                /* this.asteroids update */
+                this.asteroids.forEach(ast =>
+                {
+                    ast.update(this.worldWidth,this.worldHeight);
+                })
+
+                if(this.player.getUsingPowerUp())
+                {                                          
+                    let time  = Math.round((performance.now() - PowerUp.prototype.currentPowerUpTimer)/1000);
+                    let index = 0;  
+                    switch(this.player.getPowerUpType()) 
+                    {
+                        case PowerUpType.HEALTH:
+                            if(this.player.getHealth + PowerUp.prototype.healthIncreaseValue > 100)
+                                PowerUp.prototype.healthIncreaseAmount = PowerUp.prototype.healthIncreaseValue - ((this.player.getHealth + PowerUp.prototype.healthIncreaseValue) - 100);
+                            else
+                                PowerUp.prototype.healthIncreaseAmount = 10;
+
+                        index = this.gui.get("healthSymbol")[0].getActive() == true ? index = 0 : index = 1;
+
+                        this.player.setHealth =  PowerUp.prototype.healthIncreaseAmount;
+                        this.gui.get("healthValue")[0].getRenderSize().x += (this.gui.get("healthValue")[0].getRenderSize().x/100) *  PowerUp.prototype.healthIncreaseAmount;
+                        this.player.resetPowerUp();
+                        this.gui.get("healthSymbol")[index].setActive(false);  
+                            break;
+                        case  PowerUpType.FIRE_RATE: 
+                        index = this.gui.get("fireRate")[0].getActive() == true ? index = 0 : index = 1;
+                            if (time >= PowerUp.prototype.fireRateTimer)
+                            {
+                                this.player.setFireRate = 0.5;
+                                this.player.resetPowerUp();
+                                this.gui.get("fireRate")[index].setActive(false);
+                            }  
+                            break;
+                        case  PowerUpType.AUTOTURRET:
+                            index = this.gui.get("turret")[0].getActive() == true ? index = 0 : index = 1;
+                            if(time >= PowerUp.prototype.AutoTurretTimer)
+                            {
+                                
+                                this.player.getAutoTurret().setActive(false);
+                                this.player.resetPowerUp();
+                                this.gui.get("turret")[index].setActive(false);
+                                //explosion animation for all remaining bullets
+                                for(let value of this.player.getAutoTurret().getBullets().values())
+                                {
+                                    if (value[1] == true)
+                                    {
+                                        this.animationManager.addAnimation(5,0.02,value[0].getRect.getOrigin(),"BULLET",new Vec2(256,256),false);    
+                                    }
+                                }
+                                this.player.getAutoTurret().clear();
+                            }  
+                            break;
+                        case PowerUpType.SPEED:
+                            index = this.gui.get("speed")[0].getActive() == true ? index = 0 : index = 1;
+                            if(time >= PowerUp.prototype.speedTimer)
+                            { 
+                                this.player.setMaxAcceleration(0.5);
+                                this.player.setSpeed(0.5);
+                                this.player.resetPowerUp();
+                                this.gui.get("speed")[index].setActive(false);
+                            }
+                            break;
+                    }
+
+                    if (this.player.getCurrentPowerUp() == null && this.player.getNextPowerUp() != null)
+                    {
+                        this.player.setCurrentPowerUp(this.player.getNextPowerUp());
+                        this.player.setNextPowerUp(null);
+                        this.gui.get("activePowerUp")[0].setActive(false);
+                        for( let [powerUpGuiType,powerUpGuiSymbol] of this.gui.entries())
+                        {
+                            if(powerUpGuiType == "healthSymbol" || powerUpGuiType =="fireRate" || powerUpGuiType == "speed" || powerUpGuiType == "turret")
+                            {
+                                for( let powerUpSymbol of powerUpGuiSymbol)
+                                {
+                                    if(powerUpSymbol.getActive())
+                                    {
+                                        powerUpSymbol.setPos(new Vec2(this.camera.getSize.x/1.13,this.camera.getSize.y/1.105));
+                                        this.playerPowerUps.shift();
+                                        this.gui.get("nullPowerUp")[1].setActive(true);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    else if (this.player.getCurrentPowerUp() == null && this.player.getNextPowerUp() == null)
+                    {
+                        this.gui.get("nullPowerUp")[0].setActive(true);
+                        this.gui.get("activePowerUp")[0].setActive(false);
+                    }
+                }
+
+                this.map.update(this.animationManager,this.camera.getPos,this._canvasWidth,this._canvasHeight);
+
+                this.particleSystem.update(dt);
+
+                this.inputHandling(dt);
+                Howler.pos(this.player.getShape.getOrigin().x, this.player.getShape.getOrigin().y, -0.5);
+        
+                this.collisions();
+            }
+        }  
+        
+        if( (performance.now() - this.gameOverClock) / 1000  > this.gameOverTimer && this.gameOver)
+        {
+            this.NextScene();
+        }
     }
     
 
@@ -350,9 +427,6 @@ class GameScene extends Scene
             this.player.getCurrentWeapon().addBullet( bulletSpawnPoint ,this.player.getCurrentWeapon().getBulletSize(),this.player.getSpriteAngle * Math.PI/180,this.player.getMaxBulletSpeed);
             this.player.setFired(false);
         }
-
-
-
 
         if(this.pressedKeys['w'])
         {
@@ -423,6 +497,7 @@ class GameScene extends Scene
 
         if(this.pressedKeys['e']  && this.player.getCurrentPowerUp() != null)
         {
+            !this.player.getUsingPowerUp() && AudioManager.getInstance().playSound("powerUpActivate");
             this.player.setUsingPowerUp(true);
             PowerUp.prototype.currentPowerUpTimer = performance.now();
             this.gui.get("activePowerUp")[0].setActive(true);
@@ -446,8 +521,14 @@ class GameScene extends Scene
             }
             this.pressedKeys['e'] = false;
         }
+        else if (this.pressedKeys['e']  && this.player.getCurrentPowerUp() == null)
+        {
+           !AudioManager.getInstance().getSound("reload").playing() && AudioManager.getInstance().playSound("reload");
+        }
+
         if (this.pressedKeys['1'])
         {
+            !AudioManager.getInstance().getSound("switch").playing() && AudioManager.getInstance().playSound("switch");
             this.player.setCurrentWeapon(0);
             this.gui.get("ammo")[0].setActive(true);
             this.gui.get("ammo")[1].setActive(false);
@@ -455,6 +536,7 @@ class GameScene extends Scene
         }
         else if (this.pressedKeys['2'])
         {
+            !AudioManager.getInstance().getSound("switch").playing() && AudioManager.getInstance().playSound("switch");
             this.player.setCurrentWeapon(1); 
             this.gui.get("ammo")[1].setActive(true);
             this.gui.get("ammo")[0].setActive(false);
@@ -462,6 +544,7 @@ class GameScene extends Scene
         }
         else if (this.pressedKeys['3'])
         {
+            !AudioManager.getInstance().getSound("switch").playing() && AudioManager.getInstance().playSound("switch");
             this.player.setCurrentWeapon(2);
             this.gui.get("ammo")[2].setActive(true);
             this.gui.get("ammo")[0].setActive(false);
@@ -524,6 +607,7 @@ class GameScene extends Scene
  
              if(CollisionManager.SATCollision(this.powerUps[i].getRect().getPoints(), this.player._shape.getPoints()))
              {
+                 AudioManager.getInstance().playSound("powerUp");
                  for( let p = 0 ; p < 50; p++)
                  {
                     let percentage = p/50;
@@ -596,6 +680,7 @@ class GameScene extends Scene
  
              if(CollisionManager.SATCollision(this.ammunition[i].getRect().getPoints(), this.player._shape.getPoints()))
              {
+                 AudioManager.getInstance().playSound("ammo");
                  if (this.ammunition[i].getType() == AmmoType.MINE)
                      this.player.getWeapons()[2].addAmmo(this.ammunition[i].getAmmount());
                  else if (this.ammunition[i].getType() == AmmoType.SHOTGUN)
@@ -625,8 +710,26 @@ class GameScene extends Scene
                          this.player.getAutoTurret().getBullets().delete(this.minions[row][col].getRect.getOrigin());
                      }
  
-                     this.minions[row][col].checkHealth() &&  this.minions[row].splice(col,1);
-                     this.player.checkHealth() && this.NextScene();
+                     if(this.minions[row][col].checkHealth())
+                     {
+                        AudioManager.getInstance().playSound("collisionDeath");
+                        this.minions[row].splice(col,1);
+                     }
+                     else
+                     {
+                        AudioManager.getInstance().playSound("collisionDamage", this.minions[row][col].getRect.getOrigin());
+                     } 
+
+                     if(this.player.checkHealth())
+                     {
+                        this.gameOver = true;
+                        this.gameOverClock = performance.now();
+                        this.camera.setFadeClock(performance.now());
+                        this.camera.setFadeIn(true);
+                        this.playerRender = false;
+                        this.animationManager.addAnimation(5,0.02,this.player.getShape.getOrigin(),"EXPLOSION",new Vec2(256,256),false);
+                        break;
+                     } 
          
                      this.spawn();
                  }
@@ -641,8 +744,26 @@ class GameScene extends Scene
                  this.player.setHealth = -Bomber.collisionDamage;
                  this.bombers[b].setHealth = -this.player.getCollisionDamage();
                  
-                 this.bombers[b].checkHealth() && this.bombers.splice(b,1);
-                 this.player.checkHealth() &&  this.NextScene();
+                 if( this.bombers[b].checkHealth())
+                 {
+                    AudioManager.getInstance().playSound("collisionDeath",this.bombers[b].getRect.getOrigin());
+                    this.bombers.splice(b,1);
+                 }
+                 else
+                 {
+                    AudioManager.getInstance().playSound("collisionDamage",this.bombers[b].getRect.getOrigin());
+                 }
+                
+                 if(this.player.checkHealth())
+                 {
+                    this.gameOver = true;
+                    this.gameOverClock = performance.now();
+                    this.camera.setFadeClock(performance.now());
+                    this.camera.setFadeIn(true);
+                    this.playerRender = false;
+                    this.animationManager.addAnimation(5,0.02,this.player.getShape.getOrigin(),"EXPLOSION",new Vec2(256,256),false);
+                    break;
+                 }
                  
                  this.spawn();
                  //impulse
@@ -668,13 +789,25 @@ class GameScene extends Scene
                  }
                  if (this.asteroids[a].checkHealth())
                  {
+                     AudioManager.getInstance().playSound("collisionDeath",this.asteroids[a].getRect().getOrigin());
                      this.animationManager.addAnimation(5,0.02,this.asteroids[a].getRect().getOrigin(),"EXPLOSION",new Vec2(256,256),false);
                      this.asteroids.splice(a,1);
+                 }
+                 else
+                 {
+                    AudioManager.getInstance().playSound("collisionDamage",this.asteroids[a].getRect().getOrigin());
                  }
  
                  if(this.player.checkHealth())
                  {
-                    this.NextScene();
+                    //this.NextScene();
+                    this.gameOver = true;
+                    this.gameOverClock = performance.now();
+                    this.camera.setFadeClock(performance.now());
+                    this.camera.setFadeIn(true);
+                    this.playerRender = false;
+                    this.animationManager.addAnimation(5,0.02,this.player.getShape.getOrigin(),"EXPLOSION",new Vec2(256,256),false);
+                    break;
                  }
                  this.spawn();
              }
@@ -701,15 +834,25 @@ class GameScene extends Scene
                           if(this.minions[row][col].checkHealth())
                           {
                               this.animationManager.addAnimation(5,0.02,this.minions[row][col].getRect.getOrigin(),"EXPLOSION",new Vec2(256,256),false);
+                              AudioManager.getInstance().playSpatialSound("collisionDeath",this.minions[row][col].getRect.getOrigin());
                               this.minions[row].splice(col,1);
                               this.spawn();
                           }
+                          else
+                          {
+                            AudioManager.getInstance().playSpatialSound("collisionDamage",this.minions[row][col].getRect.getOrigin());
+                          }
+
                           if(this.bombers[b].checkHealth())
                           {
                               this.animationManager.addAnimation(5,0.02,this.bombers[b].getRect.getOrigin(),"EXPLOSION",new Vec2(256,256),false);
                               this.bombers.splice(b,1);
                               this.spawn();
                               break loop1;
+                          }
+                          else
+                          {
+                            AudioManager.getInstance().playSpatialSound("collisionDamage",this.bombers[b].getRect.getOrigin());
                           }
                           
                           if(this.bombers.length <= 0)
@@ -727,18 +870,23 @@ class GameScene extends Scene
                  if(CollisionManager.SATCollision(this.asteroids[a].getRect().getPoints(),this.bombers[b].getRect.getPoints()))
                  {
                      //MTV 
-                     this.asteroids[a].setHealth(-Bomber.collisionDamage);
-                     this.bombers[b].setHealth = -Asteroid.prototype.collisionDamage;
- 
-                     if(this.bombers[b].checkHealth())
-                     {
-                         this.bombers.splice(b,1);
-                         break;
-                     } 
-                     if(this.asteroids[a].checkHealth())
-                     {
-                         this.asteroids.splice(a,1);
-                     } 
+                    this.asteroids[a].setHealth(-Bomber.collisionDamage);
+                    this.bombers[b].setHealth = -Asteroid.prototype.collisionDamage;
+                   
+                    let midpoint = new Vec2(this.bombers[b].getRect.getOrigin().x + this.asteroids[a].getRect().getOrigin().x, this.bombers[b].getRect.getOrigin().y + this.asteroids[a].getRect().getOrigin().y);
+                    midpoint.x /=2;
+                    midpoint.y /=2;
+                    AudioManager.getInstance().playSpatialSound("collisionDeath",midpoint);
+
+                    if(this.bombers[b].checkHealth())
+                    {
+                        this.bombers.splice(b,1);
+                        break;
+                    } 
+                    if(this.asteroids[a].checkHealth())
+                    {
+                        this.asteroids.splice(a,1);
+                    } 
                  }
              }
          }
@@ -761,14 +909,19 @@ class GameScene extends Scene
                         if(this.minions[row][col].checkHealth())
                         {
                             this.animationManager.addAnimation(5,0.02,this.minions[row][col].getRect.getOrigin(),"EXPLOSION",new Vec2(256,256),false);
+                            AudioManager.getInstance().playSpatialSound("collisionDeath",this.minions[row][col].getRect.getOrigin());
                             this.minions[row].splice(col,1);
                         }
                         if(this.asteroids[a].checkHealth())
                         {
                             this.animationManager.addAnimation(5,0.02,this.asteroids[a].getRect().getOrigin(),"EXPLOSION",new Vec2(256,256),false);
+                            AudioManager.getInstance().playSpatialSound("collisionDeath",this.asteroids[a].getRect().getOrigin());
                             this.asteroids.splice(a,1);
                             break loop1;
-                           
+                        }
+                        else
+                        {
+                            AudioManager.getInstance().playSpatialSound("collisionDamage",this.asteroids[a].getRect().getOrigin());
                         }
                         //same issue here when minions collide with last aasteroid, need to break
                        this.spawn();
@@ -787,6 +940,10 @@ class GameScene extends Scene
              {
                  if (CollisionManager.SATCollision(this.asteroids[a].getRect().getPoints(),this.asteroids[b].getRect().getPoints()))
                  {
+                     let midpoint = new Vec2(this.asteroids[a].getRect().getOrigin().x + this.asteroids[b].getRect().getOrigin().x, this.asteroids[a].getRect().getOrigin().y + this.asteroids[a].getRect().getOrigin().y);
+                     midpoint.x /= 2;
+                     midpoint.y /= 2;
+                        AudioManager.getInstance().playSpatialSound("collisionDeath",midpoint);
                      this.animationManager.addAnimation(5,0.02,this.asteroids[a].getRect().getOrigin(),"EXPLOSION",new Vec2(256,256),false);
                      this.animationManager.addAnimation(5,0.02,this.asteroids[b].getRect().getOrigin(),"EXPLOSION",new Vec2(256,256),false);
                      this.asteroids.splice(b,1);
@@ -804,6 +961,17 @@ class GameScene extends Scene
             {
                 if (CollisionManager.SATCollision(this.bombers[a].getRect.getPoints(),this.bombers[b].getRect.getPoints()))
                 {
+                    let midpoint = new Vec2(this.asteroids[a].getRect().getOrigin().x + this.asteroids[b].getRect().getOrigin().x, this.asteroids[a].getRect().getOrigin().y + this.asteroids[a].getRect().getOrigin().y);
+                     midpoint.x /= 2;
+                     midpoint.y /= 2;
+                    AudioManager.getInstance().playSpatialSound("collisionDeath",midpoint);
+
+                    this.animationManager.addAnimation(5,0.02,this.bombers[a].getRect().getOrigin(),"EXPLOSION",new Vec2(256,256),false);
+                    this.animationManager.addAnimation(5,0.02,this.bombers[b].getRect().getOrigin(),"EXPLOSION",new Vec2(256,256),false);
+                    this.bombers.splice(b,1);
+                    this.bombers.splice(a,1);
+                    this.spawn();
+                    break;
                         //MTV
                 }
             }
@@ -834,14 +1002,38 @@ class GameScene extends Scene
     bulletCollisions()
     {
         this.turretCollisions();
-       // let playerBullets = this.player.getCurrentWeapon().getBullets();
+      
         //for all the players weapons // check bullets against game objects
         for(let w = 0; w < this.player.getWeapons().length; w++)
         {
             let playerBullets = this.player.getWeapons()[w].getBullets();
-            let noOfFrames = w == 2 ? 9 : 5;
-            let bulletExplosionAnimation =  w == 2 ? "MINE" : "BULLET";
-            let animationSize = w == 2 ? new Vec2(210,210) : new Vec2(256,256);
+            let noOfFrames = null;
+            let bulletExplosionAnimation = null;
+            let animationSize = null;
+            let bulletExplosionSound = null;
+            
+            if(w == 0)
+            {
+                animationSize =  new Vec2(256,256);
+                noOfFrames = 5;
+                bulletExplosionAnimation = "BULLET";
+                bulletExplosionSound = "pistolExplosion";
+            }
+            else if (w == 1)
+            {
+                animationSize =  new Vec2(256,256);
+                noOfFrames = 5;
+                bulletExplosionAnimation = "BULLET";
+                bulletExplosionSound = "shotgunCollision";
+            }
+            else if(w == 2)
+            {
+                animationSize =  new Vec2(210,210);
+                noOfFrames = 9;
+                bulletExplosionAnimation = "MINE";
+                bulletExplosionSound = "mineExplosion";
+            }
+                    
              /* Minion Player bullet collision */
             for( let row = 0; row < this.minions.length; row++)
             {
@@ -851,7 +1043,7 @@ class GameScene extends Scene
                     {
                         if(CollisionManager.SATCollision(playerBullets[b].getRect.getPoints(),this.minions[row][col].getRect.getPoints()))
                         {
-                            
+                            AudioManager.getInstance().playSpatialSound(bulletExplosionSound,playerBullets[b].getRect.getOrigin());
                             this.minions[row][col].setHealth = -this.player.getWeapons()[w].getDamage();
                             if(this.minions[row][col].checkHealth())
                             {
@@ -875,7 +1067,8 @@ class GameScene extends Scene
                 {
                     if(CollisionManager.SATCollision(playerBullets[b].getRect.getPoints(), this.bombers[i].getRect.getPoints()))
                     {
-                        //decrease bomber health   
+                        //decrease bomber health  
+                        AudioManager.getInstance().playSpatialSound(bulletExplosionSound, playerBullets[b].getRect.getOrigin()); 
                         this.bombers[i].setHealth = -this.player.getWeapons()[w].getDamage();
                         if(this.bombers[i].checkHealth())
                         {
@@ -897,6 +1090,7 @@ class GameScene extends Scene
                 {
                     if(CollisionManager.SATCollision(playerBullets[b].getRect.getPoints(), this.asteroids[i].getRect().getPoints()))
                     {
+                        AudioManager.getInstance().playSpatialSound(bulletExplosionSound, this.asteroids[i].getRect().getOrigin());
                         this.asteroids[i].setHealth(-this.player.getWeapons()[w].getDamage());
                         if(this.asteroids[i].checkHealth())
                         {
@@ -915,8 +1109,10 @@ class GameScene extends Scene
             for(let i = playerBullets.length -1 ; i >= 0; i--)
             {
                 let  time = Math.round((performance.now() - playerBullets[i].getTimer())/1000);
+               
                 if (time >= this.player.getWeapons()[w].getTTL())
                 {
+                    AudioManager.getInstance().playSpatialSound(bulletExplosionSound, playerBullets[i].getRect.getOrigin());
                     this.animationManager.addAnimation(noOfFrames,0.02,playerBullets[i].getRect.getOrigin(),bulletExplosionAnimation,animationSize,false);
                     playerBullets.splice(i,1);
                 }
@@ -929,6 +1125,7 @@ class GameScene extends Scene
             {
                 if(CollisionManager.SATCollision(this.bombers[i]._bullets[b].getRect.getPoints(),this.player.getShape.getPoints()))
                 {
+                    AudioManager.getInstance().playSpatialSound("mineExplosion", this.bombers[i]._bullets[b].getRect.getOrigin());
                     this.gui.get("healthValue")[0].getRenderSize().x -= (this.gui.get("healthValue")[0].getSize().x/100) * Bomber.bulletDamage;
                     this.animationManager.addAnimation(5,0.02,this.bombers[i]._bullets[b].getRect.getOrigin(),"EXPLOSION",new Vec2(256,256),false);
                     this.bombers[i]._bullets.splice(b,1);
@@ -936,7 +1133,14 @@ class GameScene extends Scene
                     this.player.setHealth = -Bomber.bulletDamage;
                     if(this.player.checkHealth())
                     {
-                        this.NextScene();
+                        this.gameOver = true;
+                        this.gameOverClock = performance.now();
+                        this.camera.setFadeClock(performance.now());
+                        this.camera.setFadeIn(true);
+                        this.playerRender = false;
+                        this.animationManager.addAnimation(5,0.02,this.player.getShape.getOrigin(),"EXPLOSION",new Vec2(256,256),false);
+                        break;
+                       // this.NextScene();
                     }
         
                     //implode bomb
@@ -956,6 +1160,7 @@ class GameScene extends Scene
                 if (time >= Bomber.ttl)
                 {
                     //implode bomb
+                    AudioManager.getInstance().playSpatialSound("mineExplosion", this.bombers[i]._bullets[b].getRect.getOrigin());
                     this.animationManager.addAnimation(5,0.02,this.bombers[i]._bullets[b].getRect.getOrigin(),"EXPLOSION",new Vec2(256,256),false);
                     this.bombers[i]._bullets.splice(b,1);
                 }
@@ -1071,104 +1276,110 @@ class GameScene extends Scene
 
     draw()
     {
-        this.camera.draw(GameScene._ctx);
-        //qt.draw(GameScene._ctx,camera.getPos);
-        /* Draw Black Holes */
-        this.blackHoles.forEach( bh =>
-        {
-            bh.draw(GameScene._ctx,this.camera.getPos)
-        });
-        /* Draw Asteroids */
-        this.asteroids.forEach( ast =>
-        {
-            ast.draw(GameScene._ctx,this.camera.getPos)
-        });
-        /* Draw Player Bullets */   
-        for(let i = 0; i < this.player.getWeapons().length; i++)
-        {
-            this.player.getWeapons()[i].draw(GameScene._ctx,this.camera.getPos);
-        }  
-    
-        /* Draw bombers and bomber Bullets*/
-        for(let i =0; i < this.bombers.length; i ++)
-        {
-            this.bombers[i].draw(GameScene._ctx,this.camera.getPos);
-            for(let b = 0; b < this.bombers[i]._bullets.length; b++)
+            this.camera.draw(GameScene._ctx);
+            //qt.draw(GameScene._ctx,camera.getPos);
+            /* Draw Black Holes */
+            this.blackHoles.forEach( bh =>
             {
-                this.bombers[i]._bullets[b].draw(GameScene._ctx,this.camera.getPos,Bomber.bomberBulletImage);
-            } 
-        };
-
-        this.particleSystem.render(GameScene._ctx,this.camera.getPos);
-        
-        this.player.draw(GameScene._ctx,this.camera.getPos);
-
-        this.player.getAutoTurret().getActive() && this.player.getAutoTurret().draw(GameScene._ctx,this.camera.getPos);
-
-        /* Draw all minions*/
-        this.minions.forEach(array => 
-        {
-            array.forEach(minion =>
-            {
-                minion.draw(GameScene._ctx,this.camera.getPos);
-            }); 
-        });
-
-        this.powerUps.forEach( pu =>
-        {
-            pu.draw(GameScene._ctx,this.camera.getPos)
-        });
-
-        this.ammunition.forEach( a =>
-        {
-            if(a.getActive())
-                a.draw(GameScene._ctx,this.camera.getPos)
-        });
-        
-        for (let value of this.gui.values())
-        {
-            value.forEach(val=> 
-            {
-                if(val.getActive())
-                    val.draw(GameScene._ctx, this.camera.getPos);
+                bh.draw(GameScene._ctx,this.camera.getPos)
             });
-        }
+            /* Draw Asteroids */
+            this.asteroids.forEach( ast =>
+            {
+                ast.draw(GameScene._ctx,this.camera.getPos)
+            });
+            /* Draw Player Bullets */   
+            for(let i = 0; i < this.player.getWeapons().length; i++)
+            {
+                this.player.getWeapons()[i].draw(GameScene._ctx,this.camera.getPos);
+            }  
         
-        this.map.drawMap(GameScene._ctx,this.camera.getPos);
-        this.animationManager.draw(GameScene._ctx,this.camera.getPos);
-        this.map.drawObjects(GameScene._ctx,this.camera.getPos,this.player.getSpriteAngle,this.player.getShape.getOrigin(),this.animationManager, this._canvasWidth, this._canvasHeight);
+            /* Draw bombers and bomber Bullets*/
+            for(let i =0; i < this.bombers.length; i ++)
+            {
+                this.bombers[i].draw(GameScene._ctx,this.camera.getPos);
+                for(let b = 0; b < this.bombers[i]._bullets.length; b++)
+                {
+                    this.bombers[i]._bullets[b].draw(GameScene._ctx,this.camera.getPos,Bomber.bomberBulletImage);
+                } 
+            };
 
-       
-       GameScene._ctx.fillText('INF',((this.camera.getPos.x + this.camera.getSize.x/32) - this.camera.getPos.x),((this.camera.getPos.y + this.camera.getSize.y/1.043) - this.camera.getPos.y));
-       GameScene._ctx.fillText(this.player.getWeapons()[1].getAmmoCount(),((this.camera.getPos.x + this.camera.getSize.x/10) - this.camera.getPos.x),((this.camera.getPos.y + this.camera.getSize.y/1.043) - this.camera.getPos.y));
-       GameScene._ctx.fillText(this.player.getWeapons()[2].getAmmoCount(),((this.camera.getPos.x + this.camera.getSize.x/5.9) - this.camera.getPos.x),((this.camera.getPos.y + this.camera.getSize.y/1.043) - this.camera.getPos.y));
-    
-       GameScene._ctx.fillStyle = 'blue';
-       GameScene._ctx.fillText(`fps : ${this.fps }`, (this.camera.getPos.x + 100) - this.camera.getPos.x,(this.camera.getPos.y + 50) - this.camera.getPos.y);
+            this.particleSystem.render(GameScene._ctx,this.camera.getPos);
+            
+            this.playerRender && this.player.draw(GameScene._ctx,this.camera.getPos);
+
+            this.player.getAutoTurret().getActive() && this.player.getAutoTurret().draw(GameScene._ctx,this.camera.getPos);
+
+            /* Draw all minions*/
+            this.minions.forEach(array => 
+            {
+                array.forEach(minion =>
+                {
+                    minion.draw(GameScene._ctx,this.camera.getPos);
+                }); 
+            });
+
+            this.powerUps.forEach( pu =>
+            {
+                pu.draw(GameScene._ctx,this.camera.getPos)
+            });
+
+            this.ammunition.forEach( a =>
+            {
+                if(a.getActive())
+                    a.draw(GameScene._ctx,this.camera.getPos)
+            });
+
+            if (this.boss !== null)
+            {
+                this.boss.draw(GameScene._ctx, this.camera.getPos);
+            }
+            
+            for (let value of this.gui.values())
+            {
+                value.forEach(val=> 
+                {
+                    if(val.getActive())
+                        val.draw(GameScene._ctx, this.camera.getPos);
+                });
+            }
+            
+            this.map.drawMap(GameScene._ctx,this.camera.getPos);
+            this.animationManager.draw(GameScene._ctx,this.camera.getPos);
+            this.map.drawObjects(GameScene._ctx,this.camera.getPos,this.player.getSpriteAngle,this.player.getShape.getOrigin(),this.animationManager, this._canvasWidth, this._canvasHeight);
+
+        
+            GameScene._ctx.fillText('INF',((this.camera.getPos.x + this.camera.getSize.x/32) - this.camera.getPos.x),((this.camera.getPos.y + this.camera.getSize.y/1.043) - this.camera.getPos.y));
+            GameScene._ctx.fillText(this.player.getWeapons()[1].getAmmoCount(),((this.camera.getPos.x + this.camera.getSize.x/10) - this.camera.getPos.x),((this.camera.getPos.y + this.camera.getSize.y/1.043) - this.camera.getPos.y));
+            GameScene._ctx.fillText(this.player.getWeapons()[2].getAmmoCount(),((this.camera.getPos.x + this.camera.getSize.x/5.9) - this.camera.getPos.x),((this.camera.getPos.y + this.camera.getSize.y/1.043) - this.camera.getPos.y));
+            
+            GameScene._ctx.fillStyle = 'blue';
+            GameScene._ctx.fillText(`fps : ${this.fps }`, (this.camera.getPos.x + 100) - this.camera.getPos.x,(this.camera.getPos.y + 50) - this.camera.getPos.y);
+        
+            if(this.teleporting)
+            {
+                GameScene._ctx.save();
+                if(this.camera.getFadeIn())
+                        this.camera.fadeCameraIn(GameScene._ctx,this.player.getShape.getOrigin());   
+                else if(this.camera.getFadeOut())
+                    this.camera.fadeCameraOut(GameScene._ctx);
+                GameScene._ctx.restore();
+            }
+
+            if(this.gameOver)
+            {
+                if(this.camera.getFadeIn())
+                    this.camera.fadeCameraIn(GameScene._ctx);   
+            }
+
+            
     }
 
     NextScene()
     {
+        AudioManager.getInstance().stopSound("background");
         let gameOverScene = new GameOverScene(this.scenes);
         this.scenes.push(gameOverScene);
         this.scenes.shift();
     }
 }
-
-
-                        //this.gui.get("healthSymbol")[0].getActive() == false ? index = 0 : index = 1;
-                        //get current active healthSymbol ( there's 2)
-                        /*if (this.player.getCurrentPowerUp() == null )
-                        {   //set current power up, set healthguipoweup to active and set it to the left powrupgui slot
-                            this.player.setCurrentPowerUp(PowerUpType.HEALTH);
-                            this.gui.get("healthSymbol")[index].setActive(true);
-                            this.gui.get("healthSymbol")[index].setPos(this.powerupGuiLeftPos);
-                            this.playerPowerUps[0] = "healthSymbol";
-                        }
-                        else
-                        {   //set current power up, set healthguipoweup to active and set it to the right powrupgui slot
-                            this.player.setNextPowerUp(PowerUpType.HEALTH);
-                            this.gui.get("healthSymbol")[index].setActive(true);
-                            this.gui.get("healthSymbol")[index].setPos(this.powerupGuiRightPos);
-                            this.playerPowerUps[1] = "healthSymbol";
-                        }*/

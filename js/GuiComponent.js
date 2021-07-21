@@ -7,6 +7,7 @@ const GuiComponent = function(_image,pos,size,_active,...listeners)
     this._pos = new Vec2(pos.x,pos.y);
     this._size = new Vec2(size.x,size.y);
     this._renderSize = new Vec2(size.x,size.y);
+    this._renderPos = new Vec2(0,0);
 
     for(let i = 0; i < this._listeners.length; i++)
     {
@@ -36,9 +37,11 @@ GuiComponent.prototype.setActive = function(val)
     this._active = val;
 }
 
-
 GuiComponent.prototype.mouseEnter = function(e)
 {
+    //AudioManager.getInstance().playSound("buttonHover");
+
+    /*
     if(e.target.src == 'file:///C:/Users/Predator/Desktop/InvadersJs/Assets/buttons/play.png')
     {
         e.target.src = 'file:///C:/Users/Predator/Desktop/InvadersJs/Assets/buttons/playClicked.png';
@@ -51,7 +54,21 @@ GuiComponent.prototype.mouseEnter = function(e)
     {
         e.target.src = 'file:///C:/Users/Predator/Desktop/InvadersJs/Assets/buttons/playAgainClicked.png';
     } 
-   
+    */
+   console.log(e.target.src);
+
+    if(e.target.src == '/Assets/buttons/play.png')
+    {
+        e.target.src = '/Assets/buttons/playClicked.png';
+    } 
+    else if(e.target.src == '/Assets/buttons/unquit.png')
+    {
+        e.target.src = '/Assets/buttons/quitClicked.png';
+    } 
+    else if(e.target.src == '/Assets/buttons/playAgain.png')
+    {
+        e.target.src = '/Assets/buttons/playAgainClicked.png';
+    } 
 }
 
 GuiComponent.prototype.mouseLeave = function(e)
@@ -76,7 +93,7 @@ GuiComponent.prototype.draw = function(ctx,cameraPos = new Vec2(0,0))
     ctx.save();
     ctx.beginPath();      
     ctx.translate((cameraPos.x + this._pos.x) - cameraPos.x,(cameraPos.y + this._pos.y) - cameraPos.y);
-    ctx.drawImage(this._image,0,0,this._size.x,this._size.y,-this._size.x/2,-this._size.y/2,this._renderSize.x,this._renderSize.y);
+    ctx.drawImage(this._image,this._renderPos.x,this._renderPos.y,this._size.x,this._size.y,-this._size.x/2,-this._size.y/2,this._renderSize.x,this._renderSize.y);
     ctx.closePath();
     ctx.restore();
 }
@@ -145,4 +162,10 @@ GuiComponent.prototype.setRenderSize = function(val)
 {
     this._renderSize.x -= val.x;
     this._renderSize.y -= val.y;
+}
+
+GuiComponent.prototype.setRenderPos = function(val)
+{
+    this._renderPos.x = val.x;
+    this._renderPos.y = val.y;
 }

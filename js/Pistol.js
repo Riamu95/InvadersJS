@@ -9,6 +9,7 @@ Pistol.prototype = Object.create(Weapon.prototype);
 Pistol.prototype.addBullet = function(pos,size,angle,maxSpeed)
 {
     this._bullets.push(new Bullet(new Vec2(pos.x,pos.y),size,angle,maxSpeed));
+    AudioManager.getInstance().playSound("pistol");
 }
 
 

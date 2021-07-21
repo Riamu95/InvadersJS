@@ -346,7 +346,13 @@ class Player
     }
     checkHealth()
     {
-        return this._health < 1;
+        if(this._health < 1)
+        {
+            AudioManager.getInstance().playSound("death");
+            return true;
+        }
+        else
+            return false;
     }
     getCollisionDamage()
     {

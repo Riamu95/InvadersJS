@@ -28,7 +28,7 @@ BlackHole.prototype.attract = function(origin, mass, worldWidth,worldHeight)
     if (Vec2.distance(this._rect.getOrigin(), origin) > this._activeDistance)  
             return [new Vec2(0,0), false];
 
-    if (Vec2.distance(this._rect.getOrigin(), origin) < 100)
+    if (Vec2.distance(this._rect.getOrigin(), origin) < 50)
     {
         let pos = BlackHole.teleport(worldWidth,worldHeight);
         return [pos, true];    

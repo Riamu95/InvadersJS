@@ -82,6 +82,7 @@ class Bomber extends Enemy
         { 
             let tempBullet = new Bullet(new Vec2(this._rect.getOrigin().x,this._rect.getOrigin().y),new Vec2(69,69),Math.atan2(playerPos.y - this._rect.getOrigin().y, playerPos.x - this._rect.getOrigin().x),this._maxBulletSpeed);
             this._bullets.push(tempBullet);
+            AudioManager.getInstance().playSound("mine");
             this._attackTimer = performance.now();
             this._attack = false;
         }

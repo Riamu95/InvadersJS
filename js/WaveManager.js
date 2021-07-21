@@ -8,6 +8,7 @@ const WaveManager = function(worldWidth,worldHeight)
     this._npcList.set(3,[5,5,2,5,2,3,20]);
     this._npcList.set(4,[5,5,5,5,2,5,20]);
     this._npcList.set(5,[5,5,5,5,3,5,15]);
+    this._npcList.set(6,[1]);
 
     this._MINION_COUNT = 0;
     this._MINION_FLOCK_COUNT = 0;
@@ -15,10 +16,12 @@ const WaveManager = function(worldWidth,worldHeight)
     this._ASTEROID_COUNT = 0;
     this._BOMBER_COUNT = 0;
     this._POWER_UP_COUNT = 0;
+    this._BOSS_COUNT = 0;
     this._AMMO_COUNT = 2;
     this._AMMO_INTERVAL_TIMER = 0;
-    this._wave = 0;
+    this._wave = 6;
     this.index = 0;
+    this._finalWave = 6;
 
     for (let x = 0; x < worldWidth/500; x++)
     {
@@ -65,6 +68,9 @@ WaveManager.prototype.nextWave = function()
         this._wave++;
         [this._MINION_COUNT,this._MINION_FLOCK_COUNT,this._BOMBER_COUNT,this._ASTEROID_COUNT,this._BLACK_HOLE_COUNT,this._POWER_UP_COUNT] = this._npcList.get(this._wave);
     }
+
+    if(this._finalWave == 6)
+        this._BOSS_COUNT = this._npcList.get(this._wave);
 }
 
 WaveManager.prototype.getWave =  function()
@@ -81,6 +87,11 @@ WaveManager.prototype.getNPCList =  function()
 WaveManager.prototype.getMininonCount =  function()
 {
     return this._MINION_COUNT;
+}
+
+WaveManager.prototype.getBossCount =  function()
+{
+    return this._BOSS_COUNT;
 }
 
 WaveManager.prototype.getFlockCount =  function()
