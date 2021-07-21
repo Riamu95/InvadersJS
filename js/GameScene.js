@@ -59,6 +59,8 @@ class GameScene extends Scene
         this.gameOver = false;
         this.playerRender = true;
 
+        this.boss = new Boss(new Vec2(this.worldWidth/2,this.worldHeight/100), new Vec2(261, 235));
+
         this.gameOverClock = 0;
         this.gameOverTimer = 1;
     }
@@ -224,7 +226,12 @@ class GameScene extends Scene
                 let flockPoint = new Vec2(Math.random() * this.worldWidth, Math.random() * this.worldHeight);
                 let tempBomber = new Bomber(new Vec2(pos.x,pos.y), new Vec2(128,158), new Vec2(0,0),flockPoint);
                 this.bombers.push(tempBomber);
-            }        
+            } 
+            
+            for( let i = 0; i < this.waveManager.getBossCount(); i++)
+            {
+
+            }
     }
 
     update(dt)
@@ -1322,6 +1329,11 @@ class GameScene extends Scene
                 if(a.getActive())
                     a.draw(GameScene._ctx,this.camera.getPos)
             });
+
+            if (this.boss !== null)
+            {
+                this.boss.draw(GameScene._ctx, this.camera.getPos);
+            }
             
             for (let value of this.gui.values())
             {
@@ -1359,6 +1371,8 @@ class GameScene extends Scene
                 if(this.camera.getFadeIn())
                     this.camera.fadeCameraIn(GameScene._ctx);   
             }
+
+            
     }
 
     NextScene()
