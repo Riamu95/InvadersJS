@@ -60,7 +60,7 @@ class GameScene extends Scene
         this.playerRender = true;
 
         this.gameOverClock = 0;
-        this.gameOverTimer = 2;
+        this.gameOverTimer = 1;
     }
      
 
@@ -1346,23 +1346,19 @@ class GameScene extends Scene
         
             if(this.teleporting)
             {
-                this.fade(this.player.getShape.getOrigin());
+                GameScene._ctx.save();
+                if(this.camera.getFadeIn())
+                        this.camera.fadeCameraIn(GameScene._ctx,this.player.getShape.getOrigin());   
+                else if(this.camera.getFadeOut())
+                    this.camera.fadeCameraOut(GameScene._ctx);
+                GameScene._ctx.restore();
             }
 
             if(this.gameOver)
             {
-                this.fade(this.camera.getPos);
+                if(this.camera.getFadeIn())
+                    this.camera.fadeCameraIn(GameScene._ctx);   
             }
-    }
-
-    fade(pos)
-    {
-        GameScene._ctx.save();
-        if(this.camera.getFadeIn())
-                this.camera.fadeCameraIn(GameScene._ctx,pos);   
-        else if(this.camera.getFadeOut())
-            this.camera.fadeCameraOut(GameScene._ctx);
-        GameScene._ctx.restore();
     }
 
     NextScene()
