@@ -48,7 +48,7 @@ class Camera
     {
         let percentage = ((performance.now() - this._fadeClock)/1000)  / this._fadeTime;
         let opacity = Lerp.LerpFloat(0,1,percentage);
-        console.log(opacity);
+        console.log(percentage);
         ctx.globalAlpha = opacity;
 
         if(opacity >= 1)

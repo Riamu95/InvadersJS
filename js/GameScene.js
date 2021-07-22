@@ -20,11 +20,9 @@ class GameScene extends Scene
         this.collisionManager = new CollisionManager();
         this.player = new Player(new Vec2(this.worldWidth/2,this.worldHeight/2),new Vec2(156,151));
 
-        this.teleporting = false;
-        this.teleportClock = 0;
-        this.teleportTime = 3;
+        this.fadeTime = 3;
 
-        this.camera = new Camera(this.player.getShape.getOrigin().x - this._canvasWidth/2,this.player.getShape.getOrigin().y - this._canvasHeight/2,this._canvasWidth,this._canvasHeight, this.worldWidth,this.worldHeight, this.teleportTime/2);
+        this.camera = new Camera(this.player.getShape.getOrigin().x - this._canvasWidth/2,this.player.getShape.getOrigin().y - this._canvasHeight/2,this._canvasWidth,this._canvasHeight, this.worldWidth,this.worldHeight, this.fadeTime/2);
         //let qt = new QuadTree(new Vec2(0,0),new Vec2(this.worldWidth,this.worldHeight), 5);
         this.animationManager = new AnimationManager();
         this.waveManager = new WaveManager(this.worldWidth,this.worldHeight);
@@ -60,10 +58,22 @@ class GameScene extends Scene
         this.gameOver = false;
         this.playerRender = true;
 
-        this.boss = new Boss(new Vec2(this.worldWidth/2,this.worldHeight/100), new Vec2(261, 235));
+        this.boss = null;
 
-        this.gameOverClock = 0;
-        this.gameOverTimer = 1;
+        this.teleporting = false;
+        this.waveOver = false;
+
+        this.stallGameTimer = 3;
+        this.stallClock = 0;
+        this.stall = false;
+
+        this.timerCheck = (clock, timerAmount) => 
+        {
+            if((performance.now() - clock) / 1000 > timerAmount)
+                return true;
+            else
+                return false;
+        }
     }
      
 
@@ -181,9 +191,18 @@ class GameScene extends Scene
             this.blackHoles.length > 0 &&  this.blackHoles.splice(0, this.blackHoles.length -1);
             this.asteroids.length > 0 && this.asteroids.splice(0,this.asteroids.length -1);
             this.powerUps.length > 0 && this.powerUps.splice(0,this.powerUps.length -1);
+            
+            this.waveOver = true;
+            this.stallClock = performance.now();
+            this.stallGameTimer = 3;
 
+            this.camera.setFadeClock(performance.now());
+            this.camera.setFadeIn(true); 
             this.waveManager.nextWave();
             
+            this.playerRender = false;
+            this.player.getShape.setOrigin(new Vec2(this.worldWidth/2, this.worldHeight/2));
+            this.player.setShapePosition();
             //create Power Ups
             for(let i = 0; i < this.waveManager.getPowerUpCount(); i++)
             {
@@ -231,7 +250,7 @@ class GameScene extends Scene
             
             for( let i = 0; i < this.waveManager.getBossCount(); i++)
             {
-
+                this.boss = new Boss(new Vec2(this.worldWidth/2,this.worldHeight/100), new Vec2(261, 235));
             }
     }
 
@@ -239,40 +258,39 @@ class GameScene extends Scene
     {
         this.fps  = 1000 / dt;
         
-         /* Black Holes update */
-        this.blackHoles.forEach( bh =>
+        if (this.gameOver || this.waveOver || this.teleporting)
+            this.stall = true
+
+        if(!this.stall)
         {
-            bh.update();
-            let [force, teleport] = bh.attract(this.player.getShape.getOrigin(),this.player.getMass,this.worldWidth,this.worldHeight);
-            if (!teleport)
-            {
-                this.player.getAcceleration.addVec = force;
-            }
-            else
-            {
-                this.player.getShape.setOrigin(force);
-                this.player.setShapePosition();
+                this.camera.update(this.player.getShape.getOrigin(),this._canvasWidth,this._canvasHeight);
+                /* Black Holes update */
+                this.blackHoles.forEach( bh =>
+                {
+                    bh.update();
+                    let [force, teleport] = bh.attract(this.player.getShape.getOrigin(),this.player.getMass,this.worldWidth,this.worldHeight);
+                    if (!teleport)
+                    {
+                        this.player.getAcceleration.addVec = force;
+                    }
+                    else
+                    {
+                        AudioManager.getInstance().playSound("blackHoleTeleport");
+                        
+                        this.playerRender = false;
+                        this.player.getShape.setOrigin(force);
+                        this.player.setShapePosition();
 
-                AudioManager.getInstance().playSound("blackHoleTeleport");
+                        this.teleporting = true;
+                        
+                        this.stallClock = performance.now();
+                        this.stallGameTimer = 3;
+                        
+                        this.camera.setFadeClock(performance.now());
+                        this.camera.setFadeIn(true); 
+                    }
+                });
 
-                this.teleporting = true;
-                this.teleportClock = performance.now();
-                this.camera.setFadeClock(performance.now());
-                this.camera.setFadeIn(true); 
-                //animate here apply initiala impulsesss
-            }
-        });
-
-        if((performance.now() - this.teleportClock)/ 1000 > this.teleportTime && this.teleporting)
-        {
-            this.teleporting = false;
-            console.log("opacity " , GameScene._ctx.globalAlpha);
-        }
-
-        if(!this.gameOver)
-        {
-            if(!this.teleporting)
-            {
                 for( let i = 0; i < this.player.getWeapons().length; i++)
                 {
                     this.player.getWeapons()[i].update(dt);
@@ -418,11 +436,22 @@ class GameScene extends Scene
                 Howler.pos(this.player.getShape.getOrigin().x, this.player.getShape.getOrigin().y, -0.5);
         
                 this.collisions();
-            }
-        }  
+        }
         
-        if( (performance.now() - this.gameOverClock) / 1000  > this.gameOverTimer && this.gameOver)
+        if(this.timerCheck(this.stallClock,this.stallGameTimer) && this.teleporting)
         {
+            this.teleporting = false;
+            this.stall = false;
+        }
+        if(this.timerCheck(this.stallClock,this.stallGameTimer) && this.waveOver)
+        {
+            this.waveOver = false;
+            this.stall = false;
+        }
+
+        if(this.timerCheck(this.stallClock,this.stallGameTimer) && this.gameOver)
+        {
+            this.stall = false;
             this.NextScene();
         }
     }
@@ -431,7 +460,7 @@ class GameScene extends Scene
     inputHandling(dt)
     {
 
-        if(this.player.getFired() && (performance.now() - this.player.getFireTimer) /1000 >= this.player.getFireRate && this.player.getCurrentWeapon().getAmmoCount() > 0)
+        if(this.player.getFired() && this.timerCheck(this.player.getFireTimer,this.player.getFireRate) && this.player.getCurrentWeapon().getAmmoCount() > 0)
         {
             const bulletSpawnPoint = new Vec2((this.player.getShape.getPoints()[3].x + this.player.getShape.getPoints()[2].x) /2, (this.player.getShape.getPoints()[3].y + this.player.getShape.getPoints()[2].y) /2);
 
@@ -446,9 +475,8 @@ class GameScene extends Scene
                 this.player.addSpeed(this.player.getAccelerationRate);
             } 
             this.player.move(dt); 
-            this.camera.update(this.player.getShape.getOrigin(),this._canvasWidth,this._canvasHeight);
             
-            while(((performance.now() - this.particleTimer)/1000) > 0.05)
+            while(this.timerCheck(this.particleTimer,0.05))
             {
                 for(let i = 0; i < 25; i++)
                 {  
@@ -476,7 +504,6 @@ class GameScene extends Scene
                 this.player.addSpeed(-this.player.getAccelerationRate);
             }  
             this.player.move(dt); 
-            this.camera.update(this.player.getShape.getOrigin(),this._canvasWidth,this._canvasHeight);  
         }
         else if(!this.pressedKeys['w'] && !this.pressedKeys['s'])
         {
@@ -489,8 +516,7 @@ class GameScene extends Scene
                 this.player.addSpeed(this.player.getDeccelerationRate);
             }
            
-            this.player.move(dt); 
-            this.camera.update(this.player.getShape.getOrigin(),this._canvasWidth,this._canvasHeight);  
+            this.player.move(dt);   
         }
         if(this.pressedKeys['d'])
         {
@@ -734,7 +760,8 @@ class GameScene extends Scene
                      if(this.player.checkHealth())
                      {
                         this.gameOver = true;
-                        this.gameOverClock = performance.now();
+                        this.stallClock = performance.now();
+                        this.stallGameTimer = 1;
                         this.camera.setFadeClock(performance.now());
                         this.camera.setFadeIn(true);
                         this.playerRender = false;
@@ -768,7 +795,8 @@ class GameScene extends Scene
                  if(this.player.checkHealth())
                  {
                     this.gameOver = true;
-                    this.gameOverClock = performance.now();
+                    this.stallClock = performance.now();
+                    this.stallGameTimer = 1;
                     this.camera.setFadeClock(performance.now());
                     this.camera.setFadeIn(true);
                     this.playerRender = false;
@@ -813,7 +841,8 @@ class GameScene extends Scene
                  {
                     //this.NextScene();
                     this.gameOver = true;
-                    this.gameOverClock = performance.now();
+                    this.stallClock = performance.now();
+                    this.stallGameTimer = 1;
                     this.camera.setFadeClock(performance.now());
                     this.camera.setFadeIn(true);
                     this.playerRender = false;
@@ -1119,9 +1148,8 @@ class GameScene extends Scene
             /* Player Bullet timer Collision */
             for(let i = playerBullets.length -1 ; i >= 0; i--)
             {
-                let  time = Math.round((performance.now() - playerBullets[i].getTimer())/1000);
-               
-                if (time >= this.player.getWeapons()[w].getTTL())
+
+                if(this.timerCheck(playerBullets[i].getTimer(),this.player.getWeapons()[w].getTTL()))
                 {
                     AudioManager.getInstance().playSpatialSound(bulletExplosionSound, playerBullets[i].getRect.getOrigin());
                     this.animationManager.addAnimation(noOfFrames,0.02,playerBullets[i].getRect.getOrigin(),bulletExplosionAnimation,animationSize,false);
@@ -1143,7 +1171,8 @@ class GameScene extends Scene
                 if(this.player.checkHealth())
                 {
                     this.gameOver = true;
-                    this.gameOverClock = performance.now();
+                    this.stallClock = performance.now();
+                    this.stallGameTimer = 1;
                     this.camera.setFadeClock(performance.now());
                     this.camera.setFadeIn(true);
                     this.playerRender = false;
@@ -1160,8 +1189,7 @@ class GameScene extends Scene
 
         for(let b = 0; b < this.bomberBullets.length; b++)
         {
-            let  time = Math.round( ( performance.now() - this.bomberBullets[b].getTimer())/1000);
-            if (time >= Bomber.ttl)
+            if (this.timerCheck(this.bomberBullets[b].getTimer(), Bomber.ttl))
             {
                 //implode bomb
                 AudioManager.getInstance().playSpatialSound("mineExplosion", this.bomberBullets[b].getRect.getOrigin());
@@ -1182,9 +1210,7 @@ class GameScene extends Scene
         //turret bullets and minions
         for( let [key,value] of turretBullets.entries())
         {
-            let  time = Math.round((performance.now() - value[0].getTimer())/1000);
-
-            if (time >= this.player.getAutoTurret().getTTL())
+            if (this.timerCheck(value[0].getTimer(),this.player.getAutoTurret().getTTL()))
             {
                 this.animationManager.addAnimation(5,0.02,value[0].getRect.getOrigin(),"BULLET",new Vec2(256,256),false);    
                 turretBullets.delete(key);
@@ -1272,9 +1298,6 @@ class GameScene extends Scene
                 }
             }
         }
-
-
-        //turret asteroid collision
     }
 
     draw()
@@ -1291,11 +1314,7 @@ class GameScene extends Scene
             {
                 ast.draw(GameScene._ctx,this.camera.getPos)
             });
-            /* Draw Player Bullets */   
-            for(let i = 0; i < this.player.getWeapons().length; i++)
-            {
-                this.player.getWeapons()[i].draw(GameScene._ctx,this.camera.getPos);
-            }  
+           
         
             /* Draw bombers and bomber Bullets*/
             for(let i =0; i < this.bombers.length; i ++)
@@ -1308,12 +1327,20 @@ class GameScene extends Scene
                 this.bomberBullets[b].draw(GameScene._ctx,this.camera.getPos,Bomber.bomberBulletImage);
             } 
 
-            this.particleSystem.render(GameScene._ctx,this.camera.getPos);
-            
-            this.playerRender && this.player.draw(GameScene._ctx,this.camera.getPos);
+            if(this.playerRender)
+            {
+                 /* Draw Player Bullets */   
+                for(let i = 0; i < this.player.getWeapons().length; i++)
+                {
+                    this.player.getWeapons()[i].draw(GameScene._ctx,this.camera.getPos);
+                } 
+                
+                this.particleSystem.render(GameScene._ctx,this.camera.getPos);
+                
+                this.player.draw(GameScene._ctx,this.camera.getPos);
 
-            this.player.getAutoTurret().getActive() && this.player.getAutoTurret().draw(GameScene._ctx,this.camera.getPos);
-
+                this.player.getAutoTurret().getActive() && this.player.getAutoTurret().draw(GameScene._ctx,this.camera.getPos);
+            }
             /* Draw all minions*/
             this.minions.forEach(array => 
             {
@@ -1360,23 +1387,24 @@ class GameScene extends Scene
             GameScene._ctx.fillStyle = 'blue';
             GameScene._ctx.fillText(`fps : ${this.fps }`, (this.camera.getPos.x + 100) - this.camera.getPos.x,(this.camera.getPos.y + 50) - this.camera.getPos.y);
         
-            if(this.teleporting)
+            GameScene._ctx.save();
+            if(this.camera.getFadeIn() && this.teleporting ||  this.camera.getFadeIn() && this.waveOver)
             {
-                GameScene._ctx.save();
-                if(this.camera.getFadeIn())
-                        this.camera.fadeCameraIn(GameScene._ctx,this.player.getShape.getOrigin());   
-                else if(this.camera.getFadeOut())
-                    this.camera.fadeCameraOut(GameScene._ctx);
-                GameScene._ctx.restore();
+                this.camera.fadeCameraIn(GameScene._ctx,this.player.getShape.getOrigin());   
             }
+            else if(this.camera.getFadeOut() && this.teleporting || this.camera.getFadeOut() &&  this.waveOver)
+            {
+                this.playerRender = true;
+                this.camera.update(this.player.getShape.getOrigin(),this._canvasWidth,this._canvasHeight);
+                this.camera.fadeCameraOut(GameScene._ctx);
+            }
+            GameScene._ctx.restore();
 
             if(this.gameOver)
             {
                 if(this.camera.getFadeIn())
                     this.camera.fadeCameraIn(GameScene._ctx);   
-            }
-
-            
+            }         
     }
 
     NextScene()

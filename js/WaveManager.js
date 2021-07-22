@@ -19,7 +19,7 @@ const WaveManager = function(worldWidth,worldHeight)
     this._BOSS_COUNT = 0;
     this._AMMO_COUNT = 2;
     this._AMMO_INTERVAL_TIMER = 0;
-    this._wave = 1;
+    this._wave = 0;
     this.index = 0;
     this._finalWave = 6;
 
