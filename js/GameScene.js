@@ -9,6 +9,7 @@ class GameScene extends Scene
         this.minions = [];
         this.flockPoints = [];
         this.bombers = [];
+        this.bomberBullets = [];
         this.asteroids = [];
         this.blackHoles = [];
         this.pressedKeys = new Set();
@@ -96,7 +97,7 @@ class GameScene extends Scene
         AudioManager.getInstance().addSound("death", "../Assets/Audio/playerDeath.wav", { loop : false }, { volume : 1 });
        
         AudioManager.getInstance().setListenerPos(this.player.getShape.getOrigin());
-        AudioManager.getInstance().playSound("background");
+        //AudioManager.getInstance().playSound("background");
         
         
         document.addEventListener('keydown', (event) =>
@@ -287,12 +288,22 @@ class GameScene extends Scene
                 for(let i = 0; i <  this.bombers.length; i++ )
                 {
                     this.bombers[i].move(dt, this.player.getShape.getOrigin(), this.worldWidth, this.worldHeight);
-            
-                    for(let b = 0; b <  this.bombers[i]._bullets.length; b++)
+                    
+                    if(this.bombers[i].getAttack())
                     {
-                        this.bombers[i]._bullets[b].seek(dt, this.player.getShape.getOrigin());
-                    } 
+                        let tempBullet = new Bullet(new Vec2(this.bombers[i].getRect.getOrigin().x,this.bombers[i].getRect.getOrigin().y),new Vec2(69,69),Math.atan2(this.player.getShape.getOrigin().y - this.bombers[i].getRect.getOrigin().y, this.player.getShape.getOrigin().x - this.bombers[i].getRect.getOrigin().x),this.bombers[i].getMaxBulletSpeed);
+                        this.bomberBullets.push(tempBullet);
+                        AudioManager.getInstance().playSound("mine");
+                        this.bombers[i].setAttackTimer(performance.now());
+                        this.bombers[i].setAttack(false);
+                    }
                 }
+
+                for(let b = 0; b <  this.bomberBullets.length; b++)
+                {
+                    this.bomberBullets[b].seek(dt, this.player.getShape.getOrigin());
+                }
+
 
                 this.powerUps.forEach( pu =>
                 {
@@ -1118,52 +1129,44 @@ class GameScene extends Scene
                 }
             }
         }
-        /*  For all this.bombersthis._bullets/player collision */
-        for(let i = this.bombers.length -1; i >= 0; i--)
+     
+        for(let b = 0; b < this.bomberBullets.length; b++)
         {
-            for(let b = this.bombers[i]._bullets.length -1; b >= 0 ; b--)
+            if(CollisionManager.SATCollision(this.bomberBullets[b].getRect.getPoints(),this.player.getShape.getPoints()))
             {
-                if(CollisionManager.SATCollision(this.bombers[i]._bullets[b].getRect.getPoints(),this.player.getShape.getPoints()))
+                AudioManager.getInstance().playSpatialSound("mineExplosion", this.bomberBullets[b].getRect.getOrigin());
+                this.gui.get("healthValue")[0].getRenderSize().x -= (this.gui.get("healthValue")[0].getSize().x/100) * Bomber.bulletDamage;
+                this.animationManager.addAnimation(5,0.02,this.bomberBullets[b].getRect.getOrigin(),"EXPLOSION",new Vec2(256,256),false);
+                this.bomberBullets.splice(b,1);
+                
+                this.player.setHealth = -Bomber.bulletDamage;
+                if(this.player.checkHealth())
                 {
-                    AudioManager.getInstance().playSpatialSound("mineExplosion", this.bombers[i]._bullets[b].getRect.getOrigin());
-                    this.gui.get("healthValue")[0].getRenderSize().x -= (this.gui.get("healthValue")[0].getSize().x/100) * Bomber.bulletDamage;
-                    this.animationManager.addAnimation(5,0.02,this.bombers[i]._bullets[b].getRect.getOrigin(),"EXPLOSION",new Vec2(256,256),false);
-                    this.bombers[i]._bullets.splice(b,1);
-                    
-                    this.player.setHealth = -Bomber.bulletDamage;
-                    if(this.player.checkHealth())
-                    {
-                        this.gameOver = true;
-                        this.gameOverClock = performance.now();
-                        this.camera.setFadeClock(performance.now());
-                        this.camera.setFadeIn(true);
-                        this.playerRender = false;
-                        this.animationManager.addAnimation(5,0.02,this.player.getShape.getOrigin(),"EXPLOSION",new Vec2(256,256),false);
-                        break;
-                       // this.NextScene();
-                    }
-        
-                    //implode bomb
-                    //delete bomb
-
-                    //reduce player health
+                    this.gameOver = true;
+                    this.gameOverClock = performance.now();
+                    this.camera.setFadeClock(performance.now());
+                    this.camera.setFadeIn(true);
+                    this.playerRender = false;
+                    this.animationManager.addAnimation(5,0.02,this.player.getShape.getOrigin(),"EXPLOSION",new Vec2(256,256),false);
+                    break;
                 }
+    
+                //implode bomb
+                //delete bomb
+
+                //reduce player health
             }
         }
 
-        //  For all this.bombersthis._bullets check bullet ttl
-        for(let i = 0; i < this.bombers.length; i++)
+        for(let b = 0; b < this.bomberBullets.length; b++)
         {
-            for(let b = this.bombers[i]._bullets.length -1; b >= 0; b--)
+            let  time = Math.round( ( performance.now() - this.bomberBullets[b].getTimer())/1000);
+            if (time >= Bomber.ttl)
             {
-                let  time = Math.round( ( performance.now() - this.bombers[i]._bullets[b].getTimer())/1000);
-                if (time >= Bomber.ttl)
-                {
-                    //implode bomb
-                    AudioManager.getInstance().playSpatialSound("mineExplosion", this.bombers[i]._bullets[b].getRect.getOrigin());
-                    this.animationManager.addAnimation(5,0.02,this.bombers[i]._bullets[b].getRect.getOrigin(),"EXPLOSION",new Vec2(256,256),false);
-                    this.bombers[i]._bullets.splice(b,1);
-                }
+                //implode bomb
+                AudioManager.getInstance().playSpatialSound("mineExplosion", this.bomberBullets[b].getRect.getOrigin());
+                this.animationManager.addAnimation(5,0.02,this.bomberBullets[b].getRect.getOrigin(),"EXPLOSION",new Vec2(256,256),false);
+                this.bomberBullets.splice(b,1);
             }
         }
     }
@@ -1298,11 +1301,12 @@ class GameScene extends Scene
             for(let i =0; i < this.bombers.length; i ++)
             {
                 this.bombers[i].draw(GameScene._ctx,this.camera.getPos);
-                for(let b = 0; b < this.bombers[i]._bullets.length; b++)
-                {
-                    this.bombers[i]._bullets[b].draw(GameScene._ctx,this.camera.getPos,Bomber.bomberBulletImage);
-                } 
             };
+
+            for(let b = 0; b < this.bomberBullets.length; b++)
+            {
+                this.bomberBullets[b].draw(GameScene._ctx,this.camera.getPos,Bomber.bomberBulletImage);
+            } 
 
             this.particleSystem.render(GameScene._ctx,this.camera.getPos);
             

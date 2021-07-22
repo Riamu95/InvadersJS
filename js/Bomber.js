@@ -10,7 +10,6 @@ class Bomber extends Enemy
         this._attackTimer = 0;
         this._reloadTimer = 5;
         this._maxBulletSpeed = 4;
-        this._bullets = new Array();
         this._seek = new Vec2(0,0);
         this._health = 100;
     }
@@ -76,16 +75,6 @@ class Bomber extends Enemy
         {
             this._attack = true;
         }
-       
-        //if we can shoot, create a bullet, update timer and set it so we cant attack again
-        if (this._attack) 
-        { 
-            let tempBullet = new Bullet(new Vec2(this._rect.getOrigin().x,this._rect.getOrigin().y),new Vec2(69,69),Math.atan2(playerPos.y - this._rect.getOrigin().y, playerPos.x - this._rect.getOrigin().x),this._maxBulletSpeed);
-            this._bullets.push(tempBullet);
-            AudioManager.getInstance().playSound("mine");
-            this._attackTimer = performance.now();
-            this._attack = false;
-        }
     }
 
     seek()
@@ -118,5 +107,25 @@ class Bomber extends Enemy
     get getMaxBulletSpeed()
     {
         return this._maxBulletSpeed;
+    }
+
+    getAttack()
+    {
+        return this._attack;
+    }
+
+    setAttack(val)
+    {
+        this._attack = val;
+    }
+
+    getAttackTimer()
+    {
+        return this._attackTimer;
+    }
+
+    setAttackTimer(val)
+    {
+        this._attackTimer = val;
     }
 }
