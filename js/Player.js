@@ -125,8 +125,6 @@ class Player
         ctx.closePath();
         ctx.restore();
 
-
-
         this._shape.draw(ctx,cameraPos, this._color);
         this._collisionRect.draw(ctx,cameraPos, 'blue');
         

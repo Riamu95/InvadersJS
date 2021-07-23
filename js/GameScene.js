@@ -50,7 +50,7 @@ class GameScene extends Scene
 
         this.fps = 0;
 
-        this.init();
+       
 
         this.powerupGuiLeftPos = new Vec2(this.camera.getSize.x/1.13,this.camera.getSize.y/1.105);
         this.powerupGuiRightPos = new Vec2(this.camera.getSize.x/1.0525,this.camera.getSize.y/1.105);
@@ -74,6 +74,8 @@ class GameScene extends Scene
             else
                 return false;
         }
+
+        this.init();
     }
      
 
@@ -86,29 +88,7 @@ class GameScene extends Scene
         GameScene._ctx.fillStyle = 'blue';
         PowerUp.prototype.setWorldSize(new Vec2(this.worldWidth,this.worldHeight));
         
-        AudioManager.getInstance().addSound("background", "../Assets/Audio/background.wav", { loop : true }, { volume : 0.1 });
-        AudioManager.getInstance().addSound("shotgun", "../Assets/Audio/shotgun.ogg", { loop : false }, { volume : 1 });
-        AudioManager.getInstance().addSound("reload", "../Assets/Audio/Reload.ogg", { loop : false }, { volume : 0.05});
-        AudioManager.getInstance().addSound("mine", "../Assets/Audio/mine.ogg", { loop : false }, { volume : 1 });
-        AudioManager.getInstance().addSound("mineExplosion", "../Assets/Audio/mineExplosion.wav", { loop : false }, { volume : 1 });
-        AudioManager.getInstance().addSound("pistolExplosion", "../Assets/Audio/pistolExplosion.wav", { loop : false }, { volume : 1 });
-        AudioManager.getInstance().addSound("powerUp", "../Assets/Audio/powerUp.wav", { loop : false }, { volume : 1 });
-        AudioManager.getInstance().addSound("turret", "../Assets/Audio/turret.wav", { loop : false }, { volume : 1 });
-        AudioManager.getInstance().addSound("powerUpActivate", "../Assets/Audio/powerUpActivate.wav", { loop : false } , { volume : 0.2 });
-        AudioManager.getInstance().addSound("ammo", "../Assets/Audio/ammo.wav", { loop : false },  { volume : 1 });
-    
-        AudioManager.getInstance().addSound("engine", "../Assets/Audio/engine.ogg", { loop : true }, { volume : 0 });
-        AudioManager.getInstance().addSound("pistol", "../Assets/Audio/pistol.ogg", { loop : false }, { volume : 1 });
-        AudioManager.getInstance().addSound("switch", "../Assets/Audio/switch.ogg", { loop : false }, { volume : 0.05 });
-        AudioManager.getInstance().addSound("collisionDamage", "../Assets/Audio/damageNew.ogg", { loop : false },  { volume : 1 });
-        AudioManager.getInstance().addSound("collisionDeath", "../Assets/Audio/deathNew.ogg", { loop : false }, { volume : 1 });
-        AudioManager.getInstance().addSound("shotgunCollision", "../Assets/Audio/shotgunCollision.wav", { loop : false }, { volume : 0.6 });
-        AudioManager.getInstance().addSound("blackHoleTeleport", "../Assets/Audio/blackhole.wav", { loop : false }, { volume : 0.6 });
-        AudioManager.getInstance().addSound("death", "../Assets/Audio/playerDeath.wav", { loop : false }, { volume : 1 });
-       
-        AudioManager.getInstance().setListenerPos(this.player.getShape.getOrigin());
-        //AudioManager.getInstance().playSound("background");
-        
+        this.loadSound();
         
         document.addEventListener('keydown', (event) =>
         { 
@@ -146,6 +126,32 @@ class GameScene extends Scene
         });
     }
 
+    loadSound()
+    {
+        AudioManager.getInstance().addSound("background", "../Assets/Audio/background.wav", { loop : true }, { volume : 0.1 });
+        AudioManager.getInstance().addSound("shotgun", "../Assets/Audio/shotgun.ogg", { loop : false }, { volume : 1 });
+        AudioManager.getInstance().addSound("reload", "../Assets/Audio/Reload.ogg", { loop : false }, { volume : 0.05});
+        AudioManager.getInstance().addSound("mine", "../Assets/Audio/mine.ogg", { loop : false }, { volume : 1 });
+        AudioManager.getInstance().addSound("mineExplosion", "../Assets/Audio/mineExplosion.wav", { loop : false }, { volume : 1 });
+        AudioManager.getInstance().addSound("pistolExplosion", "../Assets/Audio/pistolExplosion.wav", { loop : false }, { volume : 1 });
+        AudioManager.getInstance().addSound("powerUp", "../Assets/Audio/powerUp.wav", { loop : false }, { volume : 1 });
+        AudioManager.getInstance().addSound("turret", "../Assets/Audio/turret.wav", { loop : false }, { volume : 1 });
+        AudioManager.getInstance().addSound("powerUpActivate", "../Assets/Audio/powerUpActivate.wav", { loop : false } , { volume : 0.2 });
+        AudioManager.getInstance().addSound("ammo", "../Assets/Audio/ammo.wav", { loop : false },  { volume : 1 });
+    
+        AudioManager.getInstance().addSound("engine", "../Assets/Audio/engine.ogg", { loop : true }, { volume : 0 });
+        AudioManager.getInstance().addSound("pistol", "../Assets/Audio/pistol.ogg", { loop : false }, { volume : 1 });
+        AudioManager.getInstance().addSound("switch", "../Assets/Audio/switch.ogg", { loop : false }, { volume : 0.05 });
+        AudioManager.getInstance().addSound("collisionDamage", "../Assets/Audio/damageNew.ogg", { loop : false },  { volume : 1 });
+        AudioManager.getInstance().addSound("collisionDeath", "../Assets/Audio/deathNew.ogg", { loop : false }, { volume : 1 });
+        AudioManager.getInstance().addSound("shotgunCollision", "../Assets/Audio/shotgunCollision.wav", { loop : false }, { volume : 0.6 });
+        AudioManager.getInstance().addSound("blackHoleTeleport", "../Assets/Audio/blackhole.wav", { loop : false }, { volume : 0.6 });
+        AudioManager.getInstance().addSound("death", "../Assets/Audio/playerDeath.wav", { loop : false }, { volume : 1 });
+       
+        AudioManager.getInstance().setListenerPos(this.player.getShape.getOrigin());
+        //AudioManager.getInstance().playSound("background");
+    }
+
     loadGui()
     {
         this.gui.set("health",[new GuiComponent("healthGUI",new Vec2(164,105),new Vec2(328,105),true)]);
@@ -178,80 +184,80 @@ class GameScene extends Scene
 
     spawn()
     {
-            for(let row = 0; row < this.minions.length; row++)
-            {
-               if(this.minions[row].length > 0 )
-                    return;
-            }
+        for(let row = 0; row < this.minions.length; row++)
+        {
+            if(this.minions[row].length > 0 )
+                return;
+        }
 
-            if (this.bombers.length > 0)
-                return; 
+        if (this.bombers.length > 0)
+            return; 
 
-            //short circuits on the first falsey value
-            this.blackHoles.length > 0 &&  this.blackHoles.splice(0, this.blackHoles.length -1);
-            this.asteroids.length > 0 && this.asteroids.splice(0,this.asteroids.length -1);
-            this.powerUps.length > 0 && this.powerUps.splice(0,this.powerUps.length -1);
-            
-            this.waveOver = true;
-            this.stallClock = performance.now();
-            this.stallGameTimer = 3;
-
-            this.camera.setFadeClock(performance.now());
-            this.camera.setFadeIn(true); 
-            this.waveManager.nextWave();
-            
-            this.playerRender = false;
-            this.player.getShape.setOrigin(new Vec2(this.worldWidth/2, this.worldHeight/2));
-            this.player.setShapePosition();
-            //create Power Ups
-            for(let i = 0; i < this.waveManager.getPowerUpCount(); i++)
-            {
-                let  temp = new PowerUp(new Vec2(Math.random() * this.worldWidth, Math.random() * this.worldHeight), new Vec2(300,300),PowerUp.prototype.generateRandomType(Math.round(Math.random()* 2)),  Math.random() * 30);
-                this.powerUps.push(temp);
-            }
-
-            Ammo.prototype.initAmmo(this.ammunition,this.worldWidth,this.worldHeight);
+        //short circuits on the first falsey value
+        this.blackHoles.length > 0 &&  this.blackHoles.splice(0, this.blackHoles.length -1);
+        this.asteroids.length > 0 && this.asteroids.splice(0,this.asteroids.length -1);
+        this.powerUps.length > 0 && this.powerUps.splice(0,this.powerUps.length -1);
         
+        this.waveOver = true;
+        this.stallClock = performance.now();
+        this.stallGameTimer = 3;
 
-            /* Create Black Holes*/
-            for(let i = 0; i < this.waveManager.getBlackHoleCount(); i++)
+        this.camera.setFadeClock(performance.now());
+        this.camera.setFadeIn(true); 
+        this.waveManager.nextWave();
+        
+        this.playerRender = false;
+        this.player.getShape.setOrigin(new Vec2(this.worldWidth/2, this.worldHeight/2));
+        this.player.setShapePosition();
+        //create Power Ups
+        for(let i = 0; i < this.waveManager.getPowerUpCount(); i++)
+        {
+            let  temp = new PowerUp(new Vec2(Math.random() * this.worldWidth, Math.random() * this.worldHeight), new Vec2(300,300),PowerUp.prototype.generateRandomType(Math.round(Math.random()* 2)),  Math.random() * 30);
+            this.powerUps.push(temp);
+        }
+
+        Ammo.prototype.initAmmo(this.ammunition,this.worldWidth,this.worldHeight);
+    
+
+        /* Create Black Holes*/
+        for(let i = 0; i < this.waveManager.getBlackHoleCount(); i++)
+        {
+            let  temp = new BlackHole(new Vec2(Math.random() * this.worldWidth - 643,Math.random() * this.worldHeight - 480), new Vec2(643,480));
+            this.blackHoles.push(temp);
+        }
+        /* Createthis.asteroids */
+        for(let i = 0; i < this.waveManager.getAsteroidCount(); i++)
+        {
+            let pos = this.waveManager.getSpawnPoint(Math.trunc(Math.random() * this.spawnPoints));
+            let  temp = new Asteroid(new Vec2(pos.x, pos.y), new Vec2(99,99));
+            this.asteroids.push(temp);
+        }
+        /* Createthis.minions*/
+        for(let row = 0; row < this.waveManager.getFlockCount(); row++)
+        {
+            let pos = this.waveManager.getSpawnPoint(Math.trunc(Math.random() * this.spawnPoints));
+            let tempMinions = [];
+            for(let col = 0; col < this.waveManager.getMininonCount(); col++)
             {
-                let  temp = new BlackHole(new Vec2(Math.random() * this.worldWidth - 643,Math.random() * this.worldHeight - 480), new Vec2(643,480));
-                this.blackHoles.push(temp);
+                let tempMinion = new EnemyMinion(new Vec2(pos.x + (col * 20), pos.y + (row * 20)), new Vec2(90, 102) ,new Vec2(Math.random(1) + -1, Math.random(1) + -1));
+                tempMinions.push(tempMinion);
             }
-            /* Createthis.asteroids */
-            for(let i = 0; i < this.waveManager.getAsteroidCount(); i++)
-            {
-                let pos = this.waveManager.getSpawnPoint(Math.trunc(Math.random() * this.spawnPoints));
-                let  temp = new Asteroid(new Vec2(pos.x, pos.y), new Vec2(99,99));
-                this.asteroids.push(temp);
-            }
-            /* Createthis.minions*/
-            for(let row = 0; row < this.waveManager.getFlockCount(); row++)
-            {
-                let pos = this.waveManager.getSpawnPoint(Math.trunc(Math.random() * this.spawnPoints));
-                let tempMinions = [];
-                for(let col = 0; col < this.waveManager.getMininonCount(); col++)
-                {
-                    let tempMinion = new EnemyMinion(new Vec2(pos.x + (col * 20), pos.y + (row * 20)), new Vec2(90, 102) ,new Vec2(Math.random(1) + -1, Math.random(1) + -1));
-                    tempMinions.push(tempMinion);
-                }
-                this.minions.push(tempMinions);
-                this.flockPoints.push(new Vec2(Math.random() * (this.worldWidth - this.minionspawnXOffset), Math.random() * (this.worldHeight - this.minionspawnYOffset)));
-            }
-            /* Create this.bombers*/
-            for(let i = 0; i < this.waveManager.getBomberCount(); i++)
-            {
-                let pos = this.waveManager.getSpawnPoint(Math.trunc(Math.random() * this.spawnPoints));
-                let flockPoint = new Vec2(Math.random() * this.worldWidth, Math.random() * this.worldHeight);
-                let tempBomber = new Bomber(new Vec2(pos.x,pos.y), new Vec2(128,158), new Vec2(0,0),flockPoint);
-                this.bombers.push(tempBomber);
-            } 
-            
-            for( let i = 0; i < this.waveManager.getBossCount(); i++)
-            {
-                this.boss = new Boss(new Vec2(this.worldWidth/2,this.worldHeight/100), new Vec2(261, 235));
-            }
+            this.minions.push(tempMinions);
+            this.flockPoints.push(new Vec2(Math.random() * (this.worldWidth - this.minionspawnXOffset), Math.random() * (this.worldHeight - this.minionspawnYOffset)));
+        }
+        /* Create this.bombers*/
+        for(let i = 0; i < this.waveManager.getBomberCount(); i++)
+        {
+            let pos = this.waveManager.getSpawnPoint(Math.trunc(Math.random() * this.spawnPoints));
+            let flockPoint = new Vec2(Math.random() * this.worldWidth, Math.random() * this.worldHeight);
+            let tempBomber = new Bomber(new Vec2(pos.x,pos.y), new Vec2(128,158), new Vec2(0,0),flockPoint);
+            this.bombers.push(tempBomber);
+        } 
+        
+        for( let i = 0; i < this.waveManager.getBossCount(); i++)
+        {
+            this.boss = new Boss(new Vec2(this.worldWidth/2,this.worldHeight/100), new Vec2(251, 222));
+        }
     }
 
     update(dt)
@@ -428,13 +434,18 @@ class GameScene extends Scene
                     }
                 }
 
+                if(this.boss !== null)
+                {
+                    this.boss.update(dt);
+                }
+
                 this.map.update(this.animationManager,this.camera.getPos,this._canvasWidth,this._canvasHeight);
 
                 this.particleSystem.update(dt);
 
                 this.inputHandling(dt);
                 Howler.pos(this.player.getShape.getOrigin().x, this.player.getShape.getOrigin().y, -0.5);
-        
+    
                 this.collisions();
         }
         
@@ -443,6 +454,7 @@ class GameScene extends Scene
             this.teleporting = false;
             this.stall = false;
         }
+
         if(this.timerCheck(this.stallClock,this.stallGameTimer) && this.waveOver)
         {
             this.waveOver = false;
@@ -518,19 +530,20 @@ class GameScene extends Scene
            
             this.player.move(dt);   
         }
+
         if(this.pressedKeys['d'])
         {
             this.player.setSpriteAngle = this.player.getRotationSpeed;
             this.player.getShape.setAngle(this.player.getRotationSpeed);
             this.player.getShape.rotate();
         }
+
         if(this.pressedKeys['a'])
         {
             this.player.setSpriteAngle = -this.player.getRotationSpeed;
             this.player.getShape.setAngle(-this.player.getRotationSpeed);
             this.player.getShape.rotate();
         }
-
 
         if(this.pressedKeys['e']  && this.player.getCurrentPowerUp() != null)
         {
@@ -1302,109 +1315,109 @@ class GameScene extends Scene
 
     draw()
     {
-            this.camera.draw(GameScene._ctx);
-            //qt.draw(GameScene._ctx,camera.getPos);
-            /* Draw Black Holes */
-            this.blackHoles.forEach( bh =>
-            {
-                bh.draw(GameScene._ctx,this.camera.getPos)
-            });
-            /* Draw Asteroids */
-            this.asteroids.forEach( ast =>
-            {
-                ast.draw(GameScene._ctx,this.camera.getPos)
-            });
-           
+        this.camera.draw(GameScene._ctx);
+        //qt.draw(GameScene._ctx,camera.getPos);
+        /* Draw Black Holes */
+        this.blackHoles.forEach( bh =>
+        {
+            bh.draw(GameScene._ctx,this.camera.getPos)
+        });
+        /* Draw Asteroids */
+        this.asteroids.forEach( ast =>
+        {
+            ast.draw(GameScene._ctx,this.camera.getPos)
+        });
         
-            /* Draw bombers and bomber Bullets*/
-            for(let i =0; i < this.bombers.length; i ++)
-            {
-                this.bombers[i].draw(GameScene._ctx,this.camera.getPos);
-            };
+        /* Draw bombers and bomber Bullets*/
+        for(let i = 0; i < this.bombers.length; i++)
+        {
+            this.bombers[i].draw(GameScene._ctx,this.camera.getPos);
+        };
 
-            for(let b = 0; b < this.bomberBullets.length; b++)
+        for(let b = 0; b < this.bomberBullets.length; b++)
+        {
+            this.bomberBullets[b].draw(GameScene._ctx,this.camera.getPos,Bomber.bomberBulletImage);
+        } 
+
+        if(this.playerRender)
+        {
+                /* Draw Player Bullets */   
+            for(let i = 0; i < this.player.getWeapons().length; i++)
             {
-                this.bomberBullets[b].draw(GameScene._ctx,this.camera.getPos,Bomber.bomberBulletImage);
+                this.player.getWeapons()[i].draw(GameScene._ctx,this.camera.getPos);
             } 
-
-            if(this.playerRender)
-            {
-                 /* Draw Player Bullets */   
-                for(let i = 0; i < this.player.getWeapons().length; i++)
-                {
-                    this.player.getWeapons()[i].draw(GameScene._ctx,this.camera.getPos);
-                } 
-                
-                this.particleSystem.render(GameScene._ctx,this.camera.getPos);
-                
-                this.player.draw(GameScene._ctx,this.camera.getPos);
-
-                this.player.getAutoTurret().getActive() && this.player.getAutoTurret().draw(GameScene._ctx,this.camera.getPos);
-            }
-            /* Draw all minions*/
-            this.minions.forEach(array => 
-            {
-                array.forEach(minion =>
-                {
-                    minion.draw(GameScene._ctx,this.camera.getPos);
-                }); 
-            });
-
-            this.powerUps.forEach( pu =>
-            {
-                pu.draw(GameScene._ctx,this.camera.getPos)
-            });
-
-            this.ammunition.forEach( a =>
-            {
-                if(a.getActive())
-                    a.draw(GameScene._ctx,this.camera.getPos)
-            });
-
-            if (this.boss !== null)
-            {
-                this.boss.draw(GameScene._ctx, this.camera.getPos);
-            }
             
-            for (let value of this.gui.values())
-            {
-                value.forEach(val=> 
-                {
-                    if(val.getActive())
-                        val.draw(GameScene._ctx, this.camera.getPos);
-                });
-            }
+            this.particleSystem.render(GameScene._ctx,this.camera.getPos);
             
-            this.map.drawMap(GameScene._ctx,this.camera.getPos);
-            this.animationManager.draw(GameScene._ctx,this.camera.getPos);
-            this.map.drawObjects(GameScene._ctx,this.camera.getPos,this.player.getSpriteAngle,this.player.getShape.getOrigin(),this.animationManager, this._canvasWidth, this._canvasHeight);
+            this.player.draw(GameScene._ctx,this.camera.getPos);
 
+            this.player.getAutoTurret().getActive() && this.player.getAutoTurret().draw(GameScene._ctx,this.camera.getPos);
+        }
+        /* Draw all minions*/
+        this.minions.forEach(array => 
+        {
+            array.forEach(minion =>
+            {
+                minion.draw(GameScene._ctx,this.camera.getPos);
+            }); 
+        });
+
+        this.powerUps.forEach( pu =>
+        {
+            pu.draw(GameScene._ctx,this.camera.getPos)
+        });
+
+        this.ammunition.forEach( a =>
+        {
+            if(a.getActive())
+                a.draw(GameScene._ctx,this.camera.getPos)
+        });
+
+        if (this.boss !== null)
+        {
+            this.boss.draw(GameScene._ctx, this.camera.getPos);
+        }
         
-            GameScene._ctx.fillText('INF',((this.camera.getPos.x + this.camera.getSize.x/32) - this.camera.getPos.x),((this.camera.getPos.y + this.camera.getSize.y/1.043) - this.camera.getPos.y));
-            GameScene._ctx.fillText(this.player.getWeapons()[1].getAmmoCount(),((this.camera.getPos.x + this.camera.getSize.x/10) - this.camera.getPos.x),((this.camera.getPos.y + this.camera.getSize.y/1.043) - this.camera.getPos.y));
-            GameScene._ctx.fillText(this.player.getWeapons()[2].getAmmoCount(),((this.camera.getPos.x + this.camera.getSize.x/5.9) - this.camera.getPos.x),((this.camera.getPos.y + this.camera.getSize.y/1.043) - this.camera.getPos.y));
-            
-            GameScene._ctx.fillStyle = 'blue';
-            GameScene._ctx.fillText(`fps : ${this.fps }`, (this.camera.getPos.x + 100) - this.camera.getPos.x,(this.camera.getPos.y + 50) - this.camera.getPos.y);
+        for (let value of this.gui.values())
+        {
+            value.forEach(val=> 
+            {
+                if(val.getActive())
+                    val.draw(GameScene._ctx, this.camera.getPos);
+            });
+        }
         
-            GameScene._ctx.save();
-            if(this.camera.getFadeIn() && this.teleporting ||  this.camera.getFadeIn() && this.waveOver)
-            {
-                this.camera.fadeCameraIn(GameScene._ctx,this.player.getShape.getOrigin());   
-            }
-            else if(this.camera.getFadeOut() && this.teleporting || this.camera.getFadeOut() &&  this.waveOver)
-            {
-                this.playerRender = true;
-                this.camera.update(this.player.getShape.getOrigin(),this._canvasWidth,this._canvasHeight);
-                this.camera.fadeCameraOut(GameScene._ctx);
-            }
-            GameScene._ctx.restore();
+        this.map.drawMap(GameScene._ctx,this.camera.getPos);
+        this.animationManager.draw(GameScene._ctx,this.camera.getPos);
+        this.map.drawObjects(GameScene._ctx,this.camera.getPos,this.player.getSpriteAngle,this.player.getShape.getOrigin(),this.animationManager, this._canvasWidth, this._canvasHeight);
 
-            if(this.gameOver)
-            {
-                if(this.camera.getFadeIn())
-                    this.camera.fadeCameraIn(GameScene._ctx);   
-            }         
+    
+        GameScene._ctx.fillText('INF',((this.camera.getPos.x + this.camera.getSize.x/32) - this.camera.getPos.x),((this.camera.getPos.y + this.camera.getSize.y/1.043) - this.camera.getPos.y));
+        GameScene._ctx.fillText(this.player.getWeapons()[1].getAmmoCount(),((this.camera.getPos.x + this.camera.getSize.x/10) - this.camera.getPos.x),((this.camera.getPos.y + this.camera.getSize.y/1.043) - this.camera.getPos.y));
+        GameScene._ctx.fillText(this.player.getWeapons()[2].getAmmoCount(),((this.camera.getPos.x + this.camera.getSize.x/5.9) - this.camera.getPos.x),((this.camera.getPos.y + this.camera.getSize.y/1.043) - this.camera.getPos.y));
+        
+        GameScene._ctx.fillStyle = 'blue';
+        GameScene._ctx.fillText(`fps : ${this.fps }`, (this.camera.getPos.x + 100) - this.camera.getPos.x,(this.camera.getPos.y + 50) - this.camera.getPos.y);
+    
+        GameScene._ctx.save();
+        
+        if(this.camera.getFadeIn() && this.teleporting ||  this.camera.getFadeIn() && this.waveOver)
+        {
+            this.camera.fadeCameraIn(GameScene._ctx,this.player.getShape.getOrigin());   
+        }
+        else if(this.camera.getFadeOut() && this.teleporting || this.camera.getFadeOut() &&  this.waveOver)
+        {
+            this.playerRender = true;
+            this.camera.update(this.player.getShape.getOrigin(),this._canvasWidth,this._canvasHeight);
+            this.camera.fadeCameraOut(GameScene._ctx);
+        }
+        GameScene._ctx.restore();
+
+        if(this.gameOver)
+        {
+            if(this.camera.getFadeIn())
+                this.camera.fadeCameraIn(GameScene._ctx);   
+        }         
     }
 
     NextScene()
