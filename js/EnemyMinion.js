@@ -1,3 +1,9 @@
+import { Enemy } from "./Enemy.js";
+import { Vec2 } from "./Vec2.js";
+import { Rect } from "./Rect.js";
+
+export { EnemyMinion };
+
 class EnemyMinion extends Enemy {
 
     constructor (pos,size,vel)

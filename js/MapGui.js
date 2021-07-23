@@ -1,3 +1,7 @@
+import { GuiComponent } from "./GuiComponent.js";
+import { Vec2 } from "./Vec2.js";
+export { MapGui };
+
 class MapGui extends GuiComponent
 {
     constructor(_image,pos,size,_activateAnimation,...listeners)

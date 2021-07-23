@@ -1,3 +1,5 @@
+import { Vec2 } from "./Vec2.js";
+export { CollisionManager };
 
 class CollisionManager
 {

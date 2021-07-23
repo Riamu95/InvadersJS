@@ -1,3 +1,9 @@
+import { Rect  } from "./Rect.js";
+import { Vec2 } from "./Vec2.js";
+import { Bullet } from "./Bullet.js";
+import { AudioManager } from "./AudioManager.js";
+export { AutoTurret };
+
 const AutoTurret = function(pos,size, bulletSize)
 {
     AutoTurret.prototype.playerBulletImage = document.getElementById('playerBullet');

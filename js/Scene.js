@@ -1,3 +1,7 @@
+import { AudioManager } from "./AudioManager.js";
+
+export { Scene };
+
 class Scene 
 {
     static _canvas = document.querySelector('canvas');

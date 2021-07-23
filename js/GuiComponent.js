@@ -1,3 +1,6 @@
+import { Vec2  } from "./Vec2.js";
+export { GuiComponent };
+
 const GuiComponent = function(_image,pos,size,_active,...listeners)
 {
     this._image = document.getElementById(_image);

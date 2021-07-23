@@ -1,3 +1,7 @@
+import { Particle } from "./Particle.js";
+import { Vec2 } from "./Vec2.js";
+import { Lerp } from "./Lerp.js";
+
 const ParticleProps = function(...properties)
 {
     this.pos = properties[0],
@@ -14,6 +18,8 @@ const ParticleProps = function(...properties)
     this.maxSpeed = properties[9];
     this.startingOpacity = 1;
 }
+
+export { ParticleSystem };
 
 class ParticleSystem
 {

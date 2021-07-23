@@ -1,3 +1,5 @@
+export { Shape };
+
 const Shape = function(pos,size)
 {
     this._size = size;

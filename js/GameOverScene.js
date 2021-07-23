@@ -1,3 +1,10 @@
+import { GuiComponent } from "./GuiComponent.js";
+import { Vec2 } from "./Vec2.js";
+import { AudioManager } from "./AudioManager.js";
+import { GameScene } from "./GameScene.js";
+import { Scene } from "./Scene.js";
+export { GameOverScene };
+
 class GameOverScene extends Scene 
 {
 

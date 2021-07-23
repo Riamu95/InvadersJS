@@ -1,3 +1,6 @@
+import { Rect } from "./Rect.js";
+import { Vec2 } from "./Vec2.js";
+export { Particle };
 class Particle
 {
     constructor(particle)

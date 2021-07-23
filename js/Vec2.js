@@ -1,3 +1,4 @@
+export { Vec2 };
 
 class Vec2 
 {

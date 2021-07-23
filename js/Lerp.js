@@ -1,3 +1,4 @@
+export { Lerp };
 class Lerp 
 {
     constructor()

@@ -1,4 +1,4 @@
-
+import { SceneManager } from './SceneManager.js';
 
 let sceneManager = new SceneManager();
 

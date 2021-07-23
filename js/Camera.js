@@ -1,3 +1,7 @@
+import { Vec2 } from "./Vec2.js";
+import { Lerp } from "./Lerp.js";
+export { Camera };
+
 class Camera
 {
     constructor(x,y,width,height,worldWidth,worldHeight,_fadeTime)

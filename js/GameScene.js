@@ -1,3 +1,26 @@
+import { EnemyMinion } from './EnemyMinion.js';
+import { Vec2 } from './Vec2.js';
+import { Bomber } from './Bomber.js';
+import { Bullet } from './Bullet.js';
+import { Asteroid } from './Asteroid.js';
+import { BlackHole } from './BlackHole.js';
+import { PowerUp, PowerUpType } from './PowerUp.js';
+import { Ammo, AmmoType } from './Ammo.js';
+import { CollisionManager } from './CollisionManager.js';
+import { Player } from './Player.js';
+import { Camera } from './Camera.js';
+import { AnimationManager } from './AnimationManager.js';
+import { WaveManager } from './WaveManager.js';
+import { MapGui } from './MapGui.js';
+import { ParticleSystem } from './ParticleSystem.js';
+import { Scene } from "./Scene.js";
+import { Boss } from "./Boss.js";
+import { GuiComponent } from "./GuiComponent.js";
+import { AudioManager } from "./AudioManager.js";
+import { Lerp } from "./Lerp.js";
+import { GameOverScene } from "./GameOverScene.js";
+
+export { GameScene };
 class GameScene extends Scene 
 {
     constructor(scene)

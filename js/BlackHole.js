@@ -1,3 +1,7 @@
+import { Rect } from "./Rect.js";
+import { Vec2 } from "./Vec2.js";
+export { BlackHole };
+
 const BlackHole = function(pos,size)
 {
     this._rect = new Rect(pos,size);

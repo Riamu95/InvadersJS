@@ -1,3 +1,7 @@
+import { Vec2 } from "./Vec2.js";
+import { Enemy } from "./Enemy.js";
+export { Bomber };
+
 class Bomber extends Enemy
 {
     constructor(pos,size,velocity,fp)

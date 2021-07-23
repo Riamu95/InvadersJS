@@ -1,3 +1,11 @@
+import { GuiComponent } from './GuiComponent.js';
+import { Vec2 } from './Vec2.js';
+import { Asteroid } from './Asteroid.js';
+import { Scene } from './Scene.js';
+import { AudioManager } from './AudioManager.js';
+import { GameScene } from "./GameScene.js";
+export {StartScene};
+
 class StartScene extends Scene 
 {
     constructor(scene,canvas)

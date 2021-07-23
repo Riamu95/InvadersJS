@@ -1,3 +1,7 @@
+import { Rect } from "./Rect.js";
+import { Vec2 } from "./Vec2.js";
+
+export { Bullet };
 class Bullet
 {
     constructor(pos,size,_angle,maxSpeed)

@@ -1,3 +1,6 @@
+import { Vec2 } from "./Vec2.js";
+import { Shape } from "./Shape.js";
+export { Boss };
 class Boss 
 {
     constructor(pos, size)

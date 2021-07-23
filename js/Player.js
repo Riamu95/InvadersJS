@@ -1,3 +1,13 @@
+import { Shape } from "./Shape.js";
+import { Vec2 } from "./Vec2.js";
+import { Rect } from "./Rect.js";
+import { Pistol } from "./Pistol.js";
+import { Shotgun } from "./Shotgun.js";
+import { Mine } from "./Mine.js";
+import { AutoTurret } from "./AutoTurret.js";
+import { AudioManager } from "./AudioManager.js";
+
+export { Player };
 class Player
 {
     constructor(pos,size)

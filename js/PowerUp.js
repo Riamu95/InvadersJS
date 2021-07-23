@@ -1,3 +1,7 @@
+import { Rect } from "./Rect.js";
+import { Vec2 } from "./Vec2.js";
+
+export { PowerUpType };
 const PowerUpType = 
 {
     HEALTH : "health",
@@ -5,6 +9,8 @@ const PowerUpType =
     AUTOTURRET : "autoTurret",
     SPEED : "speed"
 };
+
+export { PowerUp };
 
 const PowerUp = function(pos,size,type, spawnTimer)
 {

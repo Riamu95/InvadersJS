@@ -1,3 +1,6 @@
+export { AudioManager };
+import { Vec2 } from "./Vec2.js";
+
 class AudioManager
 {
     static m_instance = null;

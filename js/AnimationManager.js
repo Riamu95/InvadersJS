@@ -1,3 +1,5 @@
+export { AnimationManager };
+
 const AnimationManager = function()
 {
     this._animations = [];

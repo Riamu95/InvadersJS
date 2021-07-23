@@ -1,3 +1,7 @@
+import { Vec2 } from "./Vec2.js";
+import { Shape } from "./Shape.js";
+export { Rect };
+
 const Rect = function(pos,size)
 {   
     Shape.call(this,pos,size);

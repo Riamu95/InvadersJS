@@ -1,3 +1,7 @@
+import { StartScene } from "./StartScene.js";
+
+export {SceneManager};
+
 class SceneManager 
 {
     constructor()

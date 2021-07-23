@@ -1,3 +1,6 @@
+import { Vec2 } from "./Vec2.js";
+export { Weapon };
+
 const Weapon = function(size,ammoCount,ttl,damage)
 {
     this._ammoCount = ammoCount;

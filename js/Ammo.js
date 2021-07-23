@@ -1,9 +1,14 @@
+import { Vec2 } from "./Vec2.js";
+import { Rect } from "./Rect.js";
+
+export { AmmoType };
 const AmmoType = 
 {
     SHOTGUN : "shotgunAmmo",
     MINE : "mineAmmo"
 };
 
+export { Ammo };
 const Ammo = function(pos,size, type)
 {
     this._rect = new Rect(pos,size);
