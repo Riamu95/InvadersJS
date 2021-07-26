@@ -1,7 +1,9 @@
 import { Rect } from "./Rect.js";
 import { Vec2 } from "./Vec2.js";
+import { seek } from "./Steering.js";
 
 export { Bullet };
+
 class Bullet
 {
     constructor(pos,size,_angle,maxSpeed)
@@ -25,12 +27,7 @@ class Bullet
 
     seek(dt, targetPos)
     {
-        this._steering.x = targetPos.x - this._rect.getOrigin().x;
-        this._steering.y = targetPos.y - this._rect.getOrigin().y;  
-        //normalise vector and multiply by sacalar
-        this._steering.setMagnitude = this._maxSpeed;
-        //calcualte desired velocity by subtracting current velocity form diesred vel
-        this._steering = Vec2.subtractVec(this._steering, this._velocity);
+        this._steering = seek(targetPos, this._rect, this._velocity, this._maxSpeed);
 
         this._velocity.x = this._steering.x * dt;
         this._velocity.y = this._steering.y * dt;
@@ -54,10 +51,12 @@ class Bullet
     {
         return this._velocity;
     }
+
     getTimer()
     {
         return this._timer;
     } 
+
     set setTimer(val)
     {
         this._timer = val;

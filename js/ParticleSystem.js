@@ -36,7 +36,7 @@ class ParticleSystem
         for(let i = 0; i < ParticleSystem.particleCount; i++)
         {
             this._particles.push(new Particle(new ParticleProps(new Vec2(0,0), new Vec2(15,15),new Vec2(0,0),
-            new Vec2(0,0), [0,0,0],[0, 0, 0],false,0,0,0)));
+            new Vec2(0,0), [0,0,0],[0, 0, 0],false,0,0,0,false)));
         }
     }
 
@@ -53,7 +53,7 @@ class ParticleSystem
             this._particles[ParticleSystem.currentIndex].setColour();
             this._particles[ParticleSystem.currentIndex].setAngle(angle);
             this._particles[ParticleSystem.currentIndex].setMaxSpeed(maxSpeed);
-            this._particles[ParticleSystem.currentIndex].setDirectionalVelocity(direction); 
+            this._particles[ParticleSystem.currentIndex].setDirectionalVelocity(direction);
          }
         ParticleSystem.currentIndex > 0 ?  ParticleSystem.currentIndex = --ParticleSystem.currentIndex % this._particles.length :  ParticleSystem.currentIndex = this._particles.length - 1;
     }
@@ -64,14 +64,14 @@ class ParticleSystem
         {
             if(!this._particles[i].getActive())
                     continue;
-            
-            this._particles[i].setTTl((performance.now() - this._particles[i].getRemainingLife()) /1000);
-            
-            if(this._particles[i].getTTL() < 0)
-            {
-                this._particles[i].setActive(false);
-                continue;
-            }
+         
+                this._particles[i].setTTl((performance.now() - this._particles[i].getRemainingLife()) /1000);
+                
+                if(this._particles[i].getTTL() < 0)
+                {
+                    this._particles[i].setActive(false);
+                    continue;
+                }
             this._particles[i].getRect().setAngle(1);
              //lerp all values here
             this.adjustProperties(i,dt);
@@ -80,18 +80,19 @@ class ParticleSystem
 
     adjustProperties(i,dt)
     {
-        let  value = (this._particles[i].getTotalLifeTime() - this._particles[i].getTTL())/this._particles[i].getTotalLifeTime();
+      
+            let  value = (this._particles[i].getTotalLifeTime() - this._particles[i].getTTL())/this._particles[i].getTotalLifeTime();
 
-        this._particles[i].setCurrentSpeed(Lerp.LerpFloat(this._particles[i].getMaxSpeed(),0,value));
-        this._particles[i].setVelocity(dt);
-        
-        this._particles[i].getRect().updatePoints(new Vec2(this._particles[i].getVelocity().x, this._particles[i].getVelocity().y));
+            this._particles[i].setCurrentSpeed(Lerp.LerpFloat(this._particles[i].getMaxSpeed(),0,value));
+            this._particles[i].setVelocity(dt);
+            
+            this._particles[i].getRect().updatePoints(new Vec2(this._particles[i].getVelocity().x, this._particles[i].getVelocity().y));
 
-        this._particles[i].getColour()[0] = Lerp.LerpFloat(this._particles[i].getColourBegin()[0], this._particles[i].getColourEnd()[0], value);
-        this._particles[i].getColour()[1] = Lerp.LerpFloat(this._particles[i].getColourBegin()[1], this._particles[i].getColourEnd()[1], value);
-        this._particles[i].getColour()[2] = Lerp.LerpFloat(this._particles[i].getColourBegin()[2], this._particles[i].getColourEnd()[2], value);
-        this._particles[i].setOpacity(Lerp.LerpFloat(this._particles[i].getStartingOpacity(), 0, value));
-        this._particles[i].getRect().rotate();
+            this._particles[i].getColour()[0] = Lerp.LerpFloat(this._particles[i].getColourBegin()[0], this._particles[i].getColourEnd()[0], value);
+            this._particles[i].getColour()[1] = Lerp.LerpFloat(this._particles[i].getColourBegin()[1], this._particles[i].getColourEnd()[1], value);
+            this._particles[i].getColour()[2] = Lerp.LerpFloat(this._particles[i].getColourBegin()[2], this._particles[i].getColourEnd()[2], value);
+            this._particles[i].setOpacity(Lerp.LerpFloat(this._particles[i].getStartingOpacity(), 0, value));
+            this._particles[i].getRect().rotate();
     }
 
     render(ctx, cameraPos)
@@ -103,8 +104,6 @@ class ParticleSystem
                     continue;
 
                 ctx.beginPath();
-               // ctx.fillStyle = `rgba(${this._particles[p]._colour[0]}, ${this._particles[p]._colour[1]},${this._particles[p]._colour[2]}, ${this._particles[p]._colour[3]})`;
-               // ctx.fillRect(this._particles[p].getRect().getOrigin().x - cameraPos.x,this._particles[p].getRect().getOrigin().y - cameraPos.y,this._particles[p].getRect().getSize().x,this._particles[p].getRect().getSize().y);
                 ctx.moveTo(this._particles[p].getPoints()[0].x - cameraPos.x , this._particles[p].getPoints()[0].y - cameraPos.y);
             
                 for( let i = 1; i < this._particles[p].getPoints().length; i++)

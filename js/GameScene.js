@@ -29,17 +29,20 @@ class GameScene extends Scene
         this.scenes = scene;
         this.worldWidth = 6000;
         this.worldHeight = 6000;
+
         this.minions = [];
         this.flockPoints = [];
         this.bombers = [];
         this.bomberBullets = [];
         this.asteroids = [];
         this.blackHoles = [];
-        this.pressedKeys = new Set();
-        this.buttons = Object.freeze(['w','a','s','d','e','1','2','3']);
         this.powerUps = [];
         this.ammunition = [];
+        this.playerPowerUps = [];
 
+        this.pressedKeys = new Set();
+        this.buttons = Object.freeze(['w','a','s','d','e','1','2','3']);
+    
         this.collisionManager = new CollisionManager();
         this.player = new Player(new Vec2(this.worldWidth/2,this.worldHeight/2),new Vec2(156,151));
 
@@ -57,8 +60,6 @@ class GameScene extends Scene
         this.map.addNPCPos(this.minions);
         this.map.addNPCPos(this.asteroids);
         this.map.addNPCPos(this.blackHoles);
-        
-        this.playerPowerUps = [];
 
         this.particleSystem = new ParticleSystem();
         this.particleTimer = 0;
@@ -66,14 +67,11 @@ class GameScene extends Scene
         this.minionspawnYOffset = 138;
         this.spawnPoints = 37;
 
-
         this.engineBeginColour = [226, 40, 34];
         this.engineEndColour = [255,255,0];
         this.engineTTL = 0.25;
 
         this.fps = 0;
-
-       
 
         this.powerupGuiLeftPos = new Vec2(this.camera.getSize.x/1.13,this.camera.getSize.y/1.105);
         this.powerupGuiRightPos = new Vec2(this.camera.getSize.x/1.0525,this.camera.getSize.y/1.105);
@@ -269,7 +267,7 @@ class GameScene extends Scene
             this.flockPoints.push(new Vec2(Math.random() * (this.worldWidth - this.minionspawnXOffset), Math.random() * (this.worldHeight - this.minionspawnYOffset)));
         }
         /* Create this.bombers*/
-        for(let i = 0; i < this.waveManager.getBomberCount(); i++)
+        for(let i = 0; i < this.waveManager .getBomberCount(); i++)
         {
             let pos = this.waveManager.getSpawnPoint(Math.trunc(Math.random() * this.spawnPoints));
             let flockPoint = new Vec2(Math.random() * this.worldWidth, Math.random() * this.worldHeight);
@@ -279,7 +277,7 @@ class GameScene extends Scene
         
         for( let i = 0; i < this.waveManager.getBossCount(); i++)
         {
-            this.boss = new Boss(new Vec2(this.worldWidth/2,this.worldHeight/100), new Vec2(251, 222));
+            this.boss = new Boss(new Vec2(this.worldWidth/2,this.worldHeight/100), new Vec2(222, 251), new Vec2(this.worldWidth, this.worldHeight));
         }
     }
 
@@ -527,7 +525,7 @@ class GameScene extends Scene
                     pos.x /= 2;
                     pos.y /= 2;
 
-                    this.particleSystem.emit(pos, direction, this.engineBeginColour, this.engineEndColour , this.engineTTL , 0 , Math.random() * 1);
+                    this.particleSystem.emit(pos, direction, this.engineBeginColour, this.engineEndColour , this.engineTTL , 0 , Math.random() * 1, false);
                 }
                  this.particleTimer = performance.now();
             }

@@ -5,7 +5,6 @@ class Particle
 {
     constructor(particle)
     {
-        //this._beginSize = new Vec2(particle.size.x,particle.size.y);
         this._rect =  new Rect(particle.pos,particle.size);
         this._velocity =  new Vec2(particle.velocity.x, particle.velocity.y);
         this._directionalVelocity = new Vec2(particle.dirVel.x, particle.dirVel.y);

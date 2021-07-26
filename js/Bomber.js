@@ -13,7 +13,7 @@ class Bomber extends Enemy
         this._maxForce = 1;
         this._attackTimer = 0;
         this._reloadTimer = 5;
-        this._maxBulletSpeed = 4;
+        this._maxBulletSpeed = 2;
         this._seek = new Vec2(0,0);
         this._health = 100;
     }

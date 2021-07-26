@@ -1,7 +1,7 @@
 import { Enemy } from "./Enemy.js";
 import { Vec2 } from "./Vec2.js";
 import { Rect } from "./Rect.js";
-
+import { seek } from "./Steering.js";
 export { EnemyMinion };
 
 class EnemyMinion extends Enemy {
@@ -14,7 +14,6 @@ class EnemyMinion extends Enemy {
         this._cohesionDistance = 450;
         this._seperationDistance = 90;
 
-       
         this._VelocityLength = 0;
         this._maxSpeed = 2;
         this._maxForce = 1;
@@ -86,7 +85,7 @@ class EnemyMinion extends Enemy {
        this._alignment = this.alignment(minions);
        this._cohesion = this.cohesion(minions);
        this._seperation = this.seperation(minions);
-       this._seek = this.seek(flockPoint);
+       this._seek = seek(flockPoint, this._rect, this._velocity, this._maxSpeed);
     
        this._acceleration.addVec = new Vec2(this._cohesion.x * this._cohesionWieght, this._cohesion.y * this._cohesionWieght);
        this._acceleration.addVec = new Vec2(this._alignment.x * this._alignmentWeight,this._alignment.y * this._alignmentWeight);
@@ -102,18 +101,6 @@ class EnemyMinion extends Enemy {
 
        this._rect.updatePoints(this._velocity);
        this._acceleration = new Vec2(0,0);
-    }
-
-
-    seek(pos)
-    {
-        let steering = new Vec2(0,0);
-        steering.x = pos.x - this._rect.getOrigin().x;
-        steering.y =  pos.y - this._rect.getOrigin().y;
-        steering = Vec2.subtractVec(steering, this._velocity);
-        steering.setMagnitude = this._maxSpeed;
-
-        return steering;
     }
 
     alignment(minions)
@@ -198,8 +185,6 @@ class EnemyMinion extends Enemy {
         return steering;
     }
 
-   
-    
     draw(ctx,cameraPos)
     {
         ctx.save();
