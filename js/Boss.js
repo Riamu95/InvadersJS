@@ -2,8 +2,9 @@ import { Vec2 } from "./Vec2.js";
 import { Shape } from "./Shape.js";
 import { seek } from "./Steering.js";
 import { Lerp } from "./Lerp.js";
- 
+import { Circle } from "./Circle.js";
 export { Boss };
+
 class Boss 
 {
     constructor(pos, size, worldSize)
@@ -14,6 +15,7 @@ class Boss
         this._maxSpeed = 2;
         this.m_speed = 0;
         this._health = 100;
+        this._shieldHealth = 100;
         this._worldSize = worldSize;
         this._flockPoint = new Vec2(Math.random() * this._worldSize.x, Math.random() * this._worldSize.y);
         this._shieldColour = [0,255,255];
@@ -22,7 +24,8 @@ class Boss
         this._lerpTime = 3;
         this._lerpClock = performance.now();
         this._shieldActive = true;
-        this._shieldRadius = 250;
+        this._shield = new Circle(this._shape.getOrigin(), 250);
+        this._opacity = 1;
         this.createShape();
     }
 
@@ -88,7 +91,11 @@ class Boss
         this._shieldColour[0] = Lerp.LerpFloat(this._beginShieldColour[0], this._endShieldColour[0],percentage);
         this._shieldColour[1] = Lerp.LerpFloat(this._beginShieldColour[1], this._endShieldColour[1],percentage);
         this._shieldColour[2] = Lerp.LerpFloat(this._beginShieldColour[2], this._endShieldColour[2],percentage);
-        //console.log(this._shieldColour);
+      
+        let opacityPercentage = (100 - this._shieldHealth)/100;
+        console.log(opacityPercentage);
+        this._opacity = Lerp.LerpFloat(1, 0, opacityPercentage);
+        console.log(this._opacity);
     }
 
     draw(ctx, cameraPos)
@@ -113,8 +120,9 @@ class Boss
         if(this._shieldActive)
         {
             ctx.save();
+            ctx.op
             ctx.lineWidth = 16;
-            ctx.strokeStyle = `rgba(${this._shieldColour[0]}, ${this._shieldColour[1]},${this._shieldColour[2]},1)`;
+            ctx.strokeStyle = `rgba(${this._shieldColour[0]}, ${this._shieldColour[1]},${this._shieldColour[2]},${this._opacity})`;
             ctx.beginPath();   
             ctx.translate(this._shape.getOrigin().x - cameraPos.x, this._shape.getOrigin().y - cameraPos.y);
             ctx.arc(0, 0, 250, 0, 2 * Math.PI);
@@ -128,20 +136,29 @@ class Boss
     {
         return this._shape;
     }
+
     getShieldActive()
     {
         return this._shieldActive;
     }
+
     setShieldActive(val)
     {
         this._shieldActive = val;
     }
-    getShieldRadius()
+
+    getShield()
     {
-        return this._shieldRadius;
+        return this._shield;
     }
-    setShieldRadius(val)
+
+    getShieldHealth()
     {
-        this._shieldRadius = val;
+        return this._shieldHealth;
+    }
+
+    setShieldHealth(val)
+    {
+        this._shieldHealth -= val;
     }
 }

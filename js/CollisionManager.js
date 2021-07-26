@@ -71,6 +71,31 @@ class CollisionManager
         return true; //[true, axisDirection, minimumOverlap];
     }
 
+    static CirlceRectCollision(circle,  rect)
+    {
+        let testX = circle.getPos().x;
+        let testY = circle.getPos().y;
+
+        if(circle.getPos().x < rect.getOrigin().x - rect.getSize().x/2 )
+            testX = rect.getOrigin().x - rect.getSize().x/2;
+        else if(circle.getPos().x > rect.getOrigin().x +  rect.getSize().x/2)
+            testX = rect.getOrigin().x +  rect.getSize().x/2;
+
+        if (circle.getPos().y < rect.getOrigin().y - rect.getSize().y/2)
+            testY = rect.getOrigin().y - rect.getSize().y/2;
+        else if( circle.getPos().y > rect.getOrigin().y + rect.getSize().y/2)
+            testY = rect.getOrigin().y + rect.getSize().y/2;
+
+        let distX = circle.getPos().x - testX;
+        let distY = circle.getPos().y - testY;
+        let distance = Math.sqrt(distX * distX + distY * distY);
+        
+        if( distance <= circle.getRadius())
+            return true;
+        else
+            return false;
+    }
+
     /*
     static SATCollision(obejct1, object2)
     {

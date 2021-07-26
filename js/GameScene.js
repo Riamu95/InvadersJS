@@ -509,7 +509,7 @@ class GameScene extends Scene
             } 
             this.player.move(dt); 
             
-            while(this.timerCheck(this.particleTimer,0.05))
+            while(this.timerCheck(this.particleTimer,0.1))
             {
                 for(let i = 0; i < 25; i++)
                 {  
@@ -1179,6 +1179,24 @@ class GameScene extends Scene
                     }
                 }
             }
+
+            if(this.boss !== null)
+            {
+                for(let b = playerBullets.length -1; b >= 0; b--)
+                {
+                    if(this.boss.getShieldActive())
+                    {
+                        if(CollisionManager.CirlceRectCollision(this.boss.getShield(), playerBullets[b].getRect))
+                        {
+                            AudioManager.getInstance().playSpatialSound(bulletExplosionSound, playerBullets[b].getRect.getOrigin());
+                            this.animationManager.addAnimation(noOfFrames,0.02,playerBullets[b].getRect.getOrigin(),bulletExplosionAnimation,animationSize,false);
+                            playerBullets.splice(b,1);
+                            this.boss.setShieldHealth(this.player.getWeapons()[w].getDamage());
+                        }
+                    }
+                }
+            }
+
             /* Player Bullet timer Collision */
             for(let i = playerBullets.length -1 ; i >= 0; i--)
             {
