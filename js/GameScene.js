@@ -19,6 +19,7 @@ import { GuiComponent } from "./GuiComponent.js";
 import { AudioManager } from "./AudioManager.js";
 import { Lerp } from "./Lerp.js";
 import { GameOverScene } from "./GameOverScene.js";
+import { ShieldNode } from "./ShieldNode.js";
 
 export { GameScene };
 class GameScene extends Scene 
@@ -80,6 +81,7 @@ class GameScene extends Scene
         this.playerRender = true;
 
         this.boss = null;
+        this.shieldNodes = [];
 
         this.teleporting = false;
         this.waveOver = false;
@@ -95,7 +97,7 @@ class GameScene extends Scene
             else
                 return false;
         }
-
+        this.closestShieldNode = null;
         this.init();
     }
      
@@ -278,6 +280,36 @@ class GameScene extends Scene
         for( let i = 0; i < this.waveManager.getBossCount(); i++)
         {
             this.boss = new Boss(new Vec2(this.worldWidth/2,this.worldHeight/100), new Vec2(222, 251), new Vec2(this.worldWidth, this.worldHeight));
+        }
+
+        for( let i = 0; i < this.waveManager.getShieldNodeCount(); i++)
+        {
+            this.shieldNodes.push(new ShieldNode(new Vec2(Math.random() * this.worldWidth, Math.random() * this.worldHeight)));
+        }
+
+        this.closestShieldNode = ( ) => 
+        {
+            if(this.boss.getSubBehaviour() == "flock")
+            {
+                let target = new Vec2(0,0);
+                let minDist = Infinity;
+                let dist = Infinity;
+                this.shieldNodes.forEach( node =>
+                {
+                    if(node.getActive())
+                    {
+                       dist = Math.min(Vec2.distance(this.boss.getShape().getOrigin(), node.getRect().getOrigin()), dist);
+                       if(dist < minDist)
+                       {
+                           target.x = node.getRect().getOrigin().x;
+                           target.y = node.getRect().getOrigin().y;
+                           
+                           minDist = dist;
+                       }
+                    }
+                });
+                this.boss.setFlockPoint(target);
+            }
         }
     }
 
@@ -892,7 +924,7 @@ class GameScene extends Scene
     {
           //this.bombers anddthis.minions
           loop1:
-          for( let b = this.bombers.length -1; b >= 0; b--)
+          for( let b = this.bombers.length-1; b >= 0; b--)
           {
               loop2:
               for (let row = this.minions.length -1; row >= 0; row --)
@@ -933,6 +965,18 @@ class GameScene extends Scene
                               break loop1;
                       }
                   }
+              }
+          }
+
+          if(this.boss !== null && this.boss.getPrimaryBehaviour() == "shielddown")
+          {
+              for(let i = this.shieldNodes.length -1; i > 0; i--)
+              {
+                if(CollisionManager.SATCollision(this.boss.getShape().getPoints(), this.shieldNodes[i].getRect().getPoints()) && this.shieldNodes[i].getActive())
+                {
+                    this.shieldNodes[i].setActive(false);
+                    this.boss.setShieldHealth(25,this.closestShieldNode);
+                }
               }
           }
 
@@ -1191,7 +1235,7 @@ class GameScene extends Scene
                             AudioManager.getInstance().playSpatialSound(bulletExplosionSound, playerBullets[b].getRect.getOrigin());
                             this.animationManager.addAnimation(noOfFrames,0.02,playerBullets[b].getRect.getOrigin(),bulletExplosionAnimation,animationSize,false);
                             playerBullets.splice(b,1);
-                            this.boss.setShieldHealth(this.player.getWeapons()[w].getDamage());
+                            this.boss.setShieldHealth(-this.player.getWeapons()[w].getDamage(), this.closestShieldNode);
                         }
                     }
                 }
@@ -1416,6 +1460,11 @@ class GameScene extends Scene
         {
             this.boss.draw(GameScene._ctx, this.camera.getPos);
         }
+
+        this.shieldNodes.forEach(shieldNode => 
+        {
+            shieldNode.draw(GameScene._ctx, this.camera.getPos);
+        });
         
         for (let value of this.gui.values())
         {

@@ -5,6 +5,14 @@ import { Lerp } from "./Lerp.js";
 import { Circle } from "./Circle.js";
 export { Boss };
 
+'use strict';
+
+const behaviour = {
+    SHIELDUP : "shieldup",
+    SHIELDDOWN : "shielddown",
+    ATTACK: "attack",
+    FLOCK: "flock"
+};
 class Boss 
 {
     constructor(pos, size, worldSize)
@@ -26,6 +34,11 @@ class Boss
         this._shieldActive = true;
         this._shield = new Circle(this._shape.getOrigin(), 250);
         this._opacity = 1;
+       // this._seek = false;
+
+       this._primaryBehaviour = behaviour.SHIELDUP;
+       this._subBheaviour = behaviour.FLOCK;
+
         this.createShape();
     }
 
@@ -47,33 +60,40 @@ class Boss
 
     update(dt)
     {
-        if(Vec2.distance(this._shape.getOrigin(), this._flockPoint) < 50)
+        if(this._primaryBehaviour == behaviour.SHIELDUP)
         {
-            this._flockPoint.x = Math.random() * this._worldSize.x;
-            this._flockPoint.y =  Math.random() * this._worldSize.y;
+
+            if(this._subBheaviour == behaviour.FLOCK)
+            {
+                if(Vec2.distance(this._shape.getOrigin(), this._flockPoint) < 50)
+                {
+                    this._flockPoint.x = Math.random() * this._worldSize.x;
+                    this._flockPoint.y =  Math.random() * this._worldSize.y;
+                }
+                this.seek(dt);
+            }
+            else if(this._subBheaviour == behaviour.ATTACK)
+            {
+
+            }
+                //should this be a shield method??
+            this.lerpShieldProperties();
         }
-        else
+        else if (this._primaryBehaviour == behaviour.SHIELDDOWN)
         {
-            this._acceleration = seek(this._flockPoint, this._shape,this._velocity,this._maxSpeed);
+            if(this._subBheaviour == behaviour.FLOCK)
+            {
+                this.seek(dt);
+            }
+            else if(this._subBheaviour == behaviour.ATTACK)
+            {
+                
+            }
+        }
+    }
 
-            this._velocity.addVec = this._acceleration;
-       
-            this._velocity.x = this._velocity.x * dt;
-            this._velocity.y = this._velocity.y * dt;
- 
-            this._velocity.setMagnitude = this._maxSpeed;
-
-            this._shape.setAngle(-this._shape.getAngle());
-            this._shape.rotate();
-            //rotate points by direction of
-            this._shape.setAngle(Math.atan2(this._velocity.y,this._velocity.x) * 180 / Math.PI);
-            //rotate object in direction of velocity
-            this._shape.rotate(); 
- 
-            this._shape.updatePoints(this._velocity);
-            this._acceleration = new Vec2(0,0);
-        } 
-     
+    lerpShieldProperties()
+    {
         if( ((performance.now() - this._lerpClock) /1000) > this._lerpTime)
         {
             this._lerpClock = performance.now();
@@ -87,15 +107,36 @@ class Boss
 
         let timerRemaining = (performance.now() - this._lerpClock)/1000;
         let percentage = timerRemaining / this._lerpTime;
-  
+
         this._shieldColour[0] = Lerp.LerpFloat(this._beginShieldColour[0], this._endShieldColour[0],percentage);
         this._shieldColour[1] = Lerp.LerpFloat(this._beginShieldColour[1], this._endShieldColour[1],percentage);
         this._shieldColour[2] = Lerp.LerpFloat(this._beginShieldColour[2], this._endShieldColour[2],percentage);
-      
+    
         let opacityPercentage = (100 - this._shieldHealth)/100;
-        console.log(opacityPercentage);
+
         this._opacity = Lerp.LerpFloat(1, 0, opacityPercentage);
-        console.log(this._opacity);
+    }
+
+    seek(dt)
+    {
+            this._acceleration = seek(this._flockPoint, this._shape,this._velocity,this._maxSpeed);
+
+            this._velocity.addVec = this._acceleration;
+       
+            this._velocity.x = this._velocity.x * dt;
+            this._velocity.y = this._velocity.y * dt;
+    
+            this._velocity.setMagnitude = this._maxSpeed;
+    
+            this._shape.setAngle(-this._shape.getAngle());
+            this._shape.rotate();
+            //rotate points by direction of
+            this._shape.setAngle(Math.atan2(this._velocity.y,this._velocity.x) * 180 / Math.PI);
+            //rotate object in direction of velocity
+            this._shape.rotate(); 
+    
+            this._shape.updatePoints(this._velocity);
+            this._acceleration = new Vec2(0,0);
     }
 
     draw(ctx, cameraPos)
@@ -145,6 +186,8 @@ class Boss
     setShieldActive(val)
     {
         this._shieldActive = val;
+
+        this._shieldActive == true ? this._primaryBehaviour = behaviour.SHIELDUP : this._primaryBehaviour = behaviour.SHIELDDOWN;
     }
 
     getShield()
@@ -157,8 +200,56 @@ class Boss
         return this._shieldHealth;
     }
 
-    setShieldHealth(val)
+    setShieldHealth(val, closestNode)
     {
-        this._shieldHealth -= val;
+        this._shieldHealth += val;
+
+        if(this._shieldHealth <= 0 && this._primaryBehaviour == behaviour.SHIELDUP)
+            this.setShieldActive(false);
+
+        if(this._primaryBehaviour == behaviour.SHIELDDOWN)
+            closestNode();
+        //if(this._shieldHealth >= 100 && this._primaryBehaviour == behaviour.SHIELDDOWN)
+        //    this.setPrimaryBehaviour(behaviour.SHIELDUP);
+       
+        console.log(`shield health =  ${this._shieldHealth}, primary behaviour =  ${this._primaryBehaviour}`);
+        console.log(`shield Active =  ${this._shieldActive}`);
     }
+
+    setFlockPoint(val)
+    {
+        this._flockPoint = val;
+    }
+
+    getPrimaryBehaviour()
+    {
+        return this._primaryBehaviour;
+    }
+
+    setPrimaryBehaviour(val)
+    {
+        this._primaryBehaviour = val;
+    }
+
+    getSubBehaviour()
+    {
+        return this._subBheaviour;
+    }
+
+    setSubBehaviour(val)
+    {
+        this._subBheaviour = val;
+    }
+
+    /*
+    getSeek()
+    {
+        return this._seek;
+    }
+
+    setSeek(val)
+    {
+        this._seek = val;
+    }
+    */
 }
